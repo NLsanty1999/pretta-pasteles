@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "BeautyGadish";
+  src: url("./BeautyGadish.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AmaticSC";
+  src: url("./AmaticSC-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
