@@ -110,6 +110,30 @@ function OrderModal({
 
                     <p><b>Producto:</b> {item?.name || "-"}</p>
 
+                    <p>
+
+                        <b>Fecha de entrega:</b>{" "}
+
+                        {
+
+                            item?.deliveryDate
+
+                                ? new Date(item.deliveryDate).toLocaleDateString("es-AR")
+
+                                : "-"
+
+                        }
+
+                    </p>
+
+                    <p>
+
+                        <b>Horario:</b>{" "}
+
+                        {item?.deliveryHour || "-"}
+
+                    </p>
+
                     <p><b>Tamaño:</b> {item?.size || "-"}</p>
 
                     <p><b>Bizcochuelo:</b> {item?.flavor || "-"}</p>

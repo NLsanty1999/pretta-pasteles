@@ -1,16 +1,44 @@
 import { useNavigate } from "react-router-dom";
 
 function ProductCard({ product }) {
+
     const navigate = useNavigate();
 
+    const firstPrice =
+        product.prices
+            ? Object.values(product.prices)[0]
+            : 0;
+
     return (
-        <div className="bg-white rounded-3xl shadow-md overflow-hidden">
 
-            <div className="h-48 bg-pink-100 flex items-center justify-center">
+        <div
+            className="
+                bg-white
+                rounded-3xl
+                overflow-hidden
+                shadow-md
+                hover:shadow-xl
+                transition
+            "
+        >
 
-                <span className="text-7xl">
-                    🎂
-                </span>
+            <div className="h-56 bg-[#F8F3F0] flex items-center justify-center">
+
+                {
+                    product.image
+                        ? (
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                            />
+                        )
+                        : (
+                            <span className="text-7xl">
+                                🎂
+                            </span>
+                        )
+                }
 
             </div>
 
@@ -22,33 +50,57 @@ function ProductCard({ product }) {
 
                 </h2>
 
-                <p className="mt-3 text-gray-600">
+                <p className="text-gray-500 mt-2">
 
                     {product.description}
 
                 </p>
 
+                <p className="text-xl font-bold text-[#D08A9B] mt-5">
+
+                    Desde ${firstPrice.toLocaleString("es-AR")}
+
+                </p>
+
                 <button
-                    onClick={() => navigate(`/producto/${product.id}`)}
+
+                    onClick={() => {
+
+                        if (product.type === "personalizada") {
+
+                            navigate(`/producto/${product.id}`);
+
+                        } else {
+
+                            navigate(`/producto/tradicional/${product.slug}`);
+
+                        }
+
+                    }}
+
                     className="
-                        w-full
                         mt-6
-                        py-3
-                        rounded-full
+                        w-full
                         bg-[#D08A9B]
                         text-white
-                        font-bold
-                        hover:bg-[#c97b8e]
-                        transition
+                        rounded-full
+                        py-3
+                        font-semibold
+                        hover:opacity-90
                     "
+
                 >
-                    Personalizar
+
+                    Ver producto
+
                 </button>
 
             </div>
 
         </div>
+
     );
+
 }
 
 export default ProductCard;

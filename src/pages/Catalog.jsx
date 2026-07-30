@@ -1,62 +1,95 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
 import SearchBar from "../components/SearchBar/SearchBar";
-import CategoryFilter from "../components/CategoryFilter/CategoryFilter";
 import ProductCard from "../components/ProductCard/ProductCard";
 
-import products from "../data/products";
+import useProducts from "../hooks/useProducts";
 
 function Catalog() {
+
+    const { category } = useParams();
+
+    const { products, loading } = useProducts();
+
     const [search, setSearch] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState(0);
 
-    const filteredProducts = products.filter((product) => {
-        const matchName = product.name
-            .toLowerCase()
-            .includes(search.toLowerCase());
+    if (loading) {
 
-        const matchCategory =
-            selectedCategory === 0 ||
-            product.category === selectedCategory;
+        return (
 
-        return matchName && matchCategory;
-    });
+            <Layout>
+
+                <h2 className="text-center text-2xl mt-10">
+
+                    Cargando productos...
+
+                </h2>
+
+            </Layout>
+
+        );
+
+    }
+
+    const filteredProducts = products
+        .filter((product) => {
+
+            const matchName = product.name
+                .toLowerCase()
+                .includes(search.toLowerCase());
+
+            const matchCategory =
+                !category || product.category === Number(category);
+
+            return matchName && matchCategory;
+
+        })
+        .sort((a, b) => a.id - b.id);
 
     return (
+
         <Layout>
 
             <h1 className="text-4xl font-bold text-[#5A3B31] mb-8">
+
                 Catálogo
+
             </h1>
 
             <SearchBar
-                search={search}
-                setSearch={setSearch}
-            />
 
-            <div className="mt-6">
-                <CategoryFilter
-                    selected={selectedCategory}
-                    setSelected={setSelectedCategory}
-                />
-            </div>
+                search={search}
+
+                setSearch={setSearch}
+
+            />
 
             <div className="space-y-6 mt-8">
 
-                {filteredProducts.map((product) => (
+                {
 
-                    <ProductCard
-                        key={product.id}
-                        product={product}
-                    />
+                    filteredProducts.map(product => (
 
-                ))}
+                        <ProductCard
+
+                            key={product.slug}
+
+                            product={product}
+
+                        />
+
+                    ))
+
+                }
 
             </div>
 
         </Layout>
+
     );
+
 }
 
 export default Catalog;

@@ -2,6 +2,8 @@ function OrderCard({ order, onOpen }) {
 
     const item = order.items?.[0];
 
+    console.log(JSON.stringify(order.items[0], null, 2));
+
     const statusStyle = {
         "Pendiente": {
             card: "bg-yellow-50 border-yellow-300",
@@ -88,6 +90,26 @@ function OrderCard({ order, onOpen }) {
                 <p>
 
                     📏 {item?.size || "-"}
+
+                </p>
+
+                <p>
+
+                    📅 {
+
+                        item?.deliveryDate
+
+                            ? new Date(item.deliveryDate).toLocaleDateString("es-AR")
+
+                            : "-"
+
+                    }
+
+                </p>
+
+                <p>
+
+                    🕒 {item?.deliveryHour || "-"}
 
                 </p>
 

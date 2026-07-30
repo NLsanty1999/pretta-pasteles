@@ -55,6 +55,8 @@ function Checkout() {
 
         try {
 
+            console.log(cart);
+
             await saveOrder({
 
                 client,

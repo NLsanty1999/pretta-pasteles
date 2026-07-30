@@ -26,6 +26,7 @@ import OrderModal from "../components/Admin/OrderModal";
 
 import OrderSearch from "../utils/OrderSearch";
 import OrderFilter from "../utils/OrderFilter";
+import { useNavigate } from "react-router-dom";
 
 function Admin() {
 
@@ -42,6 +43,8 @@ function Admin() {
     const [search, setSearch] = useState("");
 
     const [status, setStatus] = useState("Todos");
+
+    const navigate = useNavigate();
 
     const filteredOrders = useMemo(() => {
 
@@ -62,6 +65,30 @@ function Admin() {
         );
 
     }, [orders, search, status]);
+
+    const groupedOrders = useMemo(() => {
+
+        const groups = {};
+
+        filteredOrders.forEach(order => {
+
+            const item = order.items?.[0];
+
+            const date = item?.deliveryDate || "Sin fecha";
+
+            if (!groups[date]) {
+
+                groups[date] = [];
+
+            }
+
+            groups[date].push(order);
+
+        });
+
+        return groups;
+
+    }, [filteredOrders]);
 
     async function handleStatus(newStatus) {
 
@@ -119,6 +146,32 @@ function Admin() {
 
             <AdminHeader />
 
+            <div className="flex gap-4 mb-8">
+
+                <button
+
+                    className="flex-1 rounded-2xl bg-[#D08A9B] text-white py-3 font-semibold"
+
+                >
+
+                    📦 Pedidos
+
+                </button>
+
+                <button
+
+                    onClick={() => navigate("/admin/productos")}
+
+                    className="flex-1 rounded-2xl bg-white border py-3 font-semibold"
+
+                >
+
+                    🍰 Productos
+
+                </button>
+
+            </div>
+
             <FirebaseBadge />
 
             <RealtimeStatus />
@@ -163,21 +216,67 @@ function Admin() {
 
                             {
 
-                                filteredOrders.map(order => (
+                                Object.entries(groupedOrders).map(([date, orders]) => (
 
-                                    <OrderCard
+                                    <div key={date} className="space-y-4">
 
-                                        key={order.id}
+                                        <div className="sticky top-0 bg-pink-100 rounded-xl px-4 py-3 shadow">
 
-                                        order={order}
+                                            <h2 className="font-bold text-lg">
 
-                                        onOpen={() =>
+                                                📅 {
 
-                                            setSelectedOrder(order)
+                                                    date === "Sin fecha"
+
+                                                        ? date
+
+                                                        : new Date(date).toLocaleDateString(
+
+                                                            "es-AR",
+
+                                                            {
+
+                                                                weekday: "long",
+
+                                                                day: "2-digit",
+
+                                                                month: "2-digit",
+
+                                                                year: "numeric"
+
+                                                            }
+
+                                                        )
+
+                                                }
+
+                                            </h2>
+
+                                        </div>
+
+                                        {
+
+                                            orders.map(order => (
+
+                                                <OrderCard
+
+                                                    key={order.id}
+
+                                                    order={order}
+
+                                                    onOpen={() =>
+
+                                                        setSelectedOrder(order)
+
+                                                    }
+
+                                                />
+
+                                            ))
 
                                         }
 
-                                    />
+                                    </div>
 
                                 ))
 

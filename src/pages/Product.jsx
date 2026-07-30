@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
 
 import products from "../data/products";
+import agenda from "../data/agenda";
 
 import { useCart } from "../context/CartContext";
+
+import { getAgendaConfig } from "../firebase/agenda";
 
 function Product() {
 
@@ -41,33 +44,63 @@ function Product() {
 
     }
 
-    const [size, setSize] = useState(
+    const [size, setSize] = useState(product.sizes[0]);
 
-        product.sizes[0]
+    const [flavor, setFlavor] = useState(product.flavors[0]);
 
-    );
+    const [filling, setFilling] = useState(product.fillings[0]);
 
-    const [flavor, setFlavor] = useState(
-
-        product.flavors[0]
-
-    );
-
-    const [filling, setFilling] = useState(
-
-        product.fillings[0]
-
-    );
-
-    const [covering, setCovering] = useState(
-
-        product.coverings[0]
-
-    );
+    const [covering, setCovering] = useState(product.coverings[0]);
 
     const [extras, setExtras] = useState([]);
 
     const [note, setNote] = useState("");
+
+    const [agendaConfig, setAgendaConfig] = useState(null);
+
+    const minAdvanceDays =
+        agendaConfig?.minAdvanceDays ?? agenda.minAdvanceDays;
+
+    const minDate = new Date();
+
+    minDate.setDate(
+        minDate.getDate() + minAdvanceDays
+    );
+
+    const minDeliveryDate =
+        minDate.toISOString().split("T")[0];
+
+    const [deliveryDate, setDeliveryDate] =
+        useState(minDeliveryDate);
+
+    const [deliveryHour, setDeliveryHour] =
+        useState(agenda.workingHours[0]);
+
+    useEffect(() => {
+
+        async function loadAgenda() {
+
+            try {
+
+                const config = await getAgendaConfig();
+
+                setAgendaConfig(config);
+
+            }
+
+            catch (error) {
+
+                console.error(error);
+
+            }
+
+        }
+
+        loadAgenda();
+
+    }, []);
+
+    console.log(agendaConfig);
 
     function toggleExtra(name) {
 
@@ -147,39 +180,51 @@ function Product() {
 
     ]);
 
-    function handleAdd() {
+function handleAdd() {
 
-        addToCart({
+    const basePrice = Number(product.prices[size]);
 
-            id: crypto.randomUUID(),
+    const extrasPrice = extras.reduce((sum, extraName) => {
 
-            productId: product.id,
+        const extra = product.extras.find(
 
-            name: product.name,
-
-            size,
-
-            flavor,
-
-            filling,
-
-            covering,
-
-            extras,
-
-            note,
-
-            price: totalPrice
-
-        });
-
-        alert(
-
-            "Producto agregado al pedido."
+            e => e.name === extraName
 
         );
 
-    }
+        return sum + (extra ? extra.price : 0);
+
+    }, 0);
+
+    const total = basePrice + extrasPrice;
+
+    addToCart({
+
+        ...product,
+
+        size,
+
+        flavor,
+
+        filling,
+
+        covering,
+
+        extras,
+
+        deliveryDate,
+
+        deliveryHour,
+
+        note,
+
+        price: total
+
+    });
+
+    alert("Producto agregado al pedido.");
+
+}
 
     return (
 
@@ -364,6 +409,77 @@ function Product() {
                         Observaciones
                     </label>
 
+                <div>
+
+                    <p className="font-bold mb-3">
+
+                        Fecha de entrega
+
+                    </p>
+
+                    <input
+
+                        type="date"
+
+                        value={deliveryDate}
+
+                        min={minDeliveryDate}
+
+                        onChange={(e) => setDeliveryDate(e.target.value)}
+
+                        className="w-full rounded-xl border p-4"
+
+                    />
+
+                    <div className="mt-5">
+
+                        <p className="font-bold mb-3">
+
+                            Horario de entrega
+
+                        </p>
+
+                        <select
+
+                            value={deliveryHour}
+
+                            onChange={(e) =>
+
+                                setDeliveryHour(e.target.value)
+
+                            }
+
+                            className="w-full rounded-xl border p-4"
+
+                        >
+
+                            {
+
+                                (agendaConfig?.workingHours ?? agenda.workingHours).map(hour => (
+
+                                    <option
+
+                                        key={hour}
+
+                                        value={hour}
+
+                                    >
+
+                                        {hour}
+
+                                    </option>
+
+                                ))
+
+                            }
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
                     <textarea
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
@@ -417,7 +533,7 @@ function Product() {
 
         </Layout>
 
-    );
+        );
 
 }
 
