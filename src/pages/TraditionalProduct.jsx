@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
 import useProducts from "../hooks/useProducts";
-import { useCart } from "../context/CartContext";   
+import { useCart } from "../context/CartContext";
 
 function TraditionalProduct() {
 
@@ -23,23 +23,56 @@ function TraditionalProduct() {
 
     const [note, setNote] = useState("");
 
+
     useEffect(() => {
 
-        if (product?.sizes?.length) {
+    if (!product) return;
 
-            setSize(product.sizes[0]);
+    if (product.type === "mesaDulce") {
 
-        }
+        setSize(
+            String(product.quantity ?? "")
+        );
 
-    }, [product]);
+        return;
+
+    }
+
+    if (product.sizes?.length) {
+
+        setSize(product.sizes[0]);
+
+    }
+
+}, [product]);
+
 
     const price = useMemo(() => {
 
-        if (!product || !size) return 0;
+    if (!product) return 0;
 
-        return product.prices?.[size] ?? 0;
+    // Mesa dulce
+    if (product.type === "mesaDulce") {
 
-    }, [product, size]);
+        return Number(
+            product.prices?.mesaDulce ?? 0
+        );
+
+    }
+
+    // Alfajores y productos con precio por presentación
+    if (size) {
+
+        return Number(
+            product.prices?.[size] ?? 0
+        );
+
+    }
+
+    return 0;
+
+}, [product, size]);
+
 
     if (loading) {
 
@@ -59,6 +92,7 @@ function TraditionalProduct() {
 
     }
 
+
     if (!product) {
 
         return (
@@ -72,7 +106,52 @@ function TraditionalProduct() {
         );
 
     }
+
+
+    const available = product.available !== false;
+
+
+    const isAlfajor =
+        product.type === "alfajor";
+
+
+    const isMesaDulce =
+        product.type === "mesaDulce";
+
+
+    const isTradicional =
+        product.type === "tradicional";
+
+
+    function getPresentationLabel(value) {
+
+        if (isAlfajor) {
+
+            return "1 unidad";
+
+        }
+
+
+        if (isMesaDulce) {
+
+            return `${value} unidades`;
+
+        }
+
+
+        return `${value} cm`;
+
+    }
+
+
     function handleAdd() {
+
+        if (!available) {
+
+            return;
+
+        }
+
 
         addToCart({
 
@@ -92,13 +171,23 @@ function TraditionalProduct() {
 
     }
 
+
     return (
 
         <Layout>
 
             <div className="max-w-xl mx-auto">
 
-                <div className="h-72 rounded-3xl bg-[#F8F3F0] flex items-center justify-center">
+
+                <div
+
+                    className={`h-72 rounded-3xl flex items-center justify-center ${
+                        available
+                            ? "bg-[#F8F3F0]"
+                            : "bg-gray-100"
+                    }`}
+
+                >
 
                     <span className="text-8xl">
 
@@ -108,11 +197,32 @@ function TraditionalProduct() {
 
                 </div>
 
-                <h1 className="text-4xl font-bold mt-8">
 
-                    {product.name}
+                <div className="flex items-center justify-between gap-4 mt-8">
 
-                </h1>
+                    <h1 className="text-4xl font-bold">
+
+                        {product.name}
+
+                    </h1>
+
+
+                    {
+
+                        !available && (
+
+                            <span className="bg-red-100 text-red-700 px-4 py-2 rounded-full font-bold text-sm whitespace-nowrap">
+
+                                FUERA DE STOCK
+
+                            </span>
+
+                        )
+
+                    }
+
+                </div>
+
 
                 <p className="text-gray-500 mt-3">
 
@@ -120,142 +230,264 @@ function TraditionalProduct() {
 
                 </p>
 
-                <h2 className="font-bold text-xl mt-8 mb-3">
 
-                    Tamaño
+                {
 
-                </h2>
+                    !available ? (
 
-                <div className="flex gap-3">
+                        <div className="mt-8 bg-red-50 border border-red-200 rounded-3xl p-6 text-center">
 
-                    {
+                            <p className="text-red-700 font-semibold text-lg">
 
-                        product.sizes.map(s => (
+                                Este producto no está disponible actualmente.
 
-                            <button
+                            </p>
 
-                                key={s}
+                            <p className="text-red-500 mt-2">
 
-                                onClick={() => setSize(s)}
+                                Podés volver a consultar más adelante.
 
-                                className={`
+                            </p>
 
-                                    px-5
-                                    py-3
-                                    rounded-full
-                                    border
-                                    transition
+                        </div>
 
-                                    ${size === s
+                    ) : (
 
-                                        ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+                        <>
 
-                                        : "bg-white"
 
-                                    }
+                            <h2 className="font-bold text-xl mt-8 mb-3">
 
-                                `}
+                                Presentación
 
-                            >
+                            </h2>
 
-                                {s} cm
 
-                            </button>
+                            <div className="flex gap-3 flex-wrap">
 
-                        ))
+    {
 
-                    }
+        product.type === "mesaDulce" ? (
 
-                </div>
+            <button
 
-                <h2 className="font-bold text-xl mt-8 mb-3">
+                className="
+                    px-5
+                    py-3
+                    rounded-full
+                    border
+                    bg-[#D08A9B]
+                    text-white
+                    border-[#D08A9B]
+                "
 
-                    Cantidad
+            >
 
-                </h2>
+                {product.quantity} unidades
 
-                <div className="flex items-center gap-5">
+            </button>
 
-                    <button
+        ) : (
 
-                        onClick={() =>
-                            quantity > 1 &&
-                            setQuantity(quantity - 1)
-                        }
-
-                        className="w-12 h-12 rounded-full bg-pink-100"
-
-                    >
-
-                        -
-
-                    </button>
-
-                    <span className="text-2xl font-bold">
-
-                        {quantity}
-
-                    </span>
-
-                    <button
-
-                        onClick={() =>
-                            setQuantity(quantity + 1)
-                        }
-
-                        className="w-12 h-12 rounded-full bg-pink-100"
-
-                    >
-
-                        +
-
-                    </button>
-
-                </div>
-
-                <h2 className="font-bold text-xl mt-8 mb-3">
-
-                    Observaciones
-
-                </h2>
-
-                <textarea
-
-                    value={note}
-
-                    onChange={(e) =>
-                        setNote(e.target.value)
-                    }
-
-                    rows={4}
-
-                    className="w-full border rounded-2xl p-4"
-
-                    placeholder="Ej.: Sin nueces, escribir dedicatoria..."
-
-                />
-
-                <div className="mt-8">
-
-                    <p className="text-3xl font-bold text-[#D08A9B]">
-
-                        ${price.toLocaleString("es-AR")}
-
-                    </p>
-
-                </div>
+            (product.sizes || []).map(s => (
 
                 <button
 
-                    onClick={handleAdd}
+                    key={s}
 
-                    className="w-full mt-8 rounded-full bg-[#D08A9B] text-white py-4 font-bold"
+                    onClick={() => setSize(s)}
+
+                    className={`
+
+                        px-5
+
+                        py-3
+
+                        rounded-full
+
+                        border
+
+                        transition
+
+                        ${
+                            size === s
+
+                                ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+
+                                : "bg-white"
+
+                        }
+
+                    `}
 
                 >
 
-                    Agregar al pedido
+                    {
+
+                        product.type === "alfajor"
+
+                            ? "1 unidad"
+
+                            : `${s} cm`
+
+                    }
 
                 </button>
+
+            ))
+
+        )
+
+    }
+
+</div>
+
+
+                            {
+
+                                isAlfajor && (
+
+                                    <p className="text-sm text-gray-500 mt-3">
+
+                                        Precio por unidad.
+
+                                    </p>
+
+                                )
+
+                            }
+
+
+                            {
+
+                                isMesaDulce && (
+
+                                    <p className="text-sm text-gray-500 mt-3">
+
+                                        Elegí la presentación que querés comprar.
+
+                                    </p>
+
+                                )
+
+                            }
+
+
+                            <h2 className="font-bold text-xl mt-8 mb-3">
+
+                                Cantidad
+
+                            </h2>
+
+
+                            <div className="flex items-center gap-5">
+
+                                <button
+
+                                    onClick={() =>
+
+                                        quantity > 1 &&
+
+                                        setQuantity(
+                                            quantity - 1
+                                        )
+
+                                    }
+
+                                    className="w-12 h-12 rounded-full bg-pink-100"
+
+                                >
+
+                                    -
+
+                                </button>
+
+
+                                <span className="text-2xl font-bold">
+
+                                    {quantity}
+
+                                </span>
+
+
+                                <button
+
+                                    onClick={() =>
+
+                                        setQuantity(
+                                            quantity + 1
+                                        )
+
+                                    }
+
+                                    className="w-12 h-12 rounded-full bg-pink-100"
+
+                                >
+
+                                    +
+
+                                </button>
+
+                            </div>
+
+
+                            <h2 className="font-bold text-xl mt-8 mb-3">
+
+                                Observaciones
+
+                            </h2>
+
+
+                            <textarea
+
+                                value={note}
+
+                                onChange={(e) =>
+                                    setNote(e.target.value)
+                                }
+
+                                rows={4}
+
+                                className="w-full border rounded-2xl p-4"
+
+                                placeholder="Ej.: Sin nueces, escribir dedicatoria..."
+
+                            />
+
+
+                            <div className="mt-8">
+
+                                <p className="text-3xl font-bold text-[#D08A9B]">
+
+                                    $
+
+                                    {price.toLocaleString(
+                                        "es-AR"
+                                    )}
+
+                                </p>
+
+                            </div>
+
+
+                            <button
+
+                                onClick={handleAdd}
+
+                                className="w-full mt-8 rounded-full bg-[#D08A9B] text-white py-4 font-bold"
+
+                            >
+
+                                Agregar al pedido
+
+                            </button>
+
+
+                        </>
+
+                    )
+
+                }
 
             </div>
 

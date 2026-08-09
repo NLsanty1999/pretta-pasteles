@@ -29,17 +29,16 @@ function Home() {
 
                 <div className="space-y-6">
 
-                    {products.slice(0, 2).map((product) => (
+    {products.slice(0, 1).map((product) => (
 
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                        />
+        <ProductCard
+            key={product.id}
+            product={product}
+        />
 
-                    ))}
+    ))}
 
-                </div>
-
+</div>
             </section>
 
         </Layout>

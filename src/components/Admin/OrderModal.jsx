@@ -1,17 +1,11 @@
 import { useEffect } from "react";
 
 function OrderModal({
-
     order,
-
     open,
-
     onClose,
-
     onStatusChange,
-
     onDelete
-
 }) {
 
     useEffect(() => {
@@ -28,21 +22,30 @@ function OrderModal({
 
         if (open) {
 
-            document.addEventListener("keydown", handleKey);
+            document.addEventListener(
+                "keydown",
+                handleKey
+            );
 
         }
 
         return () => {
 
-            document.removeEventListener("keydown", handleKey);
+            document.removeEventListener(
+                "keydown",
+                handleKey
+            );
 
         };
 
     }, [open, onClose]);
 
+
     if (!open || !order) return null;
 
+
     const item = order.items?.[0];
+
 
     return (
 
@@ -94,59 +97,87 @@ function OrderModal({
 
                 </div>
 
+
                 <div className="p-6 space-y-5">
 
-                    <p>
-
-                        <b>Dirección:</b>
-
-                        {" "}
-
-                        {order.client?.address || "-"}
-
-                    </p>
 
                     <hr />
 
-                    <p><b>Producto:</b> {item?.name || "-"}</p>
+
+                    <p>
+
+                        <b>Producto:</b>{" "}
+
+                        {item?.name || "-"}
+
+                    </p>
+
 
                     <p>
 
                         <b>Fecha de entrega:</b>{" "}
 
-                        {
+                        {order.deliveryDate
 
-                            item?.deliveryDate
+                            ? new Date(
+                                `${order.deliveryDate}T00:00:00`
+                            ).toLocaleDateString("es-AR")
 
-                                ? new Date(item.deliveryDate).toLocaleDateString("es-AR")
-
-                                : "-"
+                            : "Sin fecha"
 
                         }
 
                     </p>
 
+
                     <p>
 
                         <b>Horario:</b>{" "}
 
-                        {item?.deliveryHour || "-"}
+                        {order.deliveryHour || "-"}
 
                     </p>
 
-                    <p><b>Tamaño:</b> {item?.size || "-"}</p>
-
-                    <p><b>Bizcochuelo:</b> {item?.flavor || "-"}</p>
-
-                    <p><b>Relleno:</b> {item?.filling || "-"}</p>
-
-                    <p><b>Cobertura:</b> {item?.covering || "-"}</p>
 
                     <p>
 
-                        <b>Extras:</b>
+                        <b>Tamaño:</b>{" "}
 
-                        {" "}
+                        {item?.size || "-"}
+
+                    </p>
+
+
+                    <p>
+
+                        <b>Bizcochuelo:</b>{" "}
+
+                        {item?.flavor || "-"}
+
+                    </p>
+
+
+                    <p>
+
+                        <b>Relleno:</b>{" "}
+
+                        {item?.filling || "-"}
+
+                    </p>
+
+
+                    <p>
+
+                        <b>Cobertura:</b>{" "}
+
+                        {item?.covering || "-"}
+
+                    </p>
+
+
+                    <p>
+
+                        <b>Extras:</b>{" "}
 
                         {
 
@@ -160,6 +191,7 @@ function OrderModal({
 
                     </p>
 
+
                     <div>
 
                         <b>Observaciones</b>
@@ -172,25 +204,38 @@ function OrderModal({
 
                     </div>
 
+
                     <div className="text-center">
 
                         <h2 className="text-4xl font-bold text-[#D08A9B]">
 
                             $
 
-                            {Number(order.total || item?.price || 0)
+                            {Number(
 
-                                .toLocaleString("es-AR")}
+                                order.total ||
+
+                                order.price ||
+
+                                item?.price ||
+
+                                0
+
+                            ).toLocaleString("es-AR")}
 
                         </h2>
 
                     </div>
 
+
                     <div className="grid grid-cols-2 gap-3">
+
 
                         <button
 
-                            onClick={() => onStatusChange("Pendiente")}
+                            onClick={() =>
+                                onStatusChange("Pendiente")
+                            }
 
                             className="rounded-xl py-3 bg-yellow-100"
 
@@ -200,9 +245,12 @@ function OrderModal({
 
                         </button>
 
+
                         <button
 
-                            onClick={() => onStatusChange("En preparación")}
+                            onClick={() =>
+                                onStatusChange("En preparación")
+                            }
 
                             className="rounded-xl py-3 bg-blue-100"
 
@@ -212,9 +260,12 @@ function OrderModal({
 
                         </button>
 
+
                         <button
 
-                            onClick={() => onStatusChange("Finalizado")}
+                            onClick={() =>
+                                onStatusChange("Finalizado")
+                            }
 
                             className="rounded-xl py-3 bg-green-100"
 
@@ -223,6 +274,7 @@ function OrderModal({
                             Finalizado
 
                         </button>
+
 
                         <button
 
@@ -236,7 +288,9 @@ function OrderModal({
 
                         </button>
 
+
                     </div>
+
 
                 </div>
 
@@ -247,5 +301,6 @@ function OrderModal({
     );
 
 }
+
 
 export default OrderModal;

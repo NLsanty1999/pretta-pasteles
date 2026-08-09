@@ -1,67 +1,206 @@
 import { useState } from "react";
 import { saveProduct, createSlug } from "../../firebase/products";
 
-function ProductForm({ onClose }) {
+import SizesSection from "./SizesSection";
+import ExtrasSection from "./ExtrasSection";
+import FlavorsSection from "./FlavorsSection";
+import FillingsSection from "./FillingsSection";
+import CoveringsSection from "./CoveringsSection";
 
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [category, setCategory] = useState(1);
-    const [type, setType] = useState("tradicional");
-    const [sizes, setSizes] = useState([]);
+function ProductForm({
+    onClose,
+    editingProduct = null
+}) {
 
-    const [prices, setPrices] = useState({});
+    const [name, setName] = useState(
+        editingProduct?.name || ""
+    );
 
-async function handleSave() {
+    const [description, setDescription] = useState(
+        editingProduct?.description || ""
+    );
 
-    const product = {
+    const [category, setCategory] = useState(
+        editingProduct?.category || 1
+    );
 
-        id: Date.now(),
+    const [type, setType] = useState(
+        editingProduct?.type || "tradicional"
+    );
 
-        slug: createSlug(name),
+    const [sizes, setSizes] = useState(
+        editingProduct?.sizes || []
+    );
 
-        name,
+    const [prices, setPrices] = useState(
+        editingProduct?.prices || {}
+    );
 
-        description,
+    const [flavors, setFlavors] = useState(
+        editingProduct?.flavors?.length
+            ? editingProduct.flavors
+            : [""]
+    );
 
-        category,
+    const [fillings, setFillings] = useState(
+        editingProduct?.fillings?.length
+            ? editingProduct.fillings
+            : [""]
+    );
 
-        type,
+    const [coverings, setCoverings] = useState(
+        editingProduct?.coverings?.length
+            ? editingProduct.coverings
+            : [""]
+    );
 
-        image: "",
+    const [extras, setExtras] = useState(
+        editingProduct?.extras?.length
+            ? editingProduct.extras
+            : [
+                {
+                    name: "",
+                    price: 0
+                }
+            ]
+    );
 
-        prices,
+    const [quantity, setQuantity] = useState(
+        editingProduct?.quantity || 35
+    );
 
-        sizes,
+    const [saving, setSaving] = useState(false);
 
-        flavors: [],
 
-        fillings: [],
+    function handleTypeChange(e) {
 
-        coverings: [],
+        const newType = e.target.value;
 
-        extras: []
+        setType(newType);
 
-    };
+        // Solo las tortas personalizadas
+        // utilizan sabores, rellenos y coberturas.
 
-    try {
+        if (newType !== "personalizada") {
 
-        await saveProduct(product);
+            setFlavors([""]);
 
-        alert("Producto creado correctamente ✅");
+            setFillings([""]);
 
-        onClose();
+            setCoverings([""]);
+
+        }
 
     }
 
-    catch (error) {
 
-        console.error(error);
+    async function handleSave() {
 
-        alert("Error al crear el producto");
+        if (!name.trim()) {
+
+            alert("Ingresá un nombre para el producto");
+
+            return;
+
+        }
+
+        try {
+
+            setSaving(true);
+
+            const product = {
+
+                ...editingProduct,
+
+                id: editingProduct?.id || Date.now(),
+
+                slug:
+                    editingProduct?.slug ||
+                    createSlug(name),
+
+                name,
+
+                description,
+
+                category,
+
+                type,
+
+                quantity:
+                    type === "mesaDulce"
+                        ? quantity
+                        : null,
+
+                image:
+                    editingProduct?.image || "",
+
+                prices,
+
+                sizes,
+
+                flavors:
+                    type === "personalizada"
+                        ? flavors.filter(
+                            flavor =>
+                                flavor.trim() !== ""
+                        )
+                        : [],
+
+                fillings:
+                    type === "personalizada"
+                        ? fillings.filter(
+                            filling =>
+                                filling.trim() !== ""
+                        )
+                        : [],
+
+                coverings:
+                    type === "personalizada"
+                        ? coverings.filter(
+                            covering =>
+                                covering.trim() !== ""
+                        )
+                        : [],
+
+                extras: extras.filter(
+                    extra =>
+                        extra.name.trim() !== ""
+                )
+
+            };
+
+            await saveProduct(product);
+
+            alert(
+                editingProduct
+                    ? "Producto actualizado correctamente ✅"
+                    : "Producto creado correctamente ✅"
+            );
+
+            onClose();
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            alert(
+                editingProduct
+                    ? "Error al actualizar el producto"
+                    : "Error al crear el producto"
+            );
+
+        }
+
+        finally {
+
+            setSaving(false);
+
+        }
 
     }
 
-}
 
     return (
 
@@ -69,11 +208,19 @@ async function handleSave() {
 
             <h2 className="text-3xl font-bold mb-6">
 
-                Nuevo producto
+                {
+                    editingProduct
+                        ? "Editar producto"
+                        : "Nuevo producto"
+                }
 
             </h2>
 
+
             <div className="space-y-5">
+
+
+                {/* NOMBRE */}
 
                 <div>
 
@@ -87,13 +234,18 @@ async function handleSave() {
 
                         value={name}
 
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) =>
+                            setName(e.target.value)
+                        }
 
                         className="w-full border rounded-2xl p-3 mt-2"
 
                     />
 
                 </div>
+
+
+                {/* DESCRIPCIÓN */}
 
                 <div>
 
@@ -107,7 +259,9 @@ async function handleSave() {
 
                         value={description}
 
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={(e) =>
+                            setDescription(e.target.value)
+                        }
 
                         rows={4}
 
@@ -116,6 +270,9 @@ async function handleSave() {
                     />
 
                 </div>
+
+
+                {/* CATEGORÍA */}
 
                 <div>
 
@@ -129,20 +286,36 @@ async function handleSave() {
 
                         value={category}
 
-                        onChange={(e) => setCategory(Number(e.target.value))}
+                        onChange={(e) =>
+                            setCategory(Number(e.target.value))
+                        }
 
                         className="w-full border rounded-2xl p-3 mt-2"
 
                     >
 
-                        <option value={1}>Tortas</option>
-                        <option value={2}>Tartas</option>
-                        <option value={3}>Mesa Dulce</option>
-                        <option value={4}>Alfajores</option>
+                        <option value={1}>
+                            Tortas
+                        </option>
+
+                        <option value={2}>
+                            Tartas
+                        </option>
+
+                        <option value={3}>
+                            Mesa Dulce
+                        </option>
+
+                        <option value={4}>
+                            Alfajores
+                        </option>
 
                     </select>
 
                 </div>
+
+
+                {/* TIPO */}
 
                 <div>
 
@@ -156,7 +329,7 @@ async function handleSave() {
 
                         value={type}
 
-                        onChange={(e) => setType(e.target.value)}
+                        onChange={handleTypeChange}
 
                         className="w-full border rounded-2xl p-3 mt-2"
 
@@ -174,106 +347,148 @@ async function handleSave() {
 
                         </option>
 
+                        <option value="alfajor">
+
+                            Alfajor
+
+                        </option>
+
+                        <option value="mesaDulce">
+
+                            Mesa Dulce
+
+                        </option>
+
                     </select>
-<div>
 
-    <label className="font-semibold">
+                </div>
 
-        Tamaños
+                {type === "mesaDulce" && (
 
-    </label>
+    <div className="space-y-4">
 
-    {
+        <div>
 
-        ["16", "20", "24"].map(size => (
+            <label className="font-semibold">
+                Cantidad
+            </label>
 
-            <div
-
-                key={size}
-
-                className="flex items-center gap-4 mt-3"
-
+            <select
+                value={quantity}
+                onChange={(e) =>
+                    setQuantity(Number(e.target.value))
+                }
+                className="w-full border rounded-2xl p-3 mt-2"
             >
 
-                <input
+                <option value={12}>
+                    12 unidades
+                </option>
 
-                    type="checkbox"
+                <option value={35}>
+                    35 unidades
+                </option>
 
-                    checked={sizes.includes(size)}
+            </select>
 
-                    onChange={(e) => {
+        </div>
 
-                        if (e.target.checked) {
+        <div>
 
-                            setSizes([...sizes, size]);
+            <label className="font-semibold">
+                Precio
+            </label>
 
-                        } else {
+            <input
+                type="number"
+                value={prices.mesaDulce || ""}
+                onChange={(e) =>
+                    setPrices({
+                        ...prices,
+                        mesaDulce: Number(e.target.value)
+                    })
+                }
+                placeholder="Precio"
+                className="w-full border rounded-2xl p-3 mt-2"
+            />
 
-                            setSizes(
+        </div>
 
-                                sizes.filter(s => s !== size)
+    </div>
 
-                            );
+)}
 
-                        }
 
-                    }}
+                {/* OPCIONES DE TORTA PERSONALIZADA */}
 
-                />
+                {type === "personalizada" && (
 
-                <span className="w-16">
+                    <>
 
-                    {size} cm
+                        <FlavorsSection
 
-                </span>
+                            flavors={flavors}
 
-                {
-
-                    sizes.includes(size) && (
-
-                        <input
-
-                            type="number"
-
-                            placeholder="Precio"
-
-                            value={prices[size] || ""}
-
-                            onChange={(e) =>
-
-                                setPrices({
-
-                                    ...prices,
-
-                                    [size]: Number(e.target.value)
-
-                                })
-
-                            }
-
-                            className="border rounded-xl p-2 w-40"
+                            setFlavors={setFlavors}
 
                         />
 
-                    )
+                        <FillingsSection
 
-                }
+                            fillings={fillings}
 
-            </div>
+                            setFillings={setFillings}
 
-        ))
+                        />
 
-    }
+                        <CoveringsSection
 
-</div>
+                            coverings={coverings}
 
-                </div>
+                            setCoverings={setCoverings}
+
+                        />
+
+                    </>
+
+                )}
+
+
+                {/* EXTRAS */}
+
+                <ExtrasSection
+
+                    extras={extras}
+
+                    setExtras={setExtras}
+
+                />
+
+
+                {/* TAMAÑOS Y PRECIOS */}
+
+                {type !== "mesaDulce" && (
+
+    <SizesSection
+        sizes={sizes}
+        setSizes={setSizes}
+        prices={prices}
+        setPrices={setPrices}
+        type={type}
+    />
+
+)}
+
+
+                {/* BOTONES */}
 
                 <div className="flex gap-4 pt-4">
 
                     <button
 
                         onClick={onClose}
+
+                        disabled={saving}
 
                         className="flex-1 rounded-2xl border py-3"
 
@@ -283,15 +498,30 @@ async function handleSave() {
 
                     </button>
 
+
                     <button
 
                         onClick={handleSave}
+
+                        disabled={saving}
 
                         className="flex-1 rounded-2xl bg-[#D08A9B] text-white py-3"
 
                     >
 
-                        Guardar producto
+                        {
+
+                            saving
+
+                                ? "Guardando..."
+
+                                : editingProduct
+
+                                    ? "Actualizar producto"
+
+                                    : "Guardar producto"
+
+                        }
 
                     </button>
 

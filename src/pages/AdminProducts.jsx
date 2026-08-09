@@ -1,14 +1,36 @@
 import { useState } from "react";
 
 import Layout from "../Layout/Layout";
-import products from "../data/products";
+import useProducts from "../hooks/useProducts";
 
 import ProductsList from "../components/AdminProducts/ProductsList";
 import ProductForm from "../components/AdminProducts/ProductForm";
 
 function AdminProducts() {
 
+    const { products, loading } = useProducts();
+
     const [showForm, setShowForm] = useState(false);
+
+    const [editingProduct, setEditingProduct] = useState(null);
+
+    if (loading) {
+
+        return (
+
+            <Layout>
+
+                <h2 className="text-center text-2xl mt-10">
+
+                    Cargando productos...
+
+                </h2>
+
+            </Layout>
+
+        );
+
+    }
 
     return (
 
@@ -24,9 +46,15 @@ function AdminProducts() {
 
                 <button
 
-                    onClick={() => setShowForm(true)}
+                    onClick={() => {
 
-                    className="bg-[#D08A9B] text-white px-5 py-3 rounded-2xl font-semibold hover:opacity-90"
+                        setEditingProduct(null);
+
+                        setShowForm(true);
+
+                    }}
+
+                    className="bg-[#D08A9B] text-white px-5 py-3 rounded-2xl font-semibold"
 
                 >
 
@@ -36,23 +64,29 @@ function AdminProducts() {
 
             </div>
 
-            {
+            {(showForm || editingProduct) && (
 
-                showForm && (
+                <ProductForm
 
-                    <ProductForm
+                    editingProduct={editingProduct}
 
-                        onClose={() => setShowForm(false)}
+                    onClose={() => {
 
-                    />
+                        setShowForm(false);
 
-                )
+                        setEditingProduct(null);
 
-            }
+                    }}
+
+                />
+
+            )}
 
             <ProductsList
 
                 products={products}
+
+                onEdit={setEditingProduct}
 
             />
 

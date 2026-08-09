@@ -26,17 +26,17 @@ import OrderModal from "../components/Admin/OrderModal";
 
 import OrderSearch from "../utils/OrderSearch";
 import OrderFilter from "../utils/OrderFilter";
+
 import { useNavigate } from "react-router-dom";
+
 
 function Admin() {
 
     const {
-
         orders,
-
         loading
-
     } = useRealtimeOrders();
+
 
     const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -44,27 +44,24 @@ function Admin() {
 
     const [status, setStatus] = useState("Todos");
 
+
     const navigate = useNavigate();
+
 
     const filteredOrders = useMemo(() => {
 
         const searched = OrderSearch(
-
             orders,
-
             search
-
         );
 
         return OrderFilter(
-
             searched,
-
             status
-
         );
 
     }, [orders, search, status]);
+
 
     const groupedOrders = useMemo(() => {
 
@@ -72,9 +69,7 @@ function Admin() {
 
         filteredOrders.forEach(order => {
 
-            const item = order.items?.[0];
-
-            const date = item?.deliveryDate || "Sin fecha";
+            const date = order.deliveryDate || "Sin fecha";
 
             if (!groups[date]) {
 
@@ -86,20 +81,36 @@ function Admin() {
 
         });
 
-        return groups;
+
+        const sortedGroups = Object.entries(groups)
+
+            .sort(([dateA], [dateB]) => {
+
+                // Los pedidos sin fecha van al final
+                if (dateA === "Sin fecha") return 1;
+
+                if (dateB === "Sin fecha") return -1;
+
+
+                // Ordenar de la fecha más próxima a la más lejana
+                return new Date(`${dateA}T00:00:00`) -
+                    new Date(`${dateB}T00:00:00`);
+
+            });
+
+
+        return sortedGroups;
 
     }, [filteredOrders]);
+
 
     async function handleStatus(newStatus) {
 
         try {
 
             await updateStatus(
-
                 selectedOrder.id,
-
                 newStatus
-
             );
 
             setSelectedOrder(null);
@@ -113,15 +124,14 @@ function Admin() {
         }
 
     }
+
 
     async function handleDelete() {
 
         try {
 
             await removeOrder(
-
                 selectedOrder.id
-
             );
 
             setSelectedOrder(null);
@@ -136,17 +146,22 @@ function Admin() {
 
     }
 
+
     if (loading)
 
         return <LoadingOrders />;
+
 
     return (
 
         <Layout>
 
+
             <AdminHeader />
 
+
             <div className="flex gap-4 mb-8">
+
 
                 <button
 
@@ -158,9 +173,12 @@ function Admin() {
 
                 </button>
 
+
                 <button
 
-                    onClick={() => navigate("/admin/productos")}
+                    onClick={() =>
+                        navigate("/admin/productos")
+                    }
 
                     className="flex-1 rounded-2xl bg-white border py-3 font-semibold"
 
@@ -170,15 +188,29 @@ function Admin() {
 
                 </button>
 
+                <button
+                    onClick={() => navigate("/admin/disponibilidad")}
+                    className="flex-1 rounded-2xl bg-white border py-3 font-semibold"
+                >
+                    📅 Calendario
+                </button>
+
+
             </div>
+
 
             <FirebaseBadge />
 
             <RealtimeStatus />
 
+
             <AdminActionBar>
 
-                <AdminStatsCards orders={orders} />
+
+                <AdminStatsCards
+                    orders={orders}
+                />
+
 
                 <AdminFilters
 
@@ -192,15 +224,17 @@ function Admin() {
 
                 />
 
+
             </AdminActionBar>
 
+
             <AdminSummary
-
                 orders={filteredOrders.length}
-
             />
 
+
             {
+
 
                 filteredOrders.length === 0
 
@@ -214,23 +248,34 @@ function Admin() {
 
                         <RecentOrders>
 
+
                             {
 
-                                Object.entries(groupedOrders).map(([date, orders]) => (
 
-                                    <div key={date} className="space-y-4">
+                                groupedOrders.map(([date, orders]) => (
+
+                                    <div
+                                        key={date}
+                                        className="space-y-4"
+                                    >
+
 
                                         <div className="sticky top-0 bg-pink-100 rounded-xl px-4 py-3 shadow">
 
+
                                             <h2 className="font-bold text-lg">
 
+
                                                 📅 {
+
 
                                                     date === "Sin fecha"
 
                                                         ? date
 
-                                                        : new Date(date).toLocaleDateString(
+                                                        : new Date(
+                                                            `${date}T00:00:00`
+                                                        ).toLocaleDateString(
 
                                                             "es-AR",
 
@@ -250,13 +295,18 @@ function Admin() {
 
                                                 }
 
+
                                             </h2>
+
 
                                         </div>
 
+
                                         {
 
+
                                             orders.map(order => (
+
 
                                                 <OrderCard
 
@@ -265,22 +315,26 @@ function Admin() {
                                                     order={order}
 
                                                     onOpen={() =>
-
-                                                        setSelectedOrder(order)
-
+                                                        setSelectedOrder(
+                                                            order
+                                                        )
                                                     }
 
                                                 />
+
 
                                             ))
 
                                         }
 
+
                                     </div>
+
 
                                 ))
 
                             }
+
 
                         </RecentOrders>
 
@@ -288,28 +342,35 @@ function Admin() {
 
             }
 
+
             <OrderModal
 
                 order={selectedOrder}
 
-                open={selectedOrder !== null}
-
-                onClose={() =>
-
-                    setSelectedOrder(null)
-
+                open={
+                    selectedOrder !== null
                 }
 
-                onStatusChange={handleStatus}
+                onClose={() =>
+                    setSelectedOrder(null)
+                }
 
-                onDelete={handleDelete}
+                onStatusChange={
+                    handleStatus
+                }
+
+                onDelete={
+                    handleDelete
+                }
 
             />
+
 
         </Layout>
 
     );
 
 }
+
 
 export default Admin;

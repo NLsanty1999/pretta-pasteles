@@ -10,13 +10,21 @@ import {
 
 import { db } from "./config";
 
+
 const ordersRef = collection(db, "orders");
+
 
 export async function saveOrder(order) {
 
     await addDoc(ordersRef, {
 
-        ...order,
+        client: order.client,
+
+        items: order.items,
+
+        price: order.price,
+
+        deliveryDate: order.deliveryDate || "",
 
         status: "Pendiente",
 
@@ -25,6 +33,7 @@ export async function saveOrder(order) {
     });
 
 }
+
 
 export async function getOrders() {
 
@@ -39,6 +48,7 @@ export async function getOrders() {
     }));
 
 }
+
 
 export async function updateStatus(id, status) {
 
@@ -55,6 +65,7 @@ export async function updateStatus(id, status) {
     );
 
 }
+
 
 export async function removeOrder(id) {
 

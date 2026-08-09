@@ -12,6 +12,7 @@ import Category from "../pages/Category";
 import CategoryProducts from "../pages/CategoryProducts";
 import AdminProducts from "../pages/AdminProducts";
 import TraditionalProduct from "../pages/TraditionalProduct";
+import AdminAvailability from "../pages/AdminAvailability";
 
 function AppRouter() {
     return (
@@ -39,6 +40,14 @@ function AppRouter() {
 
                     element={<AdminProducts />}
 
+                />
+                <Route
+                    path="/admin/disponibilidad"
+                    element={
+                        <ProtectedRoute>
+                            <AdminAvailability />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route

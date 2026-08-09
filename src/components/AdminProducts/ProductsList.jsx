@@ -1,6 +1,12 @@
 import ProductEditor from "./ProductEditor";
 
-function ProductsList({ products }) {
+function ProductsList({
+
+    products,
+
+    onEdit
+
+}) {
 
     return (
 
@@ -15,6 +21,8 @@ function ProductsList({ products }) {
                         key={product.slug}
 
                         product={product}
+
+                        onEdit={onEdit}
 
                     />
 
