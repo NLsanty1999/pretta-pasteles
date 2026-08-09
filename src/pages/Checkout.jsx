@@ -124,23 +124,31 @@ function Checkout() {
 
     function handleDateChange(e) {
 
-        const date = e.target.value;
+    const date = e.target.value;
 
+    if (!date) {
 
-        if (blockedDates.includes(date)) {
+        setDeliveryDate("");
 
-            alert(
-                "La fecha seleccionada no está disponible."
-            );
-
-            return;
-
-        }
-
-
-        setDeliveryDate(date);
+        return;
 
     }
+
+    if (blockedDates.includes(date)) {
+
+        alert(
+            "La fecha seleccionada no está disponible. Elegí otra fecha."
+        );
+
+        setDeliveryDate("");
+
+        return;
+
+    }
+
+    setDeliveryDate(date);
+
+}
 
 
     async function finishOrder() {
@@ -273,19 +281,12 @@ function Checkout() {
 
 
                     <input
-
-                        type="date"
-
-                        value={deliveryDate}
-
-                        min={getToday()}
-
-                        onChange={handleDateChange}
-
-                        className="w-full border rounded-xl p-4 mt-2"
-
-                    />
-
+    type="date"
+    value={deliveryDate}
+    min={getToday()}
+    onChange={handleDateChange}
+    className="w-full border rounded-xl p-4 mt-2"
+/>
 
                     <p className="text-sm text-gray-500 mt-2">
 

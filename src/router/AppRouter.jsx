@@ -35,11 +35,12 @@ function AppRouter() {
                 />
 
                 <Route
-
                     path="/admin/productos"
-
-                    element={<AdminProducts />}
-
+                    element={
+                        <ProtectedRoute>
+                            <AdminProducts />
+                        </ProtectedRoute>
+                    }
                 />
                 <Route
                     path="/admin/disponibilidad"
