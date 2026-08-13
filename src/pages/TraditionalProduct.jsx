@@ -163,22 +163,19 @@ function TraditionalProduct() {
             <div className="max-w-xl mx-auto">
 
                 {/* IMAGEN / PLACEHOLDER */}
-
 <div
-    className={`h-72 rounded-3xl overflow-hidden flex items-center justify-center ${
-        available
-            ? "bg-[#F8F3F0]"
-            : "bg-gray-100"
+    className={`rounded-3xl overflow-hidden flex items-center justify-center p-3 ${
+        available ? "bg-[#F8F3F0]" : "bg-gray-100"
     }`}
 >
     {product.image ? (
         <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover object-center"
+            className="w-full h-auto object-contain rounded-2xl"
         />
     ) : (
-        <span className="text-8xl">🎂</span>
+        <span className="text-7xl py-12">🎂</span>
     )}
 </div>
 

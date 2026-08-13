@@ -170,7 +170,7 @@ function BeforeOrder() {
                         <p className="text-[#315E73] text-base leading-relaxed">
 
                             <strong>
-                                No pedimos seña ni adelanto.
+                                Se necesita seña del 50% para tomar pedido.
                             </strong>
 
                         </p>
