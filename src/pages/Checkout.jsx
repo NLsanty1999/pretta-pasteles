@@ -3,12 +3,15 @@ import Layout from "../Layout/Layout";
 import { useCart } from "../context/CartContext";
 import { saveOrder } from "../firebase/orders";
 
+
 import {
     doc,
     onSnapshot
 } from "firebase/firestore";
 
 import { db } from "../firebase/config";
+
+import agenda from "../data/agenda";
 
 function Checkout() {
 
@@ -25,10 +28,15 @@ function Checkout() {
     const [client, setClient] = useState({
         name: "",
         phone: "",
-        address: ""
+
     });
 
     const [deliveryDate, setDeliveryDate] = useState("");
+    
+
+    const [deliveryHour, setDeliveryHour] = useState(
+    agenda.workingHours[0]
+);
 
     const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -84,7 +92,11 @@ function Checkout() {
 
         return unsubscribe;
 
+        
+
     }, []);
+
+    const availableHours = agenda.workingHours;
 
 
     function formatDate(year, month, day) {
@@ -253,6 +265,14 @@ function Checkout() {
 
         }
 
+        if (!deliveryHour) {
+
+    return alert(
+        "Seleccioná un horario de entrega."
+    );
+
+}
+
 
         if (blockedDates.includes(deliveryDate)) {
 
@@ -276,10 +296,11 @@ function Checkout() {
 
                 price: totalPrice,
 
-                deliveryDate
+                deliveryDate,
+
+                deliveryHour
 
             });
-
 
             clearCart();
 
@@ -353,19 +374,7 @@ function Checkout() {
                 />
 
 
-                <input
 
-                    name="address"
-
-                    placeholder="Dirección (opcional)"
-
-                    value={client.address}
-
-                    onChange={handleChange}
-
-                    className="w-full border rounded-xl p-4"
-
-                />
 
 
                 <div>
@@ -638,6 +647,49 @@ function Checkout() {
                     </p>
 
                 </div>
+
+                <div>
+
+    <label className="font-semibold">
+
+        Horario de entrega
+
+    </label>
+
+    <select
+
+        value={deliveryHour}
+
+        onChange={(e) =>
+            setDeliveryHour(e.target.value)
+        }
+
+        className="w-full border rounded-xl p-4 mt-2 bg-white"
+
+    >
+
+        <option value="">
+
+            Seleccionar horario
+
+        </option>
+
+        {availableHours.map(hour => (
+
+            <option
+                key={hour}
+                value={hour}
+            >
+
+                {hour}
+
+            </option>
+
+        ))}
+
+    </select>
+
+</div>
 
 
                 <div className="text-2xl font-bold">

@@ -22,17 +22,19 @@ function useProducts() {
             (snapshot) => {
 
                 const data = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+}));
 
-                    id: doc.id,
+console.log(
+    "BALCARCE:",
+    data.filter(p =>
+        p.name?.toLowerCase().includes("balcarce")
+    )
+);
 
-                    ...doc.data()
-
-                }));
-
-                setProducts(data);
-
-                setLoading(false);
-
+setProducts(data);
+setLoading(false);
             }
 
         );

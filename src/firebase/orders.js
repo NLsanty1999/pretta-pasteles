@@ -26,6 +26,8 @@ export async function saveOrder(order) {
 
         deliveryDate: order.deliveryDate || "",
 
+        deliveryHour: order.deliveryHour || "",
+
         status: "Pendiente",
 
         createdAt: serverTimestamp()

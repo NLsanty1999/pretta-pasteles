@@ -1,136 +1,147 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
-
-import products from "../data/products";
-import agenda from "../data/agenda";
+import useProducts from "../hooks/useProducts";
 
 import { useCart } from "../context/CartContext";
 
-import { getAgendaConfig } from "../firebase/agenda";
-
 function Product() {
-
     const { id } = useParams();
 
     const { addToCart } = useCart();
 
+    const {
+        products,
+        loading
+    } = useProducts();
+
+    /*
+     * BUSCAR PRODUCTO
+     */
+
     const product = products.find(
-
-        p => p.id === Number(id)
-
+        p =>
+            String(p.id) === String(id) ||
+            String(p.slug) === String(id)
     );
 
-    if (!product) {
 
-        return (
+    /*
+     * ESTADOS
+     *
+     * Todos los hooks están antes de cualquier return.
+     */
 
-            <Layout>
+    const [size, setSize] = useState("");
 
-                <div className="text-center py-20">
+    const [flavor, setFlavor] = useState("");
 
-                    <h2 className="text-3xl font-bold">
+    const [filling, setFilling] = useState("");
 
-                        Producto no encontrado
-
-                    </h2>
-
-                </div>
-
-            </Layout>
-
-        );
-
-    }
-
-    const [size, setSize] = useState(product.sizes[0]);
-
-    const [flavor, setFlavor] = useState(product.flavors[0]);
-
-    const [filling, setFilling] = useState(product.fillings[0]);
-
-    const [covering, setCovering] = useState(product.coverings[0]);
+    const [covering, setCovering] = useState("");
 
     const [extras, setExtras] = useState([]);
 
     const [note, setNote] = useState("");
 
-    const [agendaConfig, setAgendaConfig] = useState(null);
 
-    const minAdvanceDays =
-        agendaConfig?.minAdvanceDays ?? agenda.minAdvanceDays;
+    /*
+     * CARGANDO
+     */
 
-    const minDate = new Date();
+    if (loading) {
+        return (
+            <Layout>
 
-    minDate.setDate(
-        minDate.getDate() + minAdvanceDays
-    );
+                <div className="text-center py-20">
 
-    const minDeliveryDate =
-        minDate.toISOString().split("T")[0];
+                    <h2 className="text-2xl font-bold">
+                        Cargando producto...
+                    </h2>
 
-    const [deliveryDate, setDeliveryDate] =
-        useState(minDeliveryDate);
+                </div>
 
-    const [deliveryHour, setDeliveryHour] =
-        useState(agenda.workingHours[0]);
+            </Layout>
+        );
+    }
 
-    useEffect(() => {
 
-        async function loadAgenda() {
+    /*
+     * PRODUCTO NO ENCONTRADO
+     */
 
-            try {
+    if (!product) {
+        return (
+            <Layout>
 
-                const config = await getAgendaConfig();
+                <div className="text-center py-20">
 
-                setAgendaConfig(config);
+                    <h2 className="text-3xl font-bold">
+                        Producto no encontrado
+                    </h2>
 
-            }
+                </div>
 
-            catch (error) {
+            </Layout>
+        );
+    }
 
-                console.error(error);
 
-            }
+    /*
+     * VALORES POR DEFECTO
+     */
 
-        }
+    const selectedSize =
+        size ||
+        product.sizes?.[0] ||
+        "";
 
-        loadAgenda();
+    const selectedFlavor =
+        flavor ||
+        product.flavors?.[0] ||
+        "";
 
-    }, []);
+    const selectedFilling =
+        filling ||
+        product.fillings?.[0] ||
+        "";
 
-    console.log(agendaConfig);
+    const selectedCovering =
+        covering ||
+        product.coverings?.[0] ||
+        "";
+
+
+    /*
+     * EXTRAS
+     */
 
     function toggleExtra(name) {
 
         if (extras.includes(name)) {
 
             setExtras(
-
                 extras.filter(
-
                     extra => extra !== name
-
                 )
-
             );
 
-        }
-
-        else {
+        } else {
 
             setExtras([
-
                 ...extras,
-
                 name
-
             ]);
 
         }
 
     }
+
+
+    /*
+     * PRECIO DE EXTRAS
+     */
 
     const extrasPrice = useMemo(() => {
 
@@ -138,20 +149,15 @@ function Product() {
 
             (total, name) => {
 
-                const extra = product.extras.find(
-
-                    e => e.name === name
-
-                );
+                const extra =
+                    product.extras?.find(
+                        e => e.name === name
+                    );
 
                 return total + (
-
                     extra
-
-                        ? extra.price
-
+                        ? Number(extra.price)
                         : 0
-
                 );
 
             },
@@ -162,69 +168,88 @@ function Product() {
 
     }, [extras, product]);
 
+
+    /*
+     * PRECIO TOTAL
+     */
+
     const totalPrice = useMemo(() => {
 
         return Number(
-
-            product.prices[size]
-
+            product.prices?.[selectedSize] || 0
         ) + extrasPrice;
 
     }, [
-
-        size,
-
+        selectedSize,
         extrasPrice,
-
         product
-
     ]);
 
-function handleAdd() {
 
-    const basePrice = Number(product.prices[size]);
+    /*
+     * AGREGAR AL PEDIDO
+     */
 
-    const extrasPrice = extras.reduce((sum, extraName) => {
+    function handleAdd() {
 
-        const extra = product.extras.find(
+        const basePrice = Number(
+            product.prices?.[selectedSize] || 0
+        );
 
-            e => e.name === extraName
+
+        const extrasPrice = extras.reduce(
+
+            (sum, extraName) => {
+
+                const extra =
+                    product.extras?.find(
+                        e => e.name === extraName
+                    );
+
+                return sum + (
+                    extra
+                        ? Number(extra.price)
+                        : 0
+                );
+
+            },
+
+            0
 
         );
 
-        return sum + (extra ? extra.price : 0);
 
-    }, 0);
+        const total =
+            basePrice + extrasPrice;
 
-    const total = basePrice + extrasPrice;
 
-    addToCart({
+        addToCart({
 
-        ...product,
+            ...product,
 
-        size,
+            size: selectedSize,
 
-        flavor,
+            flavor: selectedFlavor,
 
-        filling,
+            filling: selectedFilling,
 
-        covering,
+            covering: selectedCovering,
 
-        extras,
+            extras,
 
-        deliveryDate,
+            note,
 
-        deliveryHour,
+            price: total
 
-        note,
+        });
 
-        price: total
 
-    });
+        alert(
+            "Producto agregado al pedido."
+        );
 
-    alert("Producto agregado al pedido.");
+    }
 
-}
 
     return (
 
@@ -233,26 +258,26 @@ function handleAdd() {
             <div className="bg-pink-100 rounded-3xl h-56 flex items-center justify-center">
 
                 <span className="text-8xl">
-
                     🎂
-
                 </span>
 
             </div>
 
+
             <h1 className="text-4xl font-bold mt-8">
-
                 {product.name}
-
             </h1>
 
+
             <p className="text-gray-600 mt-3">
-
                 {product.description}
-
             </p>
 
+
             <div className="mt-10 space-y-6">
+
+
+                {/* TAMAÑO */}
 
                 <div>
 
@@ -260,26 +285,36 @@ function handleAdd() {
                         Tamaño
                     </label>
 
+
                     <select
-                        value={size}
-                        onChange={(e) => setSize(e.target.value)}
+                        value={selectedSize}
+                        onChange={(e) =>
+                            setSize(e.target.value)
+                        }
                         className="w-full rounded-xl border p-4"
                     >
 
-                        {product.sizes.map((option) => (
+                        {product.sizes?.map(
+                            option => (
 
-                            <option
-                                key={option}
-                                value={option}
-                            >
-                                {option} cm
-                            </option>
+                                <option
+                                    key={option}
+                                    value={option}
+                                >
 
-                        ))}
+                                    {option} cm
+
+                                </option>
+
+                            )
+                        )}
 
                     </select>
 
                 </div>
+
+
+                {/* BIZCOCHUELO */}
 
                 <div>
 
@@ -287,26 +322,36 @@ function handleAdd() {
                         Bizcochuelo
                     </label>
 
+
                     <select
-                        value={flavor}
-                        onChange={(e) => setFlavor(e.target.value)}
+                        value={selectedFlavor}
+                        onChange={(e) =>
+                            setFlavor(e.target.value)
+                        }
                         className="w-full rounded-xl border p-4"
                     >
 
-                        {product.flavors.map((option) => (
+                        {product.flavors?.map(
+                            option => (
 
-                            <option
-                                key={option}
-                                value={option}
-                            >
-                                {option}
-                            </option>
+                                <option
+                                    key={option}
+                                    value={option}
+                                >
 
-                        ))}
+                                    {option}
+
+                                </option>
+
+                            )
+                        )}
 
                     </select>
 
                 </div>
+
+
+                {/* RELLENO */}
 
                 <div>
 
@@ -314,26 +359,36 @@ function handleAdd() {
                         Relleno
                     </label>
 
+
                     <select
-                        value={filling}
-                        onChange={(e) => setFilling(e.target.value)}
+                        value={selectedFilling}
+                        onChange={(e) =>
+                            setFilling(e.target.value)
+                        }
                         className="w-full rounded-xl border p-4"
                     >
 
-                        {product.fillings.map((option) => (
+                        {product.fillings?.map(
+                            option => (
 
-                            <option
-                                key={option}
-                                value={option}
-                            >
-                                {option}
-                            </option>
+                                <option
+                                    key={option}
+                                    value={option}
+                                >
 
-                        ))}
+                                    {option}
+
+                                </option>
+
+                            )
+                        )}
 
                     </select>
 
                 </div>
+
+
+                {/* COBERTURA */}
 
                 <div>
 
@@ -341,26 +396,36 @@ function handleAdd() {
                         Cobertura
                     </label>
 
+
                     <select
-                        value={covering}
-                        onChange={(e) => setCovering(e.target.value)}
+                        value={selectedCovering}
+                        onChange={(e) =>
+                            setCovering(e.target.value)
+                        }
                         className="w-full rounded-xl border p-4"
                     >
 
-                        {product.coverings.map((option) => (
+                        {product.coverings?.map(
+                            option => (
 
-                            <option
-                                key={option}
-                                value={option}
-                            >
-                                {option}
-                            </option>
+                                <option
+                                    key={option}
+                                    value={option}
+                                >
 
-                        ))}
+                                    {option}
+
+                                </option>
+
+                            )
+                        )}
 
                     </select>
 
                 </div>
+
+
+                {/* EXTRAS */}
 
                 <div>
 
@@ -368,40 +433,57 @@ function handleAdd() {
                         Extras
                     </label>
 
+
                     <div className="grid grid-cols-2 gap-3">
 
-                        {product.extras.map((extra) => (
+                        {product.extras?.map(
+                            extra => (
 
-                            <button
-                                key={extra.name}
-                                type="button"
-                                onClick={() => toggleExtra(extra.name)}
-                                className={`rounded-2xl border p-4 transition ${
-                                    extras.includes(extra.name)
-                                        ? "bg-[#D08A9B] text-white border-[#D08A9B]"
-                                        : "bg-white hover:bg-pink-50"
-                                }`}
-                            >
+                                <button
+                                    key={extra.name}
+                                    type="button"
+                                    onClick={() =>
+                                        toggleExtra(
+                                            extra.name
+                                        )
+                                    }
+                                    className={`rounded-2xl border p-4 transition ${
+                                        extras.includes(
+                                            extra.name
+                                        )
+                                            ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+                                            : "bg-white hover:bg-pink-50"
+                                    }`}
+                                >
 
-                                <div className="font-semibold">
+                                    <div className="font-semibold">
+                                        {extra.name}
+                                    </div>
 
-                                    {extra.name}
 
-                                </div>
+                                    <div className="text-sm mt-1">
 
-                                <div className="text-sm mt-1">
+                                        +$
 
-                                    +${extra.price.toLocaleString("es-AR")}
+                                        {Number(
+                                            extra.price || 0
+                                        ).toLocaleString(
+                                            "es-AR"
+                                        )}
 
-                                </div>
+                                    </div>
 
-                            </button>
+                                </button>
 
-                        ))}
+                            )
+                        )}
 
                     </div>
 
                 </div>
+
+
+                {/* OBSERVACIONES */}
 
                 <div>
 
@@ -409,85 +491,20 @@ function handleAdd() {
                         Observaciones
                     </label>
 
-                <div>
-
-                    <p className="font-bold mb-3">
-
-                        Fecha de entrega
-
-                    </p>
-
-                    <input
-
-                        type="date"
-
-                        value={deliveryDate}
-
-                        min={minDeliveryDate}
-
-                        onChange={(e) => setDeliveryDate(e.target.value)}
-
-                        className="w-full rounded-xl border p-4"
-
-                    />
-
-                    <div className="mt-5">
-
-                        <p className="font-bold mb-3">
-
-                            Horario de entrega
-
-                        </p>
-
-                        <select
-
-                            value={deliveryHour}
-
-                            onChange={(e) =>
-
-                                setDeliveryHour(e.target.value)
-
-                            }
-
-                            className="w-full rounded-xl border p-4"
-
-                        >
-
-                            {
-
-                                (agendaConfig?.workingHours ?? agenda.workingHours).map(hour => (
-
-                                    <option
-
-                                        key={hour}
-
-                                        value={hour}
-
-                                    >
-
-                                        {hour}
-
-                                    </option>
-
-                                ))
-
-                            }
-
-                        </select>
-
-                    </div>
-
-                </div>
-
 
                     <textarea
                         value={note}
-                        onChange={(e) => setNote(e.target.value)}
+                        onChange={(e) =>
+                            setNote(e.target.value)
+                        }
                         placeholder="Ej.: Sin azúcar, nombre para la torta, colores, etc."
                         className="w-full h-32 rounded-2xl border p-4 resize-none"
                     />
 
                 </div>
+
+
+                {/* TOTAL */}
 
                 <div className="bg-white rounded-3xl shadow p-6">
 
@@ -497,9 +514,14 @@ function handleAdd() {
                             Total
                         </span>
 
+
                         <span className="text-3xl font-bold text-[#D08A9B]">
 
-                            ${totalPrice.toLocaleString("es-AR")}
+                            $
+
+                            {totalPrice.toLocaleString(
+                                "es-AR"
+                            )}
 
                         </span>
 
@@ -507,10 +529,11 @@ function handleAdd() {
 
                 </div>
 
+
+                {/* BOTÓN */}
+
                 <button
-
                     onClick={handleAdd}
-
                     className="
                         w-full
                         rounded-full
@@ -522,19 +545,18 @@ function handleAdd() {
                         hover:bg-[#c77c8f]
                         transition
                     "
-
                 >
 
                     Agregar al pedido
 
                 </button>
 
+
             </div>
 
         </Layout>
 
-        );
-
+    );
 }
 
 export default Product;

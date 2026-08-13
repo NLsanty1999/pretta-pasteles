@@ -1,28 +1,32 @@
 function OrderCard({ order, onOpen }) {
 
-    const item = order.items?.[0];
-
-    console.log(JSON.stringify(order.items[0], null, 2));
-
     const statusStyle = {
+
         "Pendiente": {
             card: "bg-yellow-50 border-yellow-300",
             badge: "bg-yellow-200 text-yellow-800"
         },
+
         "En preparación": {
             card: "bg-blue-50 border-blue-300",
             badge: "bg-blue-200 text-blue-800"
         },
+
         "Finalizado": {
             card: "bg-green-50 border-green-300",
             badge: "bg-green-200 text-green-800"
         }
+
     };
 
+
     const style = statusStyle[order.status] || {
+
         card: "bg-white border-gray-200",
         badge: "bg-gray-200 text-gray-800"
+
     };
+
 
     return (
 
@@ -51,18 +55,15 @@ function OrderCard({ order, onOpen }) {
                 <div>
 
                     <h2 className="text-xl font-bold">
-
                         {order.client?.name || "Sin nombre"}
-
                     </h2>
 
                     <p className="text-gray-500 text-sm">
-
                         {order.client?.phone || "-"}
-
                     </p>
 
                 </div>
+
 
                 <span
                     className={`
@@ -79,66 +80,95 @@ function OrderCard({ order, onOpen }) {
 
             </div>
 
-            <div className="mt-5 space-y-1">
 
-                <p>
+            <div className="mt-5 space-y-2">
 
-                    🍰 <b>{item?.name || "-"}</b>
-
+                <p className="font-bold">
+                    🍰 Productos:
                 </p>
 
-                <p>
 
-                    📏 {item?.size || "-"}
+                {order.items?.map((item, index) => (
 
-                </p>
+                    <p
+                        key={index}
+                        className="pl-2"
+                    >
 
-                <p>
+                        {index + 1}. {item.name || "-"}
 
-                    📅 {
+                        {item.size
+                            ? ` — ${item.size} cm`
+                            : ""
+                        }
 
-                        item?.deliveryDate
+                    </p>
 
-                            ? new Date(item.deliveryDate).toLocaleDateString("es-AR")
+                ))}
 
-                            : "-"
+
+                {!order.items?.length && (
+
+                    <p>
+                        Sin productos
+                    </p>
+
+                )}
+
+
+                <p className="pt-2">
+
+                    📅{" "}
+
+                    {order.deliveryDate
+
+                        ? new Date(
+                            `${order.deliveryDate}T00:00:00`
+                        ).toLocaleDateString("es-AR")
+
+                        : "Sin fecha"
 
                     }
 
                 </p>
 
+
                 <p>
 
-                    🕒 {item?.deliveryHour || "-"}
+                    🕒 {order.deliveryHour || "-"}
 
                 </p>
 
             </div>
 
+
             <div className="mt-5 flex justify-between items-center">
 
                 <span className="text-gray-500">
-
                     Ver detalle →
-
                 </span>
+
 
                 <span className="text-2xl font-bold text-[#D08A9B]">
 
                     $
 
-                    {Number(order.total || item?.price || 0)
-
-                        .toLocaleString("es-AR")}
+                    {Number(
+                        order.total ||
+                        order.price ||
+                        0
+                    ).toLocaleString("es-AR")}
 
                 </span>
 
             </div>
+
 
         </button>
 
     );
 
 }
+
 
 export default OrderCard;
