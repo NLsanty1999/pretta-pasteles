@@ -164,17 +164,23 @@ function TraditionalProduct() {
 
                 {/* IMAGEN / PLACEHOLDER */}
 
-                <div
-                    className={`h-72 rounded-3xl flex items-center justify-center ${
-                        available
-                            ? "bg-[#F8F3F0]"
-                            : "bg-gray-100"
-                    }`}
-                >
-                    <span className="text-8xl">
-                        🎂
-                    </span>
-                </div>
+<div
+    className={`h-72 rounded-3xl overflow-hidden flex items-center justify-center ${
+        available
+            ? "bg-[#F8F3F0]"
+            : "bg-gray-100"
+    }`}
+>
+    {product.image ? (
+        <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover object-center"
+        />
+    ) : (
+        <span className="text-8xl">🎂</span>
+    )}
+</div>
 
 
                 {/* NOMBRE */}

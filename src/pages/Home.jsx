@@ -25,7 +25,7 @@ function Home() {
         </div>
         <div className="flex-1 text-left min-w-0">
             <p className="text-xs text-[#5A7A5E] leading-tight">
-                ¿Tenés dudas o querés hacer un pedido?
+                ¿Tenés dudas?
             </p>
             <p className="text-xs font-semibold text-[#5A7A5E] leading-tight">
                 Escribinos por WhatsApp

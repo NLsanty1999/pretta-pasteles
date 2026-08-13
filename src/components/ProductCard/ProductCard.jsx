@@ -36,43 +36,18 @@ function ProductCard({ product }) {
 
         >
 
-            <div className="h-36 bg-[#F8F3F0] flex items-center justify-center">
-
-                {
-
-                    product.image
-
-                        ? (
-
-                            <img
-
-                                src={product.image}
-
-                                alt={product.name}
-
-                                className="
-                                    w-full
-                                    h-full
-                                    object-cover
-                                "
-
-                            />
-
-                        )
-
-                        : (
-
-                            <span className="text-6xl">
-
-                                🎂
-
-                            </span>
-
-                        )
-
-                }
-
-            </div>
+           <div className="h-44 bg-[#F8F3F0] overflow-hidden flex items-center justify-center">
+    {product.image ? (
+        <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover object-center"
+            style={{ objectPosition: "center" }}
+        />
+    ) : (
+        <span className="text-6xl">🎂</span>
+    )}
+</div>
 
 
             <div className="p-4">
