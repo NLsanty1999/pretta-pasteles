@@ -235,48 +235,57 @@ function OrderModal({
                     </div>
 
 
-                    <div className="grid grid-cols-2 gap-3">
+                   <div className="grid grid-cols-2 gap-3">
 
+<button
+    onClick={() => {
+        const phone = (order.client?.phone || "").replace(/\D/g, "");
+        const name = order.client?.name || "";
 
-                        <button
-                            onClick={() =>
-                                onStatusChange("Pendiente")
-                            }
-                            className="rounded-xl py-3 bg-yellow-100"
-                        >
-                            Pendiente
-                        </button>
+        const text = `Hola ${name}! \u{1F44B}\n\nTu pedido fue *aceptado* \u{2705}\nTe vamos a avisar cuando esté listo para retirar.\n\nGracias por elegir Pretta Pasteles \u{1F495}`;
 
+        if (phone) {
+            const fullPhone = phone.startsWith("54") ? phone : `54${phone}`;
+            const url = `https://wa.me/${fullPhone}?text=${encodeURIComponent(text)}`;
+            window.open(url, "_blank");
+        }
 
-                        <button
-                            onClick={() =>
-                                onStatusChange("En preparación")
-                            }
-                            className="rounded-xl py-3 bg-blue-100"
-                        >
-                            Preparación
-                        </button>
+        onStatusChange("En preparación");
+    }}
+    className="rounded-xl py-3 bg-emerald-100 font-medium col-span-2"
+>
+    Pedido aceptado + WhatsApp
+</button>
 
+    <button
+        onClick={() => onStatusChange("Pendiente")}
+        className="rounded-xl py-3 bg-yellow-100"
+    >
+        Pendiente
+    </button>
 
-                        <button
-                            onClick={() =>
-                                onStatusChange("Finalizado")
-                            }
-                            className="rounded-xl py-3 bg-green-100"
-                        >
-                            Finalizado
-                        </button>
+    <button
+        onClick={() => onStatusChange("En preparación")}
+        className="rounded-xl py-3 bg-blue-100"
+    >
+        Preparación
+    </button>
 
+    <button
+        onClick={() => onStatusChange("Finalizado")}
+        className="rounded-xl py-3 bg-green-100"
+    >
+        Finalizado
+    </button>
 
-                        <button
-                            onClick={onDelete}
-                            className="rounded-xl py-3 bg-red-100"
-                        >
-                            Eliminar
-                        </button>
+    <button
+        onClick={onDelete}
+        className="rounded-xl py-3 bg-red-100"
+    >
+        Eliminar
+    </button>
 
-
-                    </div>
+</div>
 
 
                 </div>

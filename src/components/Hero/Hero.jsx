@@ -17,6 +17,31 @@ function Hero() {
                 />
             </div>
 
+            {/* Cartel de retiro */}
+<div className="mb-6 mx-1">
+    <div className="bg-[#FDF0F0] border border-[#F0C0C8] rounded-2xl px-3.5 py-3 flex items-center gap-3 text-left shadow-sm">
+        
+        {/* Ícono de camión */}
+        <div className="flex-shrink-0 text-[#E88A9A]">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 3h15v13H1z"/>
+                <path d="M16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+        </div>
+
+        <div>
+            <p className="text-sm font-semibold text-[#C45C6A] leading-tight">
+                Retirá tu pedido en nuestro local
+            </p>
+            <p className="text-xs text-[#C45C6A]/opacity-80 leading-tight mt-0.5">
+                No realizamos entregas a domicilio
+            </p>
+        </div>
+    </div>
+</div>
+
             {/* Contenido con su espaciado normal */}
             <h1 className="text-3xl font-bold text-[#5A3B31] leading-tight">
                 Amamos ser parte de tus momentos especiales

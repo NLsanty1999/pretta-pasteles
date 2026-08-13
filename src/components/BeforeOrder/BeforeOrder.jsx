@@ -144,8 +144,8 @@ function BeforeOrder() {
 
                         <p className="text-[#315E73] text-base leading-relaxed">
 
-                            Los pedidos se realizan de
-                            <strong> miércoles a domingo.</strong>
+                            Los pedidos se retiran de
+                            <strong> lunes a sabado.</strong>
 
                         </p>
 

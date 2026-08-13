@@ -1,36 +1,32 @@
-import {
-    Cake,
-    PieChart,
-    Candy,
-    Cookie,
-} from "lucide-react";
-
 const categories = [
-
     {
         id: 1,
-        name: "Tortas",
-        icon: Cake,
-    },
-
+        name: "TORTAS",
+        description: "Personalizadas para cada ocasión",
+        icon: "torta",
+    }, 
     {
-        id: 2,
-        name: "Tartas",
-        icon: PieChart,
+    id: 2,
+    name: "TARTAS",
+    description: "Para disfrutar en cualquier momento",
+    icon: "tartas",
     },
-
+    
+    
     {
         id: 3,
-        name: "Mesa Dulce",
-        icon: Candy,
+        name: "MESAS DULCES",
+        description: "El toque perfecto para tu evento",
+        icon: "mesa",
     },
-
-    {
+{
         id: 4,
-        name: "Alfajores",
-        icon: Cookie,
+        name: "ALFAJORES",
+        description: "Rellenos deliciosos que enamoran",
+        icon: "alfajor",
     },
 
+    
 ];
 
 export default categories;

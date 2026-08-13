@@ -9,20 +9,12 @@ function ProductCard({ product }) {
         : 0;
 
     function handleOpen() {
-
-        if (product.type === "personalizada") {
-
-            navigate(`/producto/${product.id}`);
-
-        } else {
-
-            navigate(
-                `/producto/tradicional/${product.slug}`
-            );
-
-        }
-
+    if (product.type === "personalizada") {
+        navigate(`/producto/tradicional/${product.slug || product.id}`);
+    } else {
+        navigate(`/producto/tradicional/${product.slug}`);
     }
+}
 
     return (
 

@@ -107,23 +107,29 @@ function Checkout() {
 
 
     function getToday() {
+    const date = new Date();
+    return formatDate(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+    );
+}
 
-        const date = new Date();
+// Fecha mínima = hoy + 2 días
+function getMinDate() {
+    const date = new Date();
+    date.setDate(date.getDate() + 2); // +2 días de anticipación
+    return formatDate(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+    );
+}
 
-        return formatDate(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate()
-        );
-
-    }
-
-
-    function isPast(date) {
-
-        return date < getToday();
-
-    }
+function isPast(date) {
+    // Bloquea todo lo que sea anterior a (hoy + 2 días)
+    return date < getMinDate();
+}
 
 
     function isBlocked(date) {
@@ -688,6 +694,8 @@ function Checkout() {
         ))}
 
     </select>
+
+    
 
 </div>
 
