@@ -1,60 +1,61 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ShoppingCart } from "lucide-react";
 import logo from "../../assets/images/logoPretta.png";
 import { useCart } from "../../context/CartContext";
-import { getProducts } from "../../firebase/products/products"; // ajustá la ruta si es diferente
+import { getProducts } from "../../firebase/products/products";
 
 function Navbar() {
     const navigate = useNavigate();
     const { totalItems } = useCart();
 
+    const [scrolled, setScrolled] = useState(false);
     const [query, setQuery] = useState("");
     const [products, setProducts] = useState([]);
     const [results, setResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
-    const searchRef = useRef(null);
 
-    // Cargar productos una sola vez
+    // Detectar scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 40);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     useEffect(() => {
         getProducts().then(setProducts).catch(console.error);
     }, []);
 
-    // Filtrar mientras escribe
     useEffect(() => {
         if (query.trim().length < 2) {
             setResults([]);
             return;
         }
-
         const filtered = products.filter((p) =>
             p.name?.toLowerCase().includes(query.toLowerCase())
         );
-
-        setResults(filtered.slice(0, 6)); // máximo 6 resultados
+        setResults(filtered.slice(0, 6));
         setShowResults(true);
     }, [query, products]);
-
-    // Cerrar resultados al hacer clic afuera
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (searchRef.current && !searchRef.current.contains(e.target)) {
-                setShowResults(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
 
     const handleSelect = (product) => {
         setQuery("");
         setShowResults(false);
-        // Ajustá esta ruta si es necesario
-        navigate(`/producto/tradicional/${product.slug || product.id}`);
+        navigate(`/producto/tradicional/${product.id}`);
     };
 
     return (
-        <header className="fixed top-0 left-0 w-full z-50 bg-[#FFF8F3]/90 backdrop-blur-md border-b border-[#EAD7DE]">
+        <header
+            className={`
+                fixed top-0 left-0 w-full z-50 transition-all duration-300
+                ${scrolled 
+                    ? "bg-white/95 backdrop-blur-md border-b border-[#EAD7DE] shadow-sm" 
+                    : "bg-transparent"
+                }
+            `}
+        >
             <div className="max-w-md mx-auto flex items-center px-4 h-16 gap-3">
 
                 {/* Logo */}
@@ -62,43 +63,38 @@ function Navbar() {
                     <img
                         src={logo}
                         alt="Pretta Pasteles"
-                        className="h-11 w-auto object-contain"
+                        className={`h-11 w-auto object-contain transition ${
+                            scrolled ? "opacity-100" : "brightness-0 invert"
+                        }`}
                     />
                 </button>
 
                 {/* Buscador */}
-                <div className="flex-1 relative" ref={searchRef}>
+                <div className="flex-1 relative">
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Buscar producto..."
+                            placeholder="Buscar torta..."
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            onFocus={() => query.length >= 2 && setShowResults(true)}
-                            className="
-                                w-full
-                                bg-white
-                                border border-[#EAD7DE]
-                                rounded-full
-                                py-2
-                                pl-9
-                                pr-4
-                                text-sm
-                                text-[#5A3B31]
-                                placeholder:text-gray-400
-                                focus:outline-none
-                                focus:ring-2
-                                focus:ring-[#E8A0B0]/40
-                            "
+                            className={`
+                                w-full rounded-full py-2 pl-9 pr-4 text-sm
+                                focus:outline-none focus:ring-2 focus:ring-[#E8A0B0]/40
+                                transition
+                                ${scrolled 
+                                    ? "bg-white border border-[#EAD7DE] text-[#5A3B31]" 
+                                    : "bg-white/20 border border-white/30 text-white placeholder:text-white/70"
+                                }
+                            `}
                         />
                         <Search
                             size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            strokeWidth={2}
+                            className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                                scrolled ? "text-gray-400" : "text-white/80"
+                            }`}
                         />
                     </div>
 
-                    {/* Resultados */}
                     {showResults && results.length > 0 && (
                         <div className="absolute top-full left-0 right-0 mt-1.5 bg-white rounded-2xl shadow-lg border border-[#EAD7DE] overflow-hidden z-50">
                             {results.map((product) => (
@@ -117,10 +113,11 @@ function Navbar() {
                 {/* Carrito */}
                 <button
                     onClick={() => navigate("/carrito")}
-                    className="relative text-[#5A3B31] hover:opacity-70 transition flex-shrink-0"
+                    className={`relative transition flex-shrink-0 ${
+                        scrolled ? "text-[#5A3B31]" : "text-white"
+                    }`}
                 >
                     <ShoppingCart size={22} strokeWidth={1.8} />
-
                     {totalItems > 0 && (
                         <span className="absolute -top-1.5 -right-1.5 bg-[#E8A0B0] text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
                             {totalItems}

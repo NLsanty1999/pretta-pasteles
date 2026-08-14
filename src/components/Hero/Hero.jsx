@@ -1,39 +1,51 @@
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/images/tortaPreta.png";
-import PrimaryButton from "../ui/PrimaryButton";
 
 function Hero() {
     const navigate = useNavigate();
 
+    const backgroundImage = "https://res.cloudinary.com/upitr3mr/image/upload/WhatsApp_Image_2026-08-14_at_00.29.37.jpg";
+
     return (
-        <section className="text-center">
-
-            {/* Imagen de borde a borde */}
-            <div className="-mx-4 sm:-mx-6 lg:-mx-8 mb-6">
-                <img
-                    src={logo}
-                    alt="Pretta Pasteles"
-                    className="w-full h-auto object-cover block"
-                />
-            </div>
-
+        <section className="relative -mx-5 sm:-mx-6 lg:-mx-8 h-[85vh] min-h-[520px] overflow-hidden">
             
+            {/* Foto de fondo */}
+            <div 
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${backgroundImage})` }}
+            />
 
-            {/* Contenido con su espaciado normal */}
-            <h1 className="text-3xl font-bold text-[#5A3B31] leading-tight">
-                Amamos ser parte de tus momentos especiales
-            </h1>
+            {/* Capa oscura */}
+            <div className="absolute inset-0 bg-black/40" />
 
-            <p className="mt-5 text-gray-600 leading-tight">
-                Tortas clásicas, personalizadas y mucho más
-            </p>
-
-            <div className="mt-8">
-                <PrimaryButton onClick={() => navigate("/catalogo")}>
-                    Ver Catálogo
-                </PrimaryButton>
+            {/* Título centrado en el medio */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center text-center px-6">
+                <h1 className="text-white text-2xl sm:text-4xl font-thin tracking-widest leading-snug drop-shadow-md">
+                    Endulzamos <br />
+                    tus momentos
+                </h1>
             </div>
 
+            {/* Botón abajo */}
+            <div className="absolute bottom-16 left-0 right-0 z-10 flex justify-center">
+                <button
+                    onClick={() => navigate("/catalogo")}
+                    className="
+                        bg-white
+                        text-[#5A3B31]
+                        font-medium
+                        tracking-widest
+                        text-sm
+                        px-10
+                        py-3.5
+                        rounded-none
+                        hover:bg-white/90
+                        transition
+                        shadow-lg
+                    "
+                >
+                    VER CATÁLOGO
+                </button>
+            </div>
         </section>
     );
 }

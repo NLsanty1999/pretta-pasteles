@@ -8,6 +8,9 @@ function ProductCard({ product }) {
         ? Object.values(product.prices)[0]
         : 0;
 
+
+
+        
     function handleOpen() {
     if (product.type === "personalizada") {
         navigate(`/producto/tradicional/${product.slug || product.id}`);
