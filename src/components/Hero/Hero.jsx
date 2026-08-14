@@ -6,7 +6,7 @@ function Hero() {
     const backgroundImage = "https://res.cloudinary.com/upitr3mr/image/upload/WhatsApp_Image_2026-08-14_at_00.29.37.jpg";
 
     return (
-        <section className="relative -mx-5 sm:-mx-6 lg:-mx-8 h-[85vh] min-h-[520px] overflow-hidden">
+        <section className="relative w-full h-[85vh] min-h-[520px] overflow-hidden">
             
             {/* Foto de fondo */}
             <div 
