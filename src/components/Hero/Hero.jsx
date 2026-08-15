@@ -20,8 +20,8 @@ function Hero() {
             {/* Título centrado en el medio */}
             <div className="absolute inset-0 z-10 flex items-center justify-center text-center px-6">
                 <h1 className="text-white text-2xl sm:text-4xl font-thin tracking-widest leading-snug drop-shadow-md">
-                    Endulzamos <br />
-                    tus momentos
+                    ENDULZAMOS <br />
+                    TUS MOMENTOS 
                 </h1>
             </div>
 
