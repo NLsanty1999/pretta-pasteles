@@ -118,10 +118,7 @@ function BeforeOrder() {
                                 Pedidos con 48 horas de anticipación.
                             </strong>
 
-                            {" "}
-                            Si necesitás pedir con menos tiempo,
-                            consultá disponibilidad por WhatsApp.
-
+                            
                         </p>
 
                     </div>

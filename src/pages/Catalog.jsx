@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
 import SearchBar from "../components/SearchBar/SearchBar";
@@ -10,6 +10,10 @@ import useProducts from "../hooks/useProducts";
 function Catalog() {
 
     const { category } = useParams();
+
+    const [searchParams] = useSearchParams();
+
+    const tipo = searchParams.get("tipo");
 
     const { products, loading } = useProducts();
 
@@ -40,22 +44,26 @@ function Catalog() {
         .filter((product) => {
 
             const matchName = product.name
-
-                .toLowerCase()
-
-                .includes(
-                    search.toLowerCase()
-                );
+                ?.toLowerCase()
+                .includes(search.toLowerCase());
 
 
             const matchCategory =
-
                 !category ||
-
                 product.category === Number(category);
 
 
-            return matchName && matchCategory;
+            const matchType =
+                tipo === "personalizadas"
+                    ? product.type === "personalizada"
+                    : true;
+
+
+            return (
+                matchName &&
+                matchCategory &&
+                matchType
+            );
 
         })
 
@@ -75,7 +83,10 @@ function Catalog() {
                 mb-8
             ">
 
-                Catálogo
+                {tipo === "personalizadas"
+                    ? "Tortas Personalizadas"
+                    : "Catálogo"
+                }
 
             </h1>
 

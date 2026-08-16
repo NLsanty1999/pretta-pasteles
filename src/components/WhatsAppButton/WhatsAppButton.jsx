@@ -1,3 +1,5 @@
+import { FaWhatsapp } from "react-icons/fa";
+
 function WhatsAppButton() {
 
     const whatsappNumber = "543758649258";
@@ -31,13 +33,14 @@ function WhatsAppButton() {
                 flex
                 items-center
                 justify-center
-                text-2xl
                 hover:scale-105
                 transition
             "
         >
 
-            💬
+            <FaWhatsapp
+                size={30}
+            />
 
         </a>
 
