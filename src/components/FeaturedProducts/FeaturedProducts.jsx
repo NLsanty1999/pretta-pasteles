@@ -198,25 +198,31 @@ function FeaturedProducts() {
                 />
 
 
- {/* INFORMACIÓN */}
+{/* INFORMACIÓN */}
 
 <div
     className="
         absolute
-        left-0
+        left-1/2
         top-1/2
+        -translate-x-1/2
         -translate-y-1/2
-        p-8
-        text-left
-        max-w-[80%]
+        w-[80%]
+        text-center
     "
 >
 
     {/* NOMBRE */}
 
-    <div className="h-[80px] flex items-end">
+    <div className="h-[80px] flex items-end justify-center">
 
-        <p className="text-white text-3xl font-light leading-tight drop-shadow-md">
+        <p className="
+            text-white
+            text-3xl
+            font-light
+            leading-tight
+            drop-shadow-md
+        ">
             {item.featuredTitle || item.name}
         </p>
 
@@ -227,7 +233,12 @@ function FeaturedProducts() {
 
     {item.featuredSubtitle && (
 
-        <p className="text-white/85 text-sm font-light mt-2">
+        <p className="
+            text-white/85
+            text-sm
+            font-light
+            mt-2
+        ">
             {item.featuredSubtitle}
         </p>
 
