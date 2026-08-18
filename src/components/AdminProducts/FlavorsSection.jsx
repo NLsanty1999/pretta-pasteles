@@ -1,5 +1,13 @@
 function FlavorsSection({ flavors, setFlavors }) {
 
+    function removeFlavor(index) {
+
+        setFlavors(
+            flavors.filter((_, i) => i !== index)
+        );
+
+    }
+
     return (
 
         <div>
@@ -11,33 +19,62 @@ function FlavorsSection({ flavors, setFlavors }) {
             </label>
 
             {
-
                 flavors.map((flavor, index) => (
 
-                    <input
-
+                    <div
                         key={index}
+                        className="flex gap-3 mt-2"
+                    >
 
-                        value={flavor}
+                        <input
 
-                        onChange={(e) => {
+                            value={flavor}
 
-                            const copy = [...flavors];
+                            onChange={(e) => {
 
-                            copy[index] = e.target.value;
+                                const copy = [...flavors];
 
-                            setFlavors(copy);
+                                copy[index] =
+                                    e.target.value;
 
-                        }}
+                                setFlavors(copy);
 
-                        className="w-full border rounded-2xl p-3 mt-2"
+                            }}
 
-                        placeholder="Ej.: Chocolate"
+                            className="flex-1 border rounded-2xl p-3"
 
-                    />
+                            placeholder="Ej.: Chocolate"
+
+                        />
+
+                        <button
+
+                            type="button"
+
+                            onClick={() =>
+                                removeFlavor(index)
+                            }
+
+                            className="
+                                w-12
+                                rounded-2xl
+                                bg-red-100
+                                text-red-600
+                                hover:bg-red-200
+                                transition
+                            "
+
+                            title="Eliminar bizcochuelo"
+
+                        >
+
+                            🗑️
+
+                        </button>
+
+                    </div>
 
                 ))
-
             }
 
             <button
@@ -45,9 +82,10 @@ function FlavorsSection({ flavors, setFlavors }) {
                 type="button"
 
                 onClick={() =>
-
-                    setFlavors([...flavors, ""])
-
+                    setFlavors([
+                        ...flavors,
+                        ""
+                    ])
                 }
 
                 className="text-pink-600 mt-3"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Layout from "../Layout/Layout";
 import useProducts from "../hooks/useProducts";
@@ -14,17 +14,24 @@ function AdminProducts() {
 
     const [editingProduct, setEditingProduct] = useState(null);
 
+    const formRef = useRef(null);
+
+
     if (loading) {
 
         return (
 
             <Layout>
 
-                <h2 className="text-center text-2xl mt-10">
+                <div className="pt-10">
 
-                    Cargando productos...
+                    <h2 className="text-center text-2xl">
 
-                </h2>
+                        Cargando productos...
+
+                    </h2>
+
+                </div>
 
             </Layout>
 
@@ -32,68 +39,120 @@ function AdminProducts() {
 
     }
 
+
     return (
 
         <Layout>
 
-            <div className="flex items-center justify-between mb-8">
+            <div className="pt-15">
 
-                <h1 className="text-4xl font-bold">
 
-                    Administrar Productos
+                {/* =============================== */}
+                {/* TÍTULO + NUEVO PRODUCTO */}
+                {/* =============================== */}
 
-                </h1>
+                <div className="flex items-center justify-between mb-8">
 
-                <button
+                    <h1 className="text-4xl font-bold">
 
-                    onClick={() => {
+                        Administrar Productos
 
-                        setEditingProduct(null);
+                    </h1>
 
-                        setShowForm(true);
 
-                    }}
+                    <button
 
-                    className="bg-[#D08A9B] text-white px-5 py-3 rounded-2xl font-semibold"
+                        onClick={() => {
 
-                >
+                            setEditingProduct(null);
 
-                    ➕ Nuevo producto
+                            setShowForm(true);
 
-                </button>
+                        }}
+
+                        className="
+                            bg-[#D08A9B]
+                            text-white
+                            px-5
+                            py-3
+                            rounded-2xl
+                            font-semibold
+                        "
+
+                    >
+
+                        ➕ Nuevo producto
+
+                    </button>
+
+                </div>
+
+
+                {/* =============================== */}
+                {/* FORMULARIO */}
+                {/* =============================== */}
+
+                {(showForm || editingProduct) && (
+
+    <div ref={formRef}>
+
+        <ProductForm
+
+            editingProduct={editingProduct}
+
+            onClose={() => {
+
+                setShowForm(false);
+
+                setEditingProduct(null);
+
+            }}
+
+        />
+
+    </div>
+
+)}
+
+
+                {/* =============================== */}
+                {/* LISTA DE PRODUCTOS */}
+                {/* =============================== */}
+
+                <ProductsList
+
+    products={products}
+
+    onEdit={(product) => {
+
+        setEditingProduct(product);
+
+        setShowForm(false);
+
+        setTimeout(() => {
+
+            formRef.current?.scrollIntoView({
+
+                behavior: "smooth",
+
+                block: "start"
+
+            });
+
+        }, 100);
+
+    }}
+
+/>
+
 
             </div>
-
-            {(showForm || editingProduct) && (
-
-                <ProductForm
-
-                    editingProduct={editingProduct}
-
-                    onClose={() => {
-
-                        setShowForm(false);
-
-                        setEditingProduct(null);
-
-                    }}
-
-                />
-
-            )}
-
-            <ProductsList
-
-                products={products}
-
-                onEdit={setEditingProduct}
-
-            />
 
         </Layout>
 
     );
 
 }
+
 
 export default AdminProducts;

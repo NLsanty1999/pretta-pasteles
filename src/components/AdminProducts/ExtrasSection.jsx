@@ -1,5 +1,13 @@
 function ExtrasSection({ extras, setExtras }) {
 
+    function removeExtra(index) {
+
+        setExtras(
+            extras.filter((_, i) => i !== index)
+        );
+
+    }
+
     return (
 
         <div>
@@ -11,7 +19,6 @@ function ExtrasSection({ extras, setExtras }) {
             </label>
 
             {
-
                 extras.map((extra, index) => (
 
                     <div
@@ -27,7 +34,10 @@ function ExtrasSection({ extras, setExtras }) {
 
                                 const copy = [...extras];
 
-                                copy[index].name = e.target.value;
+                                copy[index] = {
+                                    ...copy[index],
+                                    name: e.target.value
+                                };
 
                                 setExtras(copy);
 
@@ -49,8 +59,13 @@ function ExtrasSection({ extras, setExtras }) {
 
                                 const copy = [...extras];
 
-                                copy[index].price =
-                                    Number(e.target.value);
+                                copy[index] = {
+                                    ...copy[index],
+                                    price:
+                                        Number(
+                                            e.target.value
+                                        )
+                                };
 
                                 setExtras(copy);
 
@@ -62,10 +77,34 @@ function ExtrasSection({ extras, setExtras }) {
 
                         />
 
+                        <button
+
+                            type="button"
+
+                            onClick={() =>
+                                removeExtra(index)
+                            }
+
+                            className="
+                                w-12
+                                rounded-2xl
+                                bg-red-100
+                                text-red-600
+                                hover:bg-red-200
+                                transition
+                            "
+
+                            title="Eliminar extra"
+
+                        >
+
+                            🗑️
+
+                        </button>
+
                     </div>
 
                 ))
-
             }
 
             <button

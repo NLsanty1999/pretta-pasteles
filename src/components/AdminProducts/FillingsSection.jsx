@@ -1,5 +1,13 @@
 function FillingsSection({ fillings, setFillings }) {
 
+    function removeFilling(index) {
+
+        setFillings(
+            fillings.filter((_, i) => i !== index)
+        );
+
+    }
+
     return (
 
         <div>
@@ -11,33 +19,62 @@ function FillingsSection({ fillings, setFillings }) {
             </label>
 
             {
-
                 fillings.map((filling, index) => (
 
-                    <input
-
+                    <div
                         key={index}
+                        className="flex gap-3 mt-2"
+                    >
 
-                        value={filling}
+                        <input
 
-                        onChange={(e) => {
+                            value={filling}
 
-                            const copy = [...fillings];
+                            onChange={(e) => {
 
-                            copy[index] = e.target.value;
+                                const copy = [...fillings];
 
-                            setFillings(copy);
+                                copy[index] =
+                                    e.target.value;
 
-                        }}
+                                setFillings(copy);
 
-                        className="w-full border rounded-2xl p-3 mt-2"
+                            }}
 
-                        placeholder="Ej.: Dulce de leche"
+                            className="flex-1 border rounded-2xl p-3"
 
-                    />
+                            placeholder="Ej.: Dulce de leche"
+
+                        />
+
+                        <button
+
+                            type="button"
+
+                            onClick={() =>
+                                removeFilling(index)
+                            }
+
+                            className="
+                                w-12
+                                rounded-2xl
+                                bg-red-100
+                                text-red-600
+                                hover:bg-red-200
+                                transition
+                            "
+
+                            title="Eliminar relleno"
+
+                        >
+
+                            🗑️
+
+                        </button>
+
+                    </div>
 
                 ))
-
             }
 
             <button
@@ -45,9 +82,10 @@ function FillingsSection({ fillings, setFillings }) {
                 type="button"
 
                 onClick={() =>
-
-                    setFillings([...fillings, ""])
-
+                    setFillings([
+                        ...fillings,
+                        ""
+                    ])
                 }
 
                 className="text-pink-600 mt-3"

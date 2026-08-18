@@ -1,5 +1,13 @@
 function CoveringsSection({ coverings, setCoverings }) {
 
+    function removeCovering(index) {
+
+        setCoverings(
+            coverings.filter((_, i) => i !== index)
+        );
+
+    }
+
     return (
 
         <div>
@@ -11,33 +19,62 @@ function CoveringsSection({ coverings, setCoverings }) {
             </label>
 
             {
-
                 coverings.map((covering, index) => (
 
-                    <input
-
+                    <div
                         key={index}
+                        className="flex gap-3 mt-2"
+                    >
 
-                        value={covering}
+                        <input
 
-                        onChange={(e) => {
+                            value={covering}
 
-                            const copy = [...coverings];
+                            onChange={(e) => {
 
-                            copy[index] = e.target.value;
+                                const copy = [...coverings];
 
-                            setCoverings(copy);
+                                copy[index] =
+                                    e.target.value;
 
-                        }}
+                                setCoverings(copy);
 
-                        className="w-full border rounded-2xl p-3 mt-2"
+                            }}
 
-                        placeholder="Ej.: Buttercream"
+                            className="flex-1 border rounded-2xl p-3"
 
-                    />
+                            placeholder="Ej.: Buttercream"
+
+                        />
+
+                        <button
+
+                            type="button"
+
+                            onClick={() =>
+                                removeCovering(index)
+                            }
+
+                            className="
+                                w-12
+                                rounded-2xl
+                                bg-red-100
+                                text-red-600
+                                hover:bg-red-200
+                                transition
+                            "
+
+                            title="Eliminar cobertura"
+
+                        >
+
+                            🗑️
+
+                        </button>
+
+                    </div>
 
                 ))
-
             }
 
             <button
@@ -45,9 +82,10 @@ function CoveringsSection({ coverings, setCoverings }) {
                 type="button"
 
                 onClick={() =>
-
-                    setCoverings([...coverings, ""])
-
+                    setCoverings([
+                        ...coverings,
+                        ""
+                    ])
                 }
 
                 className="text-pink-600 mt-3"
