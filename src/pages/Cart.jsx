@@ -20,11 +20,18 @@ function Cart() {
 
         <Layout>
 
-            <h1 className="text-3xl font-bold mb-8">
-
-                Mi Pedido
-
-            </h1>
+            <h1
+    className="
+        text-center
+        text-3xl
+        font-light
+        text-[#5A3B31]
+        pt-15
+        mb-8
+    "
+>
+    Mi Pedido
+</h1>
 
             {
 

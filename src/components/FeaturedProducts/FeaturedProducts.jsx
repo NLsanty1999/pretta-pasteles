@@ -9,6 +9,8 @@ function FeaturedProducts() {
 
     const [current, setCurrent] = useState(0);
 
+    const [touchStart, setTouchStart] = useState(null);
+
     /*
     |--------------------------------------------------------------------------
     | Cambio automático
@@ -46,6 +48,38 @@ function FeaturedProducts() {
     | Cargando
     |--------------------------------------------------------------------------
     */
+
+    function handleTouchStart(e) {
+    setTouchStart(e.touches[0].clientX);
+}
+
+function handleTouchEnd(e) {
+    if (touchStart === null) return;
+
+    const touchEnd = e.changedTouches[0].clientX;
+    const difference = touchStart - touchEnd;
+
+    // Deslizamiento hacia la izquierda
+    if (difference > 50) {
+        setCurrent(prev =>
+            prev === featured.length - 1
+                ? 0
+                : prev + 1
+        );
+    }
+
+    // Deslizamiento hacia la derecha
+    if (difference < -50) {
+        setCurrent(prev =>
+            prev === 0
+                ? featured.length - 1
+                : prev - 1
+        );
+    }
+
+    setTouchStart(null);
+}
+
 
     if (loading) {
         return (
@@ -131,20 +165,23 @@ function FeaturedProducts() {
             {/* IMAGEN */}
 
             <button
-                type="button"
-                onClick={handleProductClick}
-                className="
-                    relative
-                    block
-                    w-full
-                    aspect-square
-                    overflow-hidden
-                    shadow-md
-                    active:scale-[0.995]
-                    transition
-                    bg-[#F8F3F0]
-                "
-            >
+    type="button"
+    onClick={handleProductClick}
+    onTouchStart={handleTouchStart}
+    onTouchEnd={handleTouchEnd}
+    className="
+        relative
+        block
+        w-full
+        aspect-square
+        overflow-hidden
+        shadow-md
+        active:scale-[0.995]
+        transition
+        bg-[#F8F3F0]
+        touch-pan-y
+    "
+>
 
 
                 {/* IMAGEN */}
@@ -260,7 +297,7 @@ function FeaturedProducts() {
             py-2.5
             rounded-none
             shadow-sm
-            mt-8
+            translate-y-28
         "
     >
 
