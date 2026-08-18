@@ -15,7 +15,7 @@ const categories = [
     
     {
         id: 3,
-        name: "MESAS DULCES",
+        name: "MESA DULCE",
         description: "El toque perfecto para tu evento",
         icon: "mesa",
     },

@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
 import useProducts from "../hooks/useProducts";
-
 import { useCart } from "../context/CartContext";
 
 function Product() {
@@ -34,17 +33,24 @@ function Product() {
      */
 
     const [size, setSize] = useState("");
+    const [weight, setWeight] = useState("");
+
     const [flavor, setFlavor] = useState("");
-    const [filling, setFilling] = useState("");
     const [covering, setCovering] = useState("");
+
     const [extras, setExtras] = useState([]);
+
+    const [changedFillings, setChangedFillings] = useState([]);
+
     const [note, setNote] = useState("");
 
-    // Imagen actualmente seleccionada
-    const [selectedImage, setSelectedImage] = useState(0);
 
-    // Visor de imagen grande
-    const [lightboxOpen, setLightboxOpen] = useState(false);
+    /*
+     * SABER SI ES PERSONALIZADA
+     */
+
+    const isPersonalized =
+        product?.type === "personalizada";
 
 
     /*
@@ -61,11 +67,6 @@ function Product() {
         product?.flavors?.[0] ||
         "";
 
-    const selectedFilling =
-        filling ||
-        product?.fillings?.[0] ||
-        "";
-
     const selectedCovering =
         covering ||
         product?.coverings?.[0] ||
@@ -73,88 +74,241 @@ function Product() {
 
 
     /*
-     * GALERÍA
-     *
-     * Si existe "images" en Firebase,
-     * usamos esas imágenes.
-     *
-     * Si no existe, usamos la imagen
-     * antigua "image".
+     * PESOS DISPONIBLES
      */
 
-    const galleryImages =
-        product?.images?.length > 0
-            ? product.images.filter(Boolean)
-            : product?.image
-                ? [product.image]
-                : [];
+    const availableWeights = useMemo(() => {
 
-
-    /*
-     * IMAGEN ACTUAL
-     */
-
-    const currentImage =
-        galleryImages[selectedImage] ||
-        galleryImages[0] ||
-        null;
-
-
-    /*
-     * CAMBIAR IMAGEN
-     */
-
-    function changeImage(index) {
-
-        if (!galleryImages.length) {
-            return;
+        if (!isPersonalized) {
+            return [];
         }
 
-        setSelectedImage(index);
+        const weights = {
+
+            "16": [
+                "1 kg",
+                "2 kg",
+                "3 kg"
+            ],
+
+            "20": [
+                "2 kg",
+                "3 kg"
+            ],
+
+            "24": [
+                "2 kg"
+            ]
+
+        };
+
+        return (
+            weights[String(selectedSize)] ||
+            []
+        );
+
+    }, [
+        selectedSize,
+        isPersonalized
+    ]);
+
+
+    /*
+     * PESO SELECCIONADO
+     */
+
+    const selectedWeight =
+        weight ||
+        availableWeights[0] ||
+        "";
+
+
+    /*
+     * CANTIDAD DE RELLENOS
+     */
+
+    const fillingLimit = useMemo(() => {
+
+        if (!isPersonalized) {
+            return 0;
+        }
+
+        const limits = {
+
+            "16-1 kg": 1,
+            "16-2 kg": 2,
+            "16-3 kg": 3,
+
+            "20-2 kg": 1,
+            "20-3 kg": 2,
+
+            "24-2 kg": 1
+
+        };
+
+        return (
+            limits[
+                `${selectedSize}-${selectedWeight}`
+            ] || 0
+        );
+
+    }, [
+        selectedSize,
+        selectedWeight,
+        isPersonalized
+    ]);
+
+
+    /*
+     * CAMBIO DE RELLENO ACTIVADO
+     */
+
+    const fillingChangeActive =
+        extras.includes("Cambio de relleno");
+
+
+    /*
+     * PRECIO DEL CAMBIO DE RELLENO
+     */
+
+    const fillingChangePrice =
+        Number(
+            product?.fillingChangePrice || 0
+        );
+
+
+    /*
+     * CAMBIAR TAMAÑO
+     */
+
+    function handleSizeChange(newSize) {
+
+        setSize(newSize);
+
+        const weights = {
+
+            "16": [
+                "1 kg",
+                "2 kg",
+                "3 kg"
+            ],
+
+            "20": [
+                "2 kg",
+                "3 kg"
+            ],
+
+            "24": [
+                "2 kg"
+            ]
+
+        };
+
+        const newWeights =
+            weights[String(newSize)] || [];
+
+        setWeight(
+            newWeights[0] || ""
+        );
+
+        /*
+         * Reiniciar rellenos
+         */
+
+        setChangedFillings([]);
 
     }
 
 
     /*
-     * SIGUIENTE IMAGEN
+     * CAMBIAR PESO
      */
 
-    function nextImage() {
+    function handleWeightChange(newWeight) {
 
-        if (galleryImages.length <= 1) {
-            return;
+        setWeight(newWeight);
+
+        setChangedFillings([]);
+
+    }
+
+
+    /*
+     * ACTIVAR / DESACTIVAR EXTRA
+     */
+
+    function toggleExtra(name) {
+
+        if (extras.includes(name)) {
+
+            setExtras(
+                extras.filter(
+                    extra => extra !== name
+                )
+            );
+
+            /*
+             * Si se desactiva el cambio
+             * de relleno, limpiamos
+             * las selecciones.
+             */
+
+            if (
+                name === "Cambio de relleno"
+            ) {
+
+                setChangedFillings([]);
+
+            }
+
+        } else {
+
+            setExtras([
+                ...extras,
+                name
+            ]);
+
         }
 
-        setSelectedImage(
-            currentIndex =>
-                (currentIndex + 1) %
-                galleryImages.length
+    }
+
+
+    /*
+     * CAMBIAR UN RELLENO
+     */
+
+    function handleFillingChange(
+        index,
+        value
+    ) {
+
+        setChangedFillings(
+            current => {
+
+                const updated = [
+                    ...current
+                ];
+
+                updated[index] = value;
+
+                return updated;
+
+            }
         );
 
     }
 
 
     /*
-     * IMAGEN ANTERIOR
+     * CANTIDAD DE RELLENOS CAMBIADOS
      */
 
-    function previousImage() {
-
-        if (galleryImages.length <= 1) {
-            return;
-        }
-
-        setSelectedImage(
-            currentIndex =>
-                (
-                    currentIndex -
-                    1 +
-                    galleryImages.length
-                ) %
-                galleryImages.length
-        );
-
-    }
+    const changedFillingsCount =
+        changedFillings.filter(
+            filling =>
+                filling &&
+                filling !== "Dulce de leche"
+        ).length;
 
 
     /*
@@ -167,25 +321,55 @@ function Product() {
             return 0;
         }
 
-        return extras.reduce(
-            (total, name) => {
+        const normalExtrasPrice =
+            extras.reduce(
+                (total, name) => {
 
-                const extra =
-                    product.extras?.find(
-                        e => e.name === name
+                    if (
+                        name ===
+                        "Cambio de relleno"
+                    ) {
+                        return total;
+                    }
+
+                    const extra =
+                        product.extras?.find(
+                            e =>
+                                e.name === name
+                        );
+
+                    return (
+                        total +
+                        (
+                            extra
+                                ? Number(
+                                    extra.price || 0
+                                )
+                                : 0
+                        )
                     );
 
-                return total + (
-                    extra
-                        ? Number(extra.price || 0)
-                        : 0
-                );
+                },
+                0
+            );
 
-            },
-            0
+
+        const fillingPrice =
+            changedFillingsCount *
+            fillingChangePrice;
+
+
+        return (
+            normalExtrasPrice +
+            fillingPrice
         );
 
-    }, [extras, product]);
+    }, [
+        extras,
+        product,
+        changedFillingsCount,
+        fillingChangePrice
+    ]);
 
 
     /*
@@ -200,7 +384,9 @@ function Product() {
 
         return (
             Number(
-                product.prices?.[selectedSize] || 0
+                product.prices?.[
+                    selectedSize
+                ] || 0
             ) +
             extrasPrice
         );
@@ -210,32 +396,6 @@ function Product() {
         extrasPrice,
         product
     ]);
-
-
-    /*
-     * EXTRAS
-     */
-
-    function toggleExtra(name) {
-
-        if (extras.includes(name)) {
-
-            setExtras(
-                extras.filter(
-                    extra => extra !== name
-                )
-            );
-
-        } else {
-
-            setExtras([
-                ...extras,
-                name
-            ]);
-
-        }
-
-    }
 
 
     /*
@@ -253,14 +413,37 @@ function Product() {
             ...product,
 
             size: selectedSize,
-            flavor: selectedFlavor,
-            filling: selectedFilling,
-            covering: selectedCovering,
+
+            weight:
+                isPersonalized
+                    ? selectedWeight
+                    : "",
+
+            flavor:
+                selectedFlavor,
+
+            filling:
+                "Dulce de leche",
+
+            covering:
+                selectedCovering,
+
             extras,
+
+            changedFillings,
+
+            fillingChanges:
+                changedFillingsCount,
+
+            fillingChangePrice,
+
             note,
-            price: totalPrice
+
+            price:
+                totalPrice
 
         });
+
 
         alert(
             "Producto agregado al pedido."
@@ -282,7 +465,9 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-2xl font-bold">
+
                         Cargando producto...
+
                     </h2>
 
                 </div>
@@ -307,7 +492,9 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-3xl font-bold">
+
                         Producto no encontrado
+
                     </h2>
 
                 </div>
@@ -326,110 +513,40 @@ function Product() {
             <div className="max-w-xl mx-auto">
 
 
-                {/* GALERÍA */}
+                {/* ================================= */}
+                {/* IMAGEN */}
+                {/* ================================= */}
 
-                <div className="px-2">
+                <div className="
+                    rounded-3xl
+                    overflow-hidden
+                    bg-[#F8F3F0]
+                ">
 
-                    {/* IMAGEN PRINCIPAL */}
+                    {product.image ? (
 
-                    <div
-                        className="
-                            rounded-3xl
-                            overflow-hidden
-                            bg-[#F8F3F0]
-                            cursor-pointer
-                        "
-                        onClick={() => {
+                        <img
+                            src={product.image}
+                            alt={product.name}
+                            className="
+                                w-full
+                                h-auto
+                                object-contain
+                            "
+                        />
 
-                            if (galleryImages.length > 0) {
-                                setLightboxOpen(true);
-                            }
-
-                        }}
-                    >
-
-                        {currentImage ? (
-
-                            <img
-                                src={currentImage}
-                                alt={product.name}
-                                className="
-                                    w-full
-                                    h-auto
-                                    object-contain
-                                "
-                            />
-
-                        ) : (
-
-                            <div className="
-                                h-56
-                                flex
-                                items-center
-                                justify-center
-                            ">
-
-                                <span className="text-8xl">
-                                    🎂
-                                </span>
-
-                            </div>
-
-                        )}
-
-                    </div>
-
-
-                    {/* MINIATURAS */}
-
-                    {galleryImages.length > 1 && (
+                    ) : (
 
                         <div className="
+                            h-56
                             flex
+                            items-center
                             justify-center
-                            gap-2
-                            mt-3
-                            px-2
                         ">
 
-                            {galleryImages.map(
-                                (image, index) => (
-
-                                    <button
-                                        key={index}
-                                        type="button"
-                                        onClick={() =>
-                                            changeImage(index)
-                                        }
-                                        className={`
-                                            w-14
-                                            h-14
-                                            rounded-xl
-                                            overflow-hidden
-                                            border-2
-                                            transition
-                                            ${
-                                                selectedImage === index
-                                                    ? "border-[#D08A9B]"
-                                                    : "border-transparent opacity-70"
-                                            }
-                                        `}
-                                    >
-
-                                        <img
-                                            src={image}
-                                            alt={`${product.name} ${index + 1}`}
-                                            className="
-                                                w-full
-                                                h-full
-                                                object-cover
-                                            "
-                                        />
-
-                                    </button>
-
-                                )
-                            )}
+                            <span className="text-8xl">
+                                🎂
+                            </span>
 
                         </div>
 
@@ -438,174 +555,9 @@ function Product() {
                 </div>
 
 
-                {/* VISOR DE IMAGEN GRANDE */}
-
-                {lightboxOpen && currentImage && (
-
-                    <div
-                        className="
-                            fixed
-                            inset-0
-                            z-[200]
-                            bg-black/90
-                            flex
-                            items-center
-                            justify-center
-                            p-4
-                        "
-                        onClick={() =>
-                            setLightboxOpen(false)
-                        }
-                    >
-
-                        {/* CERRAR */}
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setLightboxOpen(false)
-                            }
-                            className="
-                                absolute
-                                top-5
-                                right-5
-                                w-10
-                                h-10
-                                rounded-full
-                                bg-white/20
-                                text-white
-                                text-2xl
-                                flex
-                                items-center
-                                justify-center
-                                z-10
-                            "
-                        >
-                            ×
-                        </button>
-
-
-                        {/* ANTERIOR */}
-
-                        {galleryImages.length > 1 && (
-
-                            <button
-                                type="button"
-                                onClick={(e) => {
-
-                                    e.stopPropagation();
-                                    previousImage();
-
-                                }}
-                                className="
-                                    absolute
-                                    left-4
-                                    top-1/2
-                                    -translate-y-1/2
-                                    w-11
-                                    h-11
-                                    rounded-full
-                                    bg-white/20
-                                    text-white
-                                    text-3xl
-                                    flex
-                                    items-center
-                                    justify-center
-                                    z-10
-                                "
-                            >
-                                ‹
-                            </button>
-
-                        )}
-
-
-                        {/* IMAGEN GRANDE */}
-
-                        <img
-                            src={currentImage}
-                            alt={product.name}
-                            onClick={(e) =>
-                                e.stopPropagation()
-                            }
-                            className="
-                                max-w-full
-                                max-h-[85vh]
-                                object-contain
-                                rounded-xl
-                                select-none
-                            "
-                        />
-
-
-                        {/* SIGUIENTE */}
-
-                        {galleryImages.length > 1 && (
-
-                            <button
-                                type="button"
-                                onClick={(e) => {
-
-                                    e.stopPropagation();
-                                    nextImage();
-
-                                }}
-                                className="
-                                    absolute
-                                    right-4
-                                    top-1/2
-                                    -translate-y-1/2
-                                    w-11
-                                    h-11
-                                    rounded-full
-                                    bg-white/20
-                                    text-white
-                                    text-3xl
-                                    flex
-                                    items-center
-                                    justify-center
-                                    z-10
-                                "
-                            >
-                                ›
-                            </button>
-
-                        )}
-
-
-                        {/* INDICADOR */}
-
-                        {galleryImages.length > 1 && (
-
-                            <div
-                                className="
-                                    absolute
-                                    bottom-6
-                                    left-1/2
-                                    -translate-x-1/2
-                                    text-white
-                                    text-sm
-                                    bg-black/40
-                                    px-3
-                                    py-1
-                                    rounded-full
-                                "
-                            >
-
-                                {selectedImage + 1}
-                                {" / "}
-                                {galleryImages.length}
-
-                            </div>
-
-                        )}
-
-                    </div>
-
-                )}
-
-
+                {/* ================================= */}
                 {/* NOMBRE */}
+                {/* ================================= */}
 
                 <h1 className="
                     text-4xl
@@ -619,7 +571,9 @@ function Product() {
                 </h1>
 
 
+                {/* ================================= */}
                 {/* DESCRIPCIÓN */}
+                {/* ================================= */}
 
                 <p className="
                     text-gray-600
@@ -632,9 +586,14 @@ function Product() {
                 </p>
 
 
+                {/* ================================= */}
                 {/* CONFIGURACIÓN */}
+                {/* ================================= */}
 
-                <div className="mt-10 px-8">
+                <div className="
+                    mt-10
+                    px-8
+                ">
 
                     <div className="
                         max-w-lg
@@ -643,7 +602,9 @@ function Product() {
                     ">
 
 
+                        {/* ================================= */}
                         {/* TAMAÑO */}
+                        {/* ================================= */}
 
                         <div>
 
@@ -657,10 +618,13 @@ function Product() {
 
                             </label>
 
+
                             <select
                                 value={selectedSize}
                                 onChange={(e) =>
-                                    setSize(e.target.value)
+                                    handleSizeChange(
+                                        e.target.value
+                                    )
                                 }
                                 className="
                                     w-full
@@ -690,7 +654,67 @@ function Product() {
                         </div>
 
 
+                        {/* ================================= */}
+                        {/* PESO */}
+                        {/* ================================= */}
+
+                        {isPersonalized && (
+
+                            <div>
+
+                                <label className="
+                                    font-semibold
+                                    block
+                                    mb-2
+                                ">
+
+                                    Peso
+
+                                </label>
+
+
+                                <select
+                                    value={
+                                        selectedWeight
+                                    }
+                                    onChange={(e) =>
+                                        handleWeightChange(
+                                            e.target.value
+                                        )
+                                    }
+                                    className="
+                                        w-full
+                                        rounded-xl
+                                        border
+                                        p-4
+                                    "
+                                >
+
+                                    {availableWeights.map(
+                                        option => (
+
+                                            <option
+                                                key={option}
+                                                value={option}
+                                            >
+
+                                                {option}
+
+                                            </option>
+
+                                        )
+                                    )}
+
+                                </select>
+
+                            </div>
+
+                        )}
+
+
+                        {/* ================================= */}
                         {/* BIZCOCHUELO */}
+                        {/* ================================= */}
 
                         <div>
 
@@ -704,10 +728,13 @@ function Product() {
 
                             </label>
 
+
                             <select
                                 value={selectedFlavor}
                                 onChange={(e) =>
-                                    setFlavor(e.target.value)
+                                    setFlavor(
+                                        e.target.value
+                                    )
                                 }
                                 className="
                                     w-full
@@ -737,7 +764,9 @@ function Product() {
                         </div>
 
 
+                        {/* ================================= */}
                         {/* RELLENO */}
+                        {/* ================================= */}
 
                         <div>
 
@@ -751,40 +780,26 @@ function Product() {
 
                             </label>
 
-                            <select
-                                value={selectedFilling}
-                                onChange={(e) =>
-                                    setFilling(e.target.value)
-                                }
-                                className="
-                                    w-full
-                                    rounded-xl
-                                    border
-                                    p-4
-                                "
-                            >
 
-                                {product.fillings?.map(
-                                    option => (
+                            <div className="
+                                w-full
+                                rounded-xl
+                                border
+                                p-4
+                                bg-gray-50
+                                text-gray-700
+                            ">
 
-                                        <option
-                                            key={option}
-                                            value={option}
-                                        >
+                                Dulce de leche
 
-                                            {option}
-
-                                        </option>
-
-                                    )
-                                )}
-
-                            </select>
+                            </div>
 
                         </div>
 
 
+                        {/* ================================= */}
                         {/* COBERTURA */}
+                        {/* ================================= */}
 
                         <div>
 
@@ -798,10 +813,13 @@ function Product() {
 
                             </label>
 
+
                             <select
                                 value={selectedCovering}
                                 onChange={(e) =>
-                                    setCovering(e.target.value)
+                                    setCovering(
+                                        e.target.value
+                                    )
                                 }
                                 className="
                                     w-full
@@ -831,7 +849,9 @@ function Product() {
                         </div>
 
 
+                        {/* ================================= */}
                         {/* EXTRAS */}
+                        {/* ================================= */}
 
                         {product.extras?.length > 0 && (
 
@@ -847,75 +867,277 @@ function Product() {
 
                                 </label>
 
+
                                 <div className="
                                     grid
                                     grid-cols-2
                                     gap-3
                                 ">
 
-                                    {product.extras.map(
-                                        extra => (
+                                    {product.extras
+                                        .filter(
+                                            extra =>
+                                                extra.name !==
+                                                "Cambio de relleno"
+                                        )
+                                        .map(
+                                            extra => (
 
-                                            <button
-                                                key={extra.name}
-                                                type="button"
-                                                onClick={() =>
-                                                    toggleExtra(
+                                                <button
+                                                    key={
                                                         extra.name
-                                                    )
-                                                }
-                                                className={`
-                                                    rounded-2xl
-                                                    border
-                                                    p-4
-                                                    transition
-
-                                                    ${
-                                                        extras.includes(
+                                                    }
+                                                    type="button"
+                                                    onClick={() =>
+                                                        toggleExtra(
                                                             extra.name
                                                         )
-                                                            ? "bg-[#D08A9B] text-white border-[#D08A9B]"
-                                                            : "bg-white hover:bg-pink-50"
                                                     }
-                                                `}
-                                            >
+                                                    className={`
+                                                        rounded-2xl
+                                                        border
+                                                        p-4
+                                                        transition
 
-                                                <div className="
-                                                    font-semibold
-                                                ">
+                                                        ${
+                                                            extras.includes(
+                                                                extra.name
+                                                            )
+                                                                ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+                                                                : "bg-white hover:bg-pink-50"
+                                                        }
+                                                    `}
+                                                >
 
-                                                    {extra.name}
+                                                    <div className="
+                                                        font-semibold
+                                                    ">
 
-                                                </div>
+                                                        {extra.name}
 
-                                                <div className="
-                                                    text-sm
-                                                    mt-1
-                                                ">
+                                                    </div>
 
-                                                    +$
 
-                                                    {Number(
-                                                        extra.price || 0
-                                                    ).toLocaleString(
-                                                        "es-AR"
-                                                    )}
+                                                    <div className="
+                                                        text-sm
+                                                        mt-1
+                                                    ">
 
-                                                </div>
+                                                        +$
 
-                                            </button>
+                                                        {Number(
+                                                            extra.price ||
+                                                            0
+                                                        ).toLocaleString(
+                                                            "es-AR"
+                                                        )}
 
+                                                    </div>
+
+                                                </button>
+
+                                            )
                                         )
-                                    )}
+                                    }
+
+
+                                    {/* CAMBIO DE RELLENO */}
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            toggleExtra(
+                                                "Cambio de relleno"
+                                            )
+                                        }
+                                        className={`
+                                            rounded-2xl
+                                            border
+                                            p-4
+                                            transition
+
+                                            ${
+                                                fillingChangeActive
+                                                    ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+                                                    : "bg-white hover:bg-pink-50"
+                                            }
+                                        `}
+                                    >
+
+                                        <div className="
+                                            font-semibold
+                                        ">
+
+                                            Cambio de relleno
+
+                                        </div>
+
+
+                                        <div className="
+                                            text-sm
+                                            mt-1
+                                        ">
+
+                                            +$
+
+                                            {fillingChangePrice.toLocaleString(
+                                                "es-AR"
+                                            )}
+
+                                            {" "}c/u
+
+                                        </div>
+
+                                    </button>
 
                                 </div>
+
+
+                                {/* ================================= */}
+                                {/* RELLENOS */}
+                                {/* ================================= */}
+
+                                {fillingChangeActive && (
+
+                                    <div className="
+                                        mt-6
+                                        space-y-4
+                                    ">
+
+                                        <div>
+
+                                            <h3 className="
+                                                font-semibold
+                                                text-lg
+                                            ">
+
+                                                Elegí tus rellenos
+
+                                            </h3>
+
+
+                                            <p className="
+                                                text-sm
+                                                text-gray-500
+                                                mt-1
+                                            ">
+
+                                                Podés cambiar hasta{" "}
+
+                                                {fillingLimit}
+
+                                                {" "}
+
+                                                {fillingLimit === 1
+                                                    ? "relleno"
+                                                    : "rellenos"
+                                                }
+
+                                                .
+
+                                            </p>
+
+                                        </div>
+
+
+                                        {Array.from({
+                                            length:
+                                                fillingLimit
+                                        }).map(
+                                            (_, index) => (
+
+                                                <div
+                                                    key={index}
+                                                >
+
+                                                    <label className="
+                                                        font-semibold
+                                                        block
+                                                        mb-2
+                                                    ">
+
+                                                        Relleno{" "}
+
+                                                        {index + 1}
+
+                                                    </label>
+
+
+                                                    <select
+                                                        value={
+                                                            changedFillings[
+                                                                index
+                                                            ] ||
+                                                            "Dulce de leche"
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleFillingChange(
+                                                                index,
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className="
+                                                            w-full
+                                                            rounded-xl
+                                                            border
+                                                            p-4
+                                                        "
+                                                    >
+
+                                                        <option
+                                                            value="Dulce de leche"
+                                                        >
+
+                                                            Dulce de leche
+
+                                                        </option>
+
+
+                                                        {product.fillings
+                                                            ?.filter(
+                                                                filling =>
+                                                                    filling !==
+                                                                    "Dulce de leche"
+                                                            )
+                                                            .map(
+                                                                filling => (
+
+                                                                    <option
+                                                                        key={
+                                                                            filling
+                                                                        }
+                                                                        value={
+                                                                            filling
+                                                                        }
+                                                                    >
+
+                                                                        {filling}
+
+                                                                    </option>
+
+                                                                )
+                                                            )
+                                                        }
+
+                                                    </select>
+
+                                                </div>
+
+                                            )
+                                        )}
+
+                                    </div>
+
+                                )}
 
                             </div>
 
                         )}
 
 
+                        {/* ================================= */}
                         {/* OBSERVACIONES */}
+                        {/* ================================= */}
 
                         <div>
 
@@ -929,28 +1151,36 @@ function Product() {
 
                             </label>
 
+
                             <textarea
-    value={note}
-    onChange={(e) =>
-        setNote(e.target.value)
-    }
-    placeholder="Ej.: Sin azúcar, nombre para la torta, colores, etc."
-    className="
-        w-full
-        h-32
-        rounded-2xl
-        border
-        p-4
-        resize-none
-        text-left
-        align-top
-    "
-/>
+                                value={note}
+                                onChange={(e) =>
+                                    setNote(
+                                        e.target.value
+                                    )
+                                }
+                                placeholder="
+                                    Ej.: Sin azúcar, nombre para la torta,
+                                    colores, etc.
+                                "
+                                className="
+                                    w-full
+                                    h-32
+                                    rounded-2xl
+                                    border
+                                    p-4
+                                    resize-none
+                                    text-left
+                                    align-top
+                                "
+                            />
 
                         </div>
 
 
+                        {/* ================================= */}
                         {/* TOTAL */}
+                        {/* ================================= */}
 
                         <div className="
                             bg-white
@@ -974,6 +1204,7 @@ function Product() {
 
                                 </span>
 
+
                                 <span className="
                                     text-3xl
                                     font-bold
@@ -993,7 +1224,9 @@ function Product() {
                         </div>
 
 
+                        {/* ================================= */}
                         {/* BOTÓN */}
+                        {/* ================================= */}
 
                         <button
                             type="button"

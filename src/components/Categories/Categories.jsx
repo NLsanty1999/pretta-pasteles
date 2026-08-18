@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import categories from "../../data/categories";
-import { ArrowRight } from "lucide-react";
 
 import tartaIcon from "../../assets/images/tarta.png";
 import personalizadaIcon from "../../assets/images/personalizada.png";
@@ -24,7 +23,7 @@ function Categories() {
 
     return (
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 px-3">
 
 
             {/* ================================= */}
@@ -43,12 +42,12 @@ function Categories() {
                     border
                     border-white/60
                     rounded-2xl
-                    p-5
+                    px-5
+                    py-4
                     shadow-sm
                     hover:bg-white/55
                     hover:shadow-md
                     transition
-                    relative
                     flex
                     items-center
                     justify-center
@@ -87,9 +86,7 @@ function Categories() {
                             leading-tight
                         "
                     >
-
                         TORTA PERSONALIZADA
-
                     </h3>
 
 
@@ -100,34 +97,8 @@ function Categories() {
                             mt-1
                         "
                     >
-
                         Diseñá tu torta a tu gusto
-
                     </p>
-
-                </div>
-
-
-                {/* Flecha */}
-
-                <div
-                    className="
-                        absolute
-                        right-5
-                        w-7
-                        h-7
-                        rounded-full
-                        bg-[#E8A0B0]
-                        flex
-                        items-center
-                        justify-center
-                    "
-                >
-
-                    <ArrowRight
-                        size={13}
-                        className="text-white"
-                    />
 
                 </div>
 
@@ -154,17 +125,19 @@ function Categories() {
                         border
                         border-white/60
                         rounded-2xl
-                        p-4
+                        px-3
+                        py-5
                         shadow-sm
                         hover:bg-white/55
                         hover:shadow-md
                         transition
-                        text-left
-                        relative
                         flex
+                        flex-col
                         items-center
-                        gap-3
-                        pb-9
+                        justify-center
+                        text-center
+                        gap-2
+                        min-h-[135px]
                     "
                 >
 
@@ -231,47 +204,19 @@ function Categories() {
 
                     {/* Título */}
 
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0">
 
                         <h3
                             className="
-                                font-bold
+                                font-semibold
                                 text-[#5A3B31]
                                 text-[13px]
                                 tracking-wide
                                 leading-tight
                             "
                         >
-
                             {category.name}
-
                         </h3>
-
-                    </div>
-
-
-                    {/* Flechita */}
-
-                    <div
-                        className="
-                            absolute
-                            bottom-3
-                            left-1/2
-                            -translate-x-1/2
-                            w-6
-                            h-6
-                            rounded-full
-                            bg-[#E8A0B0]
-                            flex
-                            items-center
-                            justify-center
-                        "
-                    >
-
-                        <ArrowRight
-                            size={12}
-                            className="text-white"
-                        />
 
                     </div>
 

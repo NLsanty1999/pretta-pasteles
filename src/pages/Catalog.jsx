@@ -52,11 +52,12 @@ function Catalog() {
         <Layout>
 
             <div className="
-    grid
-    grid-cols-2
-    gap-4
-    pt-16
-">
+                grid
+                grid-cols-2
+                gap-4
+                pt-16
+                px-3
+            ">
 
                 {
 

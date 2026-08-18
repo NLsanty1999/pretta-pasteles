@@ -297,7 +297,7 @@ function handleTouchEnd(e) {
             py-2.5
             rounded-none
             shadow-sm
-            translate-y-28
+            translate-y-23
         "
     >
 
