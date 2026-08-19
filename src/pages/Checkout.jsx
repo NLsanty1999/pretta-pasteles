@@ -3,7 +3,6 @@ import Layout from "../Layout/Layout";
 import { useCart } from "../context/CartContext";
 import { saveOrder } from "../firebase/orders";
 
-
 import {
     doc,
     onSnapshot
@@ -28,15 +27,13 @@ function Checkout() {
     const [client, setClient] = useState({
         name: "",
         phone: "",
-
     });
 
     const [deliveryDate, setDeliveryDate] = useState("");
-    
 
     const [deliveryHour, setDeliveryHour] = useState(
-    agenda.workingHours[0]
-);
+        agenda.workingHours[0]
+    );
 
     const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -50,6 +47,10 @@ function Checkout() {
         today.getFullYear()
     );
 
+
+    /* =========================
+       DISPONIBILIDAD
+    ========================= */
 
     useEffect(() => {
 
@@ -69,9 +70,7 @@ function Checkout() {
                         snapshot.data().blockedDates || []
                     );
 
-                }
-
-                else {
+                } else {
 
                     setBlockedDates([]);
 
@@ -92,12 +91,16 @@ function Checkout() {
 
         return unsubscribe;
 
-        
-
     }, []);
 
-    const availableHours = agenda.workingHours;
 
+    const availableHours =
+        agenda.workingHours;
+
+
+    /* =========================
+       FECHAS
+    ========================= */
 
     function formatDate(year, month, day) {
 
@@ -107,29 +110,42 @@ function Checkout() {
 
 
     function getToday() {
-    const date = new Date();
-    return formatDate(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
-    );
-}
 
-// Fecha mínima = hoy + 2 días
-function getMinDate() {
-    const date = new Date();
-    date.setDate(date.getDate() + 2); // +2 días de anticipación
-    return formatDate(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate()
-    );
-}
+        const date = new Date();
 
-function isPast(date) {
-    // Bloquea todo lo que sea anterior a (hoy + 2 días)
-    return date < getMinDate();
-}
+        return formatDate(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        );
+
+    }
+
+
+    // Fecha mínima = hoy + 2 días
+
+    function getMinDate() {
+
+        const date = new Date();
+
+        date.setDate(
+            date.getDate() + 2
+        );
+
+        return formatDate(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        );
+
+    }
+
+
+    function isPast(date) {
+
+        return date < getMinDate();
+
+    }
 
 
     function isBlocked(date) {
@@ -139,31 +155,36 @@ function isPast(date) {
     }
 
 
+    /* =========================
+       CLIENTE
+    ========================= */
+
     function handleChange(e) {
 
         setClient({
 
             ...client,
 
-            [e.target.name]: e.target.value
+            [e.target.name]:
+                e.target.value
 
         });
 
     }
 
 
+    /* =========================
+       SELECCIONAR FECHA
+    ========================= */
+
     function selectDate(date) {
 
         if (isPast(date)) {
-
             return;
-
         }
 
         if (isBlocked(date)) {
-
             return;
-
         }
 
         setDeliveryDate(date);
@@ -172,6 +193,10 @@ function isPast(date) {
 
     }
 
+
+    /* =========================
+       CAMBIAR MES
+    ========================= */
 
     function previousMonth() {
 
@@ -183,9 +208,7 @@ function isPast(date) {
                 calendarYear - 1
             );
 
-        }
-
-        else {
+        } else {
 
             setCalendarMonth(
                 calendarMonth - 1
@@ -206,9 +229,7 @@ function isPast(date) {
                 calendarYear + 1
             );
 
-        }
-
-        else {
+        } else {
 
             setCalendarMonth(
                 calendarMonth + 1
@@ -218,6 +239,10 @@ function isPast(date) {
 
     }
 
+
+    /* =========================
+       CALENDARIO
+    ========================= */
 
     const firstDay = new Date(
         calendarYear,
@@ -252,9 +277,16 @@ function isPast(date) {
     );
 
 
+    /* =========================
+       FINALIZAR PEDIDO
+    ========================= */
+
     async function finishOrder() {
 
-        if (!client.name || !client.phone) {
+        if (
+            !client.name ||
+            !client.phone
+        ) {
 
             return alert(
                 "Completá nombre y teléfono."
@@ -271,16 +303,21 @@ function isPast(date) {
 
         }
 
+
         if (!deliveryHour) {
 
-    return alert(
-        "Seleccioná un horario de entrega."
-    );
+            return alert(
+                "Seleccioná un horario de entrega."
+            );
 
-}
+        }
 
 
-        if (blockedDates.includes(deliveryDate)) {
+        if (
+            blockedDates.includes(
+                deliveryDate
+            )
+        ) {
 
             return alert(
                 "La fecha seleccionada ya no está disponible. Elegí otra fecha."
@@ -307,6 +344,7 @@ function isPast(date) {
                 deliveryHour
 
             });
+
 
             clearCart();
 
@@ -336,147 +374,248 @@ function isPast(date) {
     }
 
 
+    /* =========================
+       RENDER
+    ========================= */
+
     return (
 
         <Layout>
 
-            <h1 className="text-3xl font-bold mb-8">
+            {/* Fondo completo de la vista */}
 
-                Finalizar Pedido
+            <div className="
+                min-h-screen
+                bg-grid
+                px-5
+                pt-12
+                pb-28
+            ">
 
-            </h1>
+                <div className="
+                    max-w-xl
+                    mx-auto
+                ">
 
 
-            <div className="space-y-5">
+                    {/* =========================
+                        TÍTULO
+                    ========================= */}
 
+                    <h1 className="
+                        text-3xl
+                        font-bold
+                        mb-8
+                        mt-5
+                    ">
 
-                <input
+                        Finalizar Pedido
 
-                    name="name"
+                    </h1>
 
-                    placeholder="Nombre"
 
-                    value={client.name}
+                    {/* =========================
+                        FORMULARIO
+                    ========================= */}
 
-                    onChange={handleChange}
+                    <div className="
+                        space-y-5
+                    ">
 
-                    className="w-full border rounded-xl p-4"
 
-                />
+                        {/* NOMBRE */}
 
+                        <input
 
-                <input
+                            name="name"
 
-                    name="phone"
+                            placeholder="Nombre"
 
-                    placeholder="Teléfono"
+                            value={client.name}
 
-                    value={client.phone}
+                            onChange={handleChange}
 
-                    onChange={handleChange}
+                            className="
+                                w-full
+                                border
+                                rounded-xl
+                                p-4
+                                bg-white
+                            "
 
-                    className="w-full border rounded-xl p-4"
+                        />
 
-                />
 
+                        {/* TELÉFONO */}
 
+                        <input
 
+                            name="phone"
 
+                            placeholder="Teléfono"
 
-                <div>
+                            value={client.phone}
 
-                    <label className="font-semibold">
+                            onChange={handleChange}
 
-                        Fecha de entrega
+                            className="
+                                w-full
+                                border
+                                rounded-xl
+                                p-4
+                                bg-white
+                            "
 
-                    </label>
+                        />
 
 
-                    <button
+                        {/* =========================
+                            FECHA
+                        ========================= */}
 
-                        type="button"
+                        <div>
 
-                        onClick={() =>
-                            setCalendarOpen(!calendarOpen)
-                        }
+                            <label className="
+                                font-semibold
+                            ">
 
-                        className="w-full border rounded-xl p-4 mt-2 text-left bg-white"
+                                Fecha de entrega
 
-                    >
+                            </label>
 
-                        {
 
-                            deliveryDate
+                            <button
 
-                                ? new Date(
-                                    deliveryDate + "T00:00:00"
-                                ).toLocaleDateString(
-                                    "es-AR"
-                                )
+                                type="button"
 
-                                : "Seleccionar fecha"
+                                onClick={() =>
+                                    setCalendarOpen(
+                                        !calendarOpen
+                                    )
+                                }
 
-                        }
+                                className="
+                                    w-full
+                                    border
+                                    rounded-xl
+                                    p-4
+                                    mt-2
+                                    text-left
+                                    bg-white
+                                "
 
-                    </button>
+                            >
 
+                                {
 
-                    {
+                                    deliveryDate
 
-                        calendarOpen && (
+                                        ? new Date(
+                                            deliveryDate +
+                                            "T00:00:00"
+                                        ).toLocaleDateString(
+                                            "es-AR"
+                                        )
 
-                            <div className="bg-white border rounded-3xl shadow-xl p-5 mt-3">
+                                        : "Seleccionar fecha"
 
+                                }
 
-                                <div className="flex items-center justify-between mb-5">
+                            </button>
 
 
-                                    <button
+                            {/* CALENDARIO */}
 
-                                        type="button"
+                            {calendarOpen && (
 
-                                        onClick={previousMonth}
+                                <div className="
+                                    bg-white
+                                    border
+                                    rounded-3xl
+                                    shadow-xl
+                                    p-5
+                                    mt-3
+                                ">
 
-                                        className="w-10 h-10 rounded-full border"
 
-                                    >
+                                    {/* CABECERA */}
 
-                                        ←
+                                    <div className="
+                                        flex
+                                        items-center
+                                        justify-between
+                                        mb-5
+                                    ">
 
-                                    </button>
 
+                                        <button
 
-                                    <h2 className="font-bold text-lg capitalize">
+                                            type="button"
 
-                                        {monthName}
+                                            onClick={
+                                                previousMonth
+                                            }
 
-                                    </h2>
+                                            className="
+                                                w-10
+                                                h-10
+                                                rounded-full
+                                                border
+                                            "
 
+                                        >
 
-                                    <button
+                                            ←
 
-                                        type="button"
+                                        </button>
 
-                                        onClick={nextMonth}
 
-                                        className="w-10 h-10 rounded-full border"
+                                        <h2 className="
+                                            font-bold
+                                            text-lg
+                                            capitalize
+                                        ">
 
-                                    >
+                                            {monthName}
 
-                                        →
+                                        </h2>
 
-                                    </button>
 
+                                        <button
 
-                                </div>
+                                            type="button"
 
+                                            onClick={
+                                                nextMonth
+                                            }
 
-                                <div className="grid grid-cols-7 gap-1 mb-2">
+                                            className="
+                                                w-10
+                                                h-10
+                                                rounded-full
+                                                border
+                                            "
 
-                                    {
+                                        >
 
-                                        [
+                                            →
 
+                                        </button>
+
+
+                                    </div>
+
+
+                                    {/* DÍAS */}
+
+                                    <div className="
+                                        grid
+                                        grid-cols-7
+                                        gap-1
+                                        mb-2
+                                    ">
+
+                                        {[
                                             "L",
                                             "M",
                                             "X",
@@ -484,14 +623,19 @@ function isPast(date) {
                                             "V",
                                             "S",
                                             "D"
-
                                         ].map(day => (
 
                                             <div
 
                                                 key={day}
 
-                                                className="text-center text-xs font-bold text-gray-500 py-2"
+                                                className="
+                                                    text-center
+                                                    text-xs
+                                                    font-bold
+                                                    text-gray-500
+                                                    py-2
+                                                "
 
                                             >
 
@@ -499,236 +643,319 @@ function isPast(date) {
 
                                             </div>
 
-                                        ))
+                                        ))}
 
-                                    }
-
-                                </div>
+                                    </div>
 
 
-                                <div className="grid grid-cols-7 gap-1">
+                                    {/* NÚMEROS */}
 
-                                    {
-
-                                        Array.from({
-
-                                            length: adjustedFirstDay
-
-                                        }).map((_, index) => (
-
-                                            <div
-
-                                                key={`empty-${index}`}
-
-                                            />
-
-                                        ))
-
-                                    }
+                                    <div className="
+                                        grid
+                                        grid-cols-7
+                                        gap-1
+                                    ">
 
 
-                                    {
+                                        {Array.from({
 
-                                        Array.from({
+                                            length:
+                                                adjustedFirstDay
 
-                                            length: daysInMonth
+                                        }).map(
+                                            (_, index) => (
 
-                                        }).map((_, index) => {
+                                                <div
+                                                    key={`empty-${index}`}
+                                                />
 
-                                            const day =
-                                                index + 1;
-
-                                            const date =
-                                                formatDate(
-                                                    calendarYear,
-                                                    calendarMonth,
-                                                    day
-                                                );
-
-                                            const blocked =
-                                                isBlocked(date);
-
-                                            const past =
-                                                isPast(date);
-
-                                            const selected =
-                                                deliveryDate === date;
+                                            )
+                                        )}
 
 
-                                            return (
+                                        {Array.from({
 
-                                                <button
+                                            length:
+                                                daysInMonth
 
-                                                    type="button"
+                                        }).map(
+                                            (_, index) => {
 
-                                                    key={date}
+                                                const day =
+                                                    index + 1;
 
-                                                    disabled={
-                                                        blocked ||
-                                                        past
-                                                    }
 
-                                                    onClick={() =>
-                                                        selectDate(date)
-                                                    }
+                                                const date =
+                                                    formatDate(
+                                                        calendarYear,
+                                                        calendarMonth,
+                                                        day
+                                                    );
 
-                                                    className={`
 
-                                                        min-h-12
+                                                const blocked =
+                                                    isBlocked(
+                                                        date
+                                                    );
 
-                                                        rounded-xl
 
-                                                        text-sm
+                                                const past =
+                                                    isPast(
+                                                        date
+                                                    );
 
-                                                        font-semibold
 
-                                                        transition
+                                                const selected =
+                                                    deliveryDate ===
+                                                    date;
 
-                                                        ${selected
 
-                                                            ? "bg-[#D08A9B] text-white"
+                                                return (
 
-                                                            : blocked
+                                                    <button
 
-                                                                ? "bg-red-100 text-red-600 border border-red-200 cursor-not-allowed"
+                                                        type="button"
 
-                                                                : past
+                                                        key={date}
 
-                                                                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
-
-                                                                    : "bg-green-50 text-green-700 hover:bg-green-100"
-
+                                                        disabled={
+                                                            blocked ||
+                                                            past
                                                         }
 
-                                                    `}
+                                                        onClick={() =>
+                                                            selectDate(
+                                                                date
+                                                            )
+                                                        }
 
-                                                >
+                                                        className={`
 
-                                                    {day}
+                                                            min-h-12
 
-                                                </button>
+                                                            rounded-xl
 
-                                            );
+                                                            text-sm
 
-                                        })
+                                                            font-semibold
 
-                                    }
+                                                            transition
 
-                                </div>
+                                                            ${
+                                                                selected
 
+                                                                    ? "bg-[#D08A9B] text-white"
 
-                                <div className="flex justify-center gap-5 mt-5 text-xs">
+                                                                    : blocked
 
-                                    <div className="flex items-center gap-1">
+                                                                        ? "bg-red-100 text-red-600 border border-red-200 cursor-not-allowed"
 
-                                        <span className="w-3 h-3 rounded bg-green-200" />
+                                                                        : past
 
-                                        Disponible
+                                                                            ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+
+                                                                            : "bg-green-50 text-green-700 hover:bg-green-100"
+
+                                                            }
+
+                                                        `}
+
+                                                    >
+
+                                                        {day}
+
+                                                    </button>
+
+                                                );
+
+                                            }
+                                        )}
 
                                     </div>
 
 
-                                    <div className="flex items-center gap-1">
+                                    {/* REFERENCIAS */}
 
-                                        <span className="w-3 h-3 rounded bg-red-200" />
+                                    <div className="
+                                        flex
+                                        justify-center
+                                        gap-5
+                                        mt-5
+                                        text-xs
+                                    ">
 
-                                        Cerrado
+
+                                        <div className="
+                                            flex
+                                            items-center
+                                            gap-1
+                                        ">
+
+                                            <span className="
+                                                w-3
+                                                h-3
+                                                rounded
+                                                bg-green-200
+                                            " />
+
+                                            Disponible
+
+                                        </div>
+
+
+                                        <div className="
+                                            flex
+                                            items-center
+                                            gap-1
+                                        ">
+
+                                            <span className="
+                                                w-3
+                                                h-3
+                                                rounded
+                                                bg-red-200
+                                            " />
+
+                                            Cerrado
+
+                                        </div>
+
 
                                     </div>
 
+
                                 </div>
 
-
-                            </div>
-
-                        )
-
-                    }
+                            )}
 
 
-                    <p className="text-sm text-gray-500 mt-2">
+                            <p className="
+                                text-sm
+                                text-gray-500
+                                mt-2
+                            ">
 
-                        Las fechas en rojo no están disponibles.
+                                Las fechas en rojo no están
+                                disponibles.
 
-                    </p>
+                            </p>
+
+                        </div>
+
+
+                        {/* =========================
+                            HORARIO
+                        ========================= */}
+
+                        <div>
+
+                            <label className="
+                                font-semibold
+                            ">
+
+                                Horario de entrega
+
+                            </label>
+
+
+                            <select
+
+                                value={deliveryHour}
+
+                                onChange={(e) =>
+                                    setDeliveryHour(
+                                        e.target.value
+                                    )
+                                }
+
+                                className="
+                                    w-full
+                                    border
+                                    rounded-xl
+                                    p-4
+                                    mt-2
+                                    bg-white
+                                "
+
+                            >
+
+                                <option value="">
+
+                                    Seleccionar horario
+
+                                </option>
+
+
+                                {availableHours.map(
+                                    hour => (
+
+                                        <option
+                                            key={hour}
+                                            value={hour}
+                                        >
+
+                                            {hour}
+
+                                        </option>
+
+                                    )
+                                )}
+
+                            </select>
+
+                        </div>
+
+
+                        {/* =========================
+                            TOTAL
+                        ========================= */}
+
+                        <div className="
+                            text-2xl
+                            font-bold
+                        ">
+
+                            Total: $
+                            {totalPrice.toLocaleString(
+                                "es-AR"
+                            )}
+
+                        </div>
+
+
+                        {/* =========================
+                            CONFIRMAR
+                        ========================= */}
+
+                        <button
+
+                            disabled={loading}
+
+                            onClick={finishOrder}
+
+                            className="
+                                w-full
+                                rounded-full
+                                py-4
+                                bg-[#D08A9B]
+                                text-white
+                                font-bold
+                            "
+
+                        >
+
+                            {
+                                loading
+                                    ? "Enviando..."
+                                    : "Confirmar Pedido"
+                            }
+
+                        </button>
+
+
+                    </div>
 
                 </div>
-
-                <div>
-
-    <label className="font-semibold">
-
-        Horario de entrega
-
-    </label>
-
-    <select
-
-        value={deliveryHour}
-
-        onChange={(e) =>
-            setDeliveryHour(e.target.value)
-        }
-
-        className="w-full border rounded-xl p-4 mt-2 bg-white"
-
-    >
-
-        <option value="">
-
-            Seleccionar horario
-
-        </option>
-
-        {availableHours.map(hour => (
-
-            <option
-                key={hour}
-                value={hour}
-            >
-
-                {hour}
-
-            </option>
-
-        ))}
-
-    </select>
-
-    
-
-</div>
-
-
-                <div className="text-2xl font-bold">
-
-                    Total: ${totalPrice.toLocaleString("es-AR")}
-
-                </div>
-
-
-                <button
-
-                    disabled={loading}
-
-                    onClick={finishOrder}
-
-                    className="w-full rounded-full py-4 bg-[#D08A9B] text-white font-bold"
-
-                >
-
-                    {
-
-                        loading
-
-                            ? "Enviando..."
-
-                            : "Confirmar Pedido"
-
-                    }
-
-                </button>
-
 
             </div>
 

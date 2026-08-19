@@ -26,7 +26,7 @@ function Hero() {
             </div>
 
             {/* Botón abajo */}
-            <div className="absolute bottom-24 left-0 right-0 z-14 flex justify-center">
+            <div className="absolute bottom-25 left-0 right-0 z-14 flex justify-center">
                 <button
                     onClick={() => navigate("/catalogo")}
                     className="
