@@ -7,127 +7,259 @@ function SizesSection({
 }) {
 
     const isAlfajor = type === "alfajor";
+    const isCookies = type === "cookies";
     const isMesaDulce = type === "mesaDulce";
 
-    // Alfajores: siempre 1 unidad
-    // Mesa dulce: usa la presentación que tenga el producto
-    // Tortas: tamaños tradicionales
-    const options = isAlfajor
-        ? ["1"]
-        : isMesaDulce
-            ? sizes.length
-                ? sizes
-                : ["35"]
-            : ["16", "20", "24"];
 
-    const isFixedPresentation =
-        isAlfajor || isMesaDulce;
+    /*
+     * ALFAJORES / COOKIES
+     */
+
+    if (isAlfajor || isCookies) {
+
+        const presentation =
+            sizes.length > 0
+                ? sizes[0]
+                : "";
+
+        return (
+
+            <div>
+
+                <label className="font-semibold">
+                    Presentación
+                </label>
+
+                <div className="flex items-center gap-4 mt-3">
+
+                    <div className="flex items-center gap-2">
+
+                        <input
+                            type="number"
+                            min="1"
+                            value={presentation}
+                            onChange={(e) => {
+
+                                const value =
+                                    e.target.value;
+
+                                setSizes(
+                                    value
+                                        ? [value]
+                                        : []
+                                );
+
+                            }}
+                            className="border rounded-xl p-2 w-24"
+                            placeholder="Cantidad"
+                        />
+
+                        <span>
+                            unidades
+                        </span>
+
+                    </div>
+
+                    <input
+                        type="number"
+                        value={
+                            presentation
+                                ? prices[presentation] || ""
+                                : ""
+                        }
+                        onChange={(e) => {
+
+                            if (!presentation) {
+                                return;
+                            }
+
+                            setPrices({
+
+                                ...prices,
+
+                                [presentation]:
+                                    Number(
+                                        e.target.value
+                                    )
+
+                            });
+
+                        }}
+                        className="border rounded-xl p-2 w-40"
+                        placeholder="Precio del pack"
+                    />
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    /*
+     * MESA DULCE
+     */
+
+    if (isMesaDulce) {
+
+        const presentation =
+            sizes.length > 0
+                ? sizes[0]
+                : "35";
+
+        return (
+
+            <div>
+
+                <label className="font-semibold">
+                    Presentación
+                </label>
+
+                <div className="flex items-center gap-4 mt-3">
+
+                    <span className="w-32">
+                        {presentation} unidades
+                    </span>
+
+                    <input
+                        type="number"
+                        value={
+                            prices[presentation] || ""
+                        }
+                        onChange={(e) =>
+                            setPrices({
+
+                                ...prices,
+
+                                [presentation]:
+                                    Number(
+                                        e.target.value
+                                    )
+
+                            })
+                        }
+                        className="
+                            border
+                            rounded-xl
+                            p-2
+                            w-40
+                        "
+                        placeholder="Precio"
+                    />
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    /*
+     * TORTAS / TARTAS
+     */
+
+    const options = [
+        "16",
+        "20",
+        "24"
+    ];
 
     return (
 
         <div>
 
             <label className="font-semibold">
-
-                {
-                    isAlfajor
-                        ? "Por unidad"
-                        : isMesaDulce
-                            ? "Presentación"
-                            : "Tamaños"
-                }
-
+                Tamaños
             </label>
 
-            {
+            {options.map(size => (
 
-                options.map(size => (
+                <div
+                    key={size}
+                    className="
+                        flex
+                        items-center
+                        gap-4
+                        mt-3
+                    "
+                >
 
-                    <div
-                        key={size}
-                        className="flex items-center gap-4 mt-3"
-                    >
-
-                        {
-                            !isFixedPresentation && (
-
-                                <input
-                                    type="checkbox"
-                                    checked={sizes.includes(size)}
-                                    onChange={(e) => {
-
-                                        if (e.target.checked) {
-
-                                            setSizes([
-                                                ...sizes,
-                                                size
-                                            ]);
-
-                                        } else {
-
-                                            setSizes(
-                                                sizes.filter(
-                                                    s => s !== size
-                                                )
-                                            );
-
-                                        }
-
-                                    }}
-                                />
-
-                            )
+                    <input
+                        type="checkbox"
+                        checked={
+                            sizes.includes(size)
                         }
+                        onChange={(e) => {
 
-                        <span className="w-32">
+                            if (e.target.checked) {
 
-                            {
-                                isAlfajor
-                                    ? "1 unidad"
-                                    : isMesaDulce
-                                        ? `${size} unidades`
-                                        : `${size} cm`
+                                setSizes([
+                                    ...sizes,
+                                    size
+                                ]);
+
+                            } else {
+
+                                setSizes(
+                                    sizes.filter(
+                                        s => s !== size
+                                    )
+                                );
+
+                                const newPrices = {
+                                    ...prices
+                                };
+
+                                delete newPrices[size];
+
+                                setPrices(newPrices);
+
                             }
 
-                        </span>
+                        }}
+                    />
 
-                        {
+                    <span className="w-32">
+                        {size} cm
+                    </span>
 
-                            (
-                                isFixedPresentation ||
-                                sizes.includes(size)
-                            ) && (
+                    {sizes.includes(size) && (
 
-                                <input
-                                    type="number"
-                                    value={prices[size] || ""}
-                                    onChange={(e) =>
+                        <input
+                            type="number"
+                            value={
+                                prices[size] || ""
+                            }
+                            onChange={(e) =>
+                                setPrices({
 
-                                        setPrices({
+                                    ...prices,
 
-                                            ...prices,
+                                    [size]:
+                                        Number(
+                                            e.target.value
+                                        )
 
-                                            [size]:
-                                                Number(
-                                                    e.target.value
-                                                )
+                                })
+                            }
+                            className="
+                                border
+                                rounded-xl
+                                p-2
+                                w-40
+                            "
+                            placeholder="Precio"
+                        />
 
-                                        })
+                    )}
 
-                                    }
-                                    className="border rounded-xl p-2 w-40"
-                                    placeholder="Precio"
-                                />
+                </div>
 
-                            )
-
-                        }
-
-                    </div>
-
-                ))
-
-            }
+            ))}
 
         </div>
 

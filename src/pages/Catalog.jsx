@@ -31,20 +31,32 @@ function Catalog() {
     }
 
 
-    const filteredProducts = products
+const filteredProducts = products
 
-        .filter((product) => {
+    .filter((product) => {
+
+        // Si estamos viendo Tortas clásicas
+        // mostramos categoría 1, excepto personalizadas
+        if (Number(category) === 1) {
 
             return (
-                !category ||
-                product.category === Number(category)
+                product.category === 1 &&
+                product.type !== "personalizada"
             );
 
-        })
+        }
 
-        .sort(
-            (a, b) => a.id - b.id
+        // Resto de categorías
+        return (
+            !category ||
+            product.category === Number(category)
         );
+
+    })
+
+    .sort(
+        (a, b) => a.id - b.id
+    );
 
 
     return (

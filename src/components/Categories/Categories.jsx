@@ -6,6 +6,8 @@ import personalizadaIcon from "../../assets/images/personalizada.png";
 import alfajoresIcon from "../../assets/images/alfajores.png";
 import tradicionalIcon from "../../assets/images/tradicional.png";
 import mesaDulceIcon from "../../assets/images/mesadulce.png";
+import cookiesIcon from "../../assets/images/cookies.png";
+import bentoCakeIcon from "../../assets/images/bentocake.png";
 
 
 const icons = {
@@ -13,6 +15,8 @@ const icons = {
     tartas: tartaIcon,
     alfajor: alfajoresIcon,
     mesa: mesaDulceIcon,
+    cookies: cookiesIcon,
+    bento: bentoCakeIcon,
 };
 
 
@@ -86,7 +90,9 @@ function Categories() {
                             leading-tight
                         "
                     >
+
                         TORTA PERSONALIZADA
+
                     </h3>
 
 
@@ -97,7 +103,9 @@ function Categories() {
                             mt-1
                         "
                     >
+
                         Diseñá tu torta a tu gusto
+
                     </p>
 
                 </div>
@@ -141,51 +149,17 @@ function Categories() {
                     "
                 >
 
-                    {/* Imagen */}
+                    {/* ================================= */}
+                    {/* ICONO */}
+                    {/* ================================= */}
 
                     <div className="flex-shrink-0">
 
-                        {category.icon === "torta" ? (
+                        {icons[category.icon] ? (
 
                             <img
-                                src={tradicionalIcon}
-                                alt="Tortas"
-                                className="
-                                    w-14
-                                    h-14
-                                    object-contain
-                                "
-                            />
-
-                        ) : category.icon === "tartas" ? (
-
-                            <img
-                                src={tartaIcon}
-                                alt="Tartas"
-                                className="
-                                    w-14
-                                    h-14
-                                    object-contain
-                                "
-                            />
-
-                        ) : category.icon === "alfajor" ? (
-
-                            <img
-                                src={alfajoresIcon}
-                                alt="Alfajores"
-                                className="
-                                    w-14
-                                    h-14
-                                    object-contain
-                                "
-                            />
-
-                        ) : category.icon === "mesa" ? (
-
-                            <img
-                                src={mesaDulceIcon}
-                                alt="Mesa dulce"
+                                src={icons[category.icon]}
+                                alt={category.name}
                                 className="
                                     w-14
                                     h-14
@@ -195,14 +169,28 @@ function Categories() {
 
                         ) : (
 
-                            icons[category.icon]
+                            <div className="
+                                w-14
+                                h-14
+                                flex
+                                items-center
+                                justify-center
+                                text-gray-400
+                                text-xs
+                            ">
+
+                                Sin icono
+
+                            </div>
 
                         )}
 
                     </div>
 
 
-                    {/* Título */}
+                    {/* ================================= */}
+                    {/* TÍTULO */}
+                    {/* ================================= */}
 
                     <div className="min-w-0">
 
@@ -215,7 +203,9 @@ function Categories() {
                                 leading-tight
                             "
                         >
+
                             {category.name}
+
                         </h3>
 
                     </div>

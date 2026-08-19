@@ -18,12 +18,19 @@ function TraditionalProduct() {
     );
 
 
-    /* ESTADOS */
+    /* =========================
+       ESTADOS
+    ========================= */
 
     const [size, setSize] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [note, setNote] = useState("");
     const [extras, setExtras] = useState([]);
+
+    // Bento
+    const [bentoForm, setBentoForm] = useState("");
+    const [bentoFlavor, setBentoFlavor] = useState("");
+    const [bentoCovering, setBentoCovering] = useState("");
 
     // Galería
     const [selectedImage, setSelectedImage] = useState(0);
@@ -32,11 +39,32 @@ function TraditionalProduct() {
     const [lightboxOpen, setLightboxOpen] = useState(false);
 
 
-    /* CONFIGURAR TAMAÑO */
+    /* =========================
+       TIPOS DE PRODUCTO
+    ========================= */
+
+    const isAlfajor =
+        product?.type === "alfajor";
+
+    const isMesaDulce =
+        product?.type === "mesaDulce";
+
+    const isCookies =
+        product?.type === "cookies";
+
+    const isBento =
+        product?.type === "bento" ||
+        Number(product?.category) === 5;
+
+
+    /* =========================
+       CONFIGURAR TAMAÑO
+    ========================= */
 
     useEffect(() => {
 
         if (!product) return;
+
 
         if (product.type === "mesaDulce") {
 
@@ -45,12 +73,14 @@ function TraditionalProduct() {
             );
 
             return;
+
         }
+
 
         if (product.sizes?.length) {
 
             setSize(
-                product.sizes[0]
+                String(product.sizes[0])
             );
 
         }
@@ -58,19 +88,114 @@ function TraditionalProduct() {
     }, [product]);
 
 
-    /*
-     * GALERÍA
-     *
-     * Ahora usamos solamente "images"
-     */
+    /* =========================
+       CONFIGURAR BENTO
+    ========================= */
+
+    useEffect(() => {
+
+        if (!product || !isBento) {
+            return;
+        }
+
+
+        /*
+         * FORMAS
+         *
+         * Firebase:
+         * bentoFormas
+         */
+
+        const forms =
+            product.bentoFormas ||
+            [];
+
+
+        /*
+         * BIZCOCHUELOS
+         *
+         * Firebase:
+         * bentoBizcochuelos
+         */
+
+        const bizcochuelos =
+            product.bentoBizcochuelos ||
+            [];
+
+
+        /*
+         * COBERTURAS
+         *
+         * Si en Firebase hay coberturas,
+         * usamos esas.
+         *
+         * Si está vacío, usamos Buttercream.
+         */
+
+        const coverings =
+            product.coverings?.length
+                ? product.coverings
+                : ["Buttercream"];
+
+
+        /*
+         * PRIMERA FORMA
+         */
+
+        setBentoForm(
+            forms[0] || ""
+        );
+
+
+        /*
+         * PRIMER BIZCOCHUELO
+         */
+
+        setBentoFlavor(
+            bizcochuelos[0] || ""
+        );
+
+
+        /*
+         * PRIMERA COBERTURA
+         */
+
+        setBentoCovering(
+            coverings[0] || ""
+        );
+
+
+        /*
+         * TAMAÑO
+         */
+
+        if (product.sizes?.length) {
+
+            setSize(
+                String(product.sizes[0])
+            );
+
+        }
+        else {
+
+            setSize("10");
+
+        }
+
+    }, [product, isBento]);
+
+
+    /* =========================
+       GALERÍA
+    ========================= */
 
     const galleryImages =
         product?.images?.filter(Boolean) || [];
 
 
-    /*
-     * IMAGEN ACTUAL
-     */
+    /* =========================
+       IMAGEN ACTUAL
+    ========================= */
 
     const currentImage =
         galleryImages[selectedImage] ||
@@ -78,9 +203,9 @@ function TraditionalProduct() {
         null;
 
 
-    /*
-     * CAMBIAR IMAGEN
-     */
+    /* =========================
+       CAMBIAR IMAGEN
+    ========================= */
 
     function changeImage(index) {
 
@@ -93,9 +218,9 @@ function TraditionalProduct() {
     }
 
 
-    /*
-     * SIGUIENTE IMAGEN
-     */
+    /* =========================
+       SIGUIENTE IMAGEN
+    ========================= */
 
     function nextImage() {
 
@@ -112,9 +237,9 @@ function TraditionalProduct() {
     }
 
 
-    /*
-     * IMAGEN ANTERIOR
-     */
+    /* =========================
+       IMAGEN ANTERIOR
+    ========================= */
 
     function previousImage() {
 
@@ -135,13 +260,16 @@ function TraditionalProduct() {
     }
 
 
-    /*
-     * PRECIO BASE
-     */
+    /* =========================
+       PRECIO BASE
+    ========================= */
 
     const basePrice = useMemo(() => {
 
-        if (!product) return 0;
+        if (!product) {
+            return 0;
+        }
+
 
         if (product.type === "mesaDulce") {
 
@@ -151,65 +279,127 @@ function TraditionalProduct() {
 
         }
 
+
         if (size) {
 
-            return Number(
-                product.prices?.[size] ?? 0
-            );
+            const prices =
+                product.prices || {};
+
+
+            /*
+             * Primero busca el tamaño exacto.
+             */
+
+            if (
+                prices[String(size)] !== undefined
+            ) {
+
+                return Number(
+                    prices[String(size)] || 0
+                );
+
+            }
+
+
+            /*
+             * Compatibilidad con el Bento
+             * si Firebase tiene la clave "100".
+             */
+
+            if (
+                isBento &&
+                prices["100"] !== undefined
+            ) {
+
+                return Number(
+                    prices["100"] || 0
+                );
+
+            }
 
         }
 
+
         return 0;
 
-    }, [product, size]);
+    }, [
+        product,
+        size,
+        isBento
+    ]);
 
 
-    /*
-     * PRECIO EXTRAS
-     */
+    /* =========================
+       PRECIO EXTRAS
+    ========================= */
 
     const extrasPrice = useMemo(() => {
 
-        if (!product) return 0;
+        if (!product) {
+            return 0;
+        }
 
-        return extras.reduce(
-            (total, extraName) => {
 
-                const extra =
-                    product.extras?.find(
-                        e => e.name === extraName
+        const singleExtrasPrice =
+            extras.reduce(
+                (total, extraName) => {
+
+                    const extra =
+                        product.extras?.find(
+                            e =>
+                                e.name === extraName
+                        );
+
+
+                    return (
+                        total +
+                        (
+                            extra
+                                ? Number(
+                                    extra.price ?? 0
+                                )
+                                : 0
+                        )
                     );
 
-                return (
-                    total +
-                    (
-                        extra
-                            ? Number(extra.price ?? 0)
-                            : 0
-                    )
-                );
+                },
+                0
+            );
 
-            },
-            0
+
+        return (
+            singleExtrasPrice *
+            quantity
         );
 
-    }, [product, extras]);
+    }, [
+        product,
+        extras,
+        quantity
+    ]);
 
 
-    /*
-     * PRECIO TOTAL
-     */
+    /* =========================
+       PRECIO TOTAL
+    ========================= */
 
     const price = useMemo(() => {
 
-        return basePrice + extrasPrice;
+        return (
+            basePrice * quantity +
+            extrasPrice
+        );
 
-    }, [basePrice, extrasPrice]);
+    }, [
+        basePrice,
+        quantity,
+        extrasPrice
+    ]);
 
 
-    /*
-     * SELECCIONAR EXTRA
-     */
+    /* =========================
+       SELECCIONAR EXTRA
+    ========================= */
 
     function toggleExtra(extraName) {
 
@@ -222,10 +412,12 @@ function TraditionalProduct() {
             ) {
 
                 return currentExtras.filter(
-                    name => name !== extraName
+                    name =>
+                        name !== extraName
                 );
 
             }
+
 
             return [
                 ...currentExtras,
@@ -237,9 +429,9 @@ function TraditionalProduct() {
     }
 
 
-    /*
-     * CARGANDO
-     */
+    /* =========================
+       CARGANDO
+    ========================= */
 
     if (loading) {
 
@@ -264,9 +456,9 @@ function TraditionalProduct() {
     }
 
 
-    /*
-     * PRODUCTO NO ENCONTRADO
-     */
+    /* =========================
+       PRODUCTO NO ENCONTRADO
+    ========================= */
 
     if (!product) {
 
@@ -294,23 +486,34 @@ function TraditionalProduct() {
         product.available !== false;
 
 
-    const isAlfajor =
-        product.type === "alfajor";
+    /* =========================
+       DATOS BENTO
+    ========================= */
+
+    const bentoForms =
+        product.bentoFormas || [];
 
 
-    const isMesaDulce =
-        product.type === "mesaDulce";
+    const bentoBizcochuelos =
+        product.bentoBizcochuelos || [];
 
 
-    /*
-     * AGREGAR AL PEDIDO
-     */
+    const bentoCoverings =
+        product.coverings?.length
+            ? product.coverings
+            : ["Buttercream"];
+
+
+    /* =========================
+       AGREGAR AL PEDIDO
+    ========================= */
 
     function handleAdd() {
 
         if (!available) {
             return;
         }
+
 
         addToCart({
 
@@ -326,9 +529,29 @@ function TraditionalProduct() {
 
             extras,
 
+            /*
+             * Datos Bento
+             */
+
+            bentoForm:
+                isBento
+                    ? bentoForm
+                    : "",
+
+            flavor:
+                isBento
+                    ? bentoFlavor
+                    : "",
+
+            covering:
+                isBento
+                    ? bentoCovering
+                    : "",
+
             price
 
         });
+
 
         alert(
             "Producto agregado al pedido."
@@ -490,9 +713,6 @@ function TraditionalProduct() {
                         }
                     >
 
-
-                        {/* CERRAR */}
-
                         <button
                             type="button"
                             onClick={() =>
@@ -519,8 +739,6 @@ function TraditionalProduct() {
 
                         </button>
 
-
-                        {/* ANTERIOR */}
 
                         {galleryImages.length > 1 && (
 
@@ -558,8 +776,6 @@ function TraditionalProduct() {
                         )}
 
 
-                        {/* IMAGEN */}
-
                         <img
                             src={currentImage}
                             alt={product.name}
@@ -575,8 +791,6 @@ function TraditionalProduct() {
                             "
                         />
 
-
-                        {/* SIGUIENTE */}
 
                         {galleryImages.length > 1 && (
 
@@ -613,8 +827,6 @@ function TraditionalProduct() {
 
                         )}
 
-
-                        {/* INDICADOR */}
 
                         {galleryImages.length > 1 && (
 
@@ -690,8 +902,6 @@ function TraditionalProduct() {
                     </div>
 
 
-                    {/* DESCRIPCIÓN */}
-
                     <p className="
                         text-gray-500
                         mt-3
@@ -747,119 +957,372 @@ function TraditionalProduct() {
                     ">
 
 
-                        {/* PRESENTACIÓN */}
+                        {/* =========================
+                            BENTO CAKES
+                        ========================= */}
 
-                        <h2 className="
-                            font-bold
-                            text-xl
-                            mt-8
-                            mb-3
-                        ">
+                        {isBento && (
 
-                            Presentación
-
-                        </h2>
+                            <div className="
+                                mt-8
+                                space-y-6
+                            ">
 
 
-                        <div className="
-                            flex
-                            gap-3
-                            flex-wrap
-                        ">
+                                {/* FORMA */}
 
-                            {isMesaDulce ? (
+                                <div>
 
-                                <button
-                                    type="button"
-                                    className="
-                                        px-5
-                                        py-3
-                                        rounded-full
+                                    <h2 className="
+                                        font-bold
+                                        text-xl
+                                        mb-3
+                                    ">
+
+                                        Forma
+
+                                    </h2>
+
+
+                                    {bentoForms.length > 0 ? (
+
+                                        <select
+                                            value={bentoForm}
+                                            onChange={(e) =>
+                                                setBentoForm(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="
+                                                w-full
+                                                rounded-xl
+                                                border
+                                                p-4
+                                            "
+                                        >
+
+                                            {bentoForms.map(
+                                                (option, index) => (
+
+                                                    <option
+                                                        key={`${option}-${index}`}
+                                                        value={option}
+                                                    >
+
+                                                        {option}
+
+                                                    </option>
+
+                                                )
+                                            )}
+
+                                        </select>
+
+                                    ) : (
+
+                                        <div className="
+                                            w-full
+                                            rounded-xl
+                                            border
+                                            p-4
+                                            bg-gray-50
+                                            text-gray-500
+                                        ">
+
+                                            No hay formas
+                                            configuradas.
+
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+
+                                {/* BIZCOCHUELO */}
+
+                                <div>
+
+                                    <h2 className="
+                                        font-bold
+                                        text-xl
+                                        mb-3
+                                    ">
+
+                                        Bizcochuelo
+
+                                    </h2>
+
+
+                                    {bentoBizcochuelos.length > 0 ? (
+
+                                        <select
+                                            value={bentoFlavor}
+                                            onChange={(e) =>
+                                                setBentoFlavor(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="
+                                                w-full
+                                                rounded-xl
+                                                border
+                                                p-4
+                                            "
+                                        >
+
+                                            {bentoBizcochuelos.map(
+                                                (option, index) => (
+
+                                                    <option
+                                                        key={`${option}-${index}`}
+                                                        value={option}
+                                                    >
+
+                                                        {option}
+
+                                                    </option>
+
+                                                )
+                                            )}
+
+                                        </select>
+
+                                    ) : (
+
+                                        <div className="
+                                            w-full
+                                            rounded-xl
+                                            border
+                                            p-4
+                                            bg-gray-50
+                                            text-gray-500
+                                        ">
+
+                                            No hay bizcochuelos
+                                            configurados.
+
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+
+                                {/* TAMAÑO */}
+
+                                <div>
+
+                                    <h2 className="
+                                        font-bold
+                                        text-xl
+                                        mb-3
+                                    ">
+
+                                        Tamaño
+
+                                    </h2>
+
+
+                                    <div className="
+                                        w-full
+                                        rounded-xl
                                         border
-                                        bg-[#D08A9B]
-                                        text-white
-                                        border-[#D08A9B]
-                                    "
-                                >
+                                        p-4
+                                        bg-gray-50
+                                        text-gray-700
+                                    ">
 
-                                    {product.quantity}
-                                    {" "}
-                                    unidades
+                                        {size || "10"} cm
 
-                                </button>
+                                    </div>
 
-                            ) : (
+                                </div>
 
-                                (product.sizes || []).map(
-                                    s => (
+
+                                {/* COBERTURA */}
+
+                                <div>
+
+                                    <h2 className="
+                                        font-bold
+                                        text-xl
+                                        mb-3
+                                    ">
+
+                                        Cobertura
+
+                                    </h2>
+
+
+                                    <select
+                                        value={bentoCovering}
+                                        onChange={(e) =>
+                                            setBentoCovering(
+                                                e.target.value
+                                            )
+                                        }
+                                        className="
+                                            w-full
+                                            rounded-xl
+                                            border
+                                            p-4
+                                        "
+                                    >
+
+                                        {bentoCoverings.map(
+                                            (option, index) => (
+
+                                                <option
+                                                    key={`${option}-${index}`}
+                                                    value={option}
+                                                >
+
+                                                    {option}
+
+                                                </option>
+
+                                            )
+                                        )}
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+
+                        {/* =========================
+                            PRESENTACIÓN
+                            SOLO NO BENTO
+                        ========================= */}
+
+                        {!isBento && (
+
+                            <>
+
+                                <h2 className="
+                                    font-bold
+                                    text-xl
+                                    mt-8
+                                    mb-3
+                                ">
+
+                                    Presentación
+
+                                </h2>
+
+
+                                <div className="
+                                    flex
+                                    gap-3
+                                    flex-wrap
+                                ">
+
+                                    {isMesaDulce ? (
 
                                         <button
-                                            key={s}
                                             type="button"
-                                            onClick={() =>
-                                                setSize(s)
-                                            }
-                                            className={`
+                                            className="
                                                 px-5
                                                 py-3
                                                 rounded-full
                                                 border
-                                                transition
-                                                ${
-                                                    size === s
-                                                        ? "bg-[#D08A9B] text-white border-[#D08A9B]"
-                                                        : "bg-white"
-                                                }
-                                            `}
+                                                bg-[#D08A9B]
+                                                text-white
+                                                border-[#D08A9B]
+                                            "
                                         >
 
-                                            {isAlfajor
-                                                ? "1 unidad"
-                                                : `${s} cm`
-                                            }
+                                            {product.quantity}
+                                            {" "}
+                                            unidades
 
                                         </button>
 
-                                    )
-                                )
+                                    ) : (
 
-                            )}
+                                        (product.sizes || []).map(
+                                            s => (
 
-                        </div>
+                                                <button
+                                                    key={s}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setSize(
+                                                            String(s)
+                                                        )
+                                                    }
+                                                    className={`
+                                                        px-5
+                                                        py-3
+                                                        rounded-full
+                                                        border
+                                                        transition
+                                                        ${
+                                                            size === String(s)
+                                                                ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+                                                                : "bg-white"
+                                                        }
+                                                    `}
+                                                >
+
+                                                    {isAlfajor ||
+                                                     isCookies
+                                                        ? `${s} unidades`
+                                                        : `${s} cm`
+                                                    }
+
+                                                </button>
+
+                                            )
+                                        )
+
+                                    )}
+
+                                </div>
 
 
-                        {isAlfajor && (
+                                {isAlfajor && (
 
-                            <p className="
-                                text-sm
-                                text-gray-500
-                                mt-3
-                            ">
+                                    <p className="
+                                        text-sm
+                                        text-gray-500
+                                        mt-3
+                                    ">
 
-                                Precio por unidad.
+                                        Precio por presentación.
 
-                            </p>
+                                    </p>
+
+                                )}
+
+
+                                {isMesaDulce && (
+
+                                    <p className="
+                                        text-sm
+                                        text-gray-500
+                                        mt-3
+                                    ">
+
+                                        Elegí la presentación
+                                        que querés comprar.
+
+                                    </p>
+
+                                )}
+
+                            </>
 
                         )}
 
 
-                        {isMesaDulce && (
-
-                            <p className="
-                                text-sm
-                                text-gray-500
-                                mt-3
-                            ">
-
-                                Elegí la presentación
-                                que querés comprar.
-
-                            </p>
-
-                        )}
-
-
-                        {/* EXTRAS */}
+                        {/* =========================
+                            EXTRAS
+                        ========================= */}
 
                         {product.extras?.length > 0 && (
 
@@ -895,10 +1358,10 @@ function TraditionalProduct() {
                                 ">
 
                                     {product.extras.map(
-                                        extra => (
+                                        (extra, index) => (
 
                                             <button
-                                                key={extra.name}
+                                                key={`${extra.name}-${index}`}
                                                 type="button"
                                                 onClick={() =>
                                                     toggleExtra(
@@ -957,7 +1420,9 @@ function TraditionalProduct() {
                         )}
 
 
-                        {/* CANTIDAD */}
+                        {/* =========================
+                            CANTIDAD
+                        ========================= */}
 
                         <h2 className="
                             font-bold
@@ -1030,7 +1495,9 @@ function TraditionalProduct() {
                         </div>
 
 
-                        {/* OBSERVACIONES */}
+                        {/* =========================
+                            OBSERVACIONES
+                        ========================= */}
 
                         <h2 className="
                             font-bold
@@ -1045,24 +1512,28 @@ function TraditionalProduct() {
 
 
                         <textarea
-    value={note}
-    onChange={(e) =>
-        setNote(e.target.value)
-    }
-    rows={4}
-    className="
-        w-full
-        border
-        rounded-2xl
-        p-4
-        text-left
-        align-top
-    "
-    placeholder="Ej.: Sin nueces, escribir dedicatoria..."
-/>
+                            value={note}
+                            onChange={(e) =>
+                                setNote(
+                                    e.target.value
+                                )
+                            }
+                            rows={4}
+                            className="
+                                w-full
+                                border
+                                rounded-2xl
+                                p-4
+                                text-left
+                                align-top
+                            "
+                            placeholder="Ej.: Sin nueces, escribir dedicatoria..."
+                        />
 
 
-                        {/* RESUMEN */}
+                        {/* =========================
+                            RESUMEN
+                        ========================= */}
 
                         <div className="
                             mt-8
@@ -1083,15 +1554,21 @@ function TraditionalProduct() {
                                 ">
 
                                     Precio base
+                                    {quantity > 1 &&
+                                        ` × ${quantity}`
+                                    }
 
                                 </span>
+
 
                                 <span>
 
                                     $
-                                    {basePrice.toLocaleString(
-                                        "es-AR"
-                                    )}
+                                    {(basePrice * quantity)
+                                        .toLocaleString(
+                                            "es-AR"
+                                        )
+                                    }
 
                                 </span>
 
@@ -1112,15 +1589,21 @@ function TraditionalProduct() {
                                     ">
 
                                         Extras
+                                        {quantity > 1 &&
+                                            ` × ${quantity}`
+                                        }
 
                                     </span>
+
 
                                     <span>
 
                                         +$
-                                        {extrasPrice.toLocaleString(
-                                            "es-AR"
-                                        )}
+                                        {extrasPrice
+                                            .toLocaleString(
+                                                "es-AR"
+                                            )
+                                        }
 
                                     </span>
 
@@ -1166,7 +1649,9 @@ function TraditionalProduct() {
                         </div>
 
 
-                        {/* BOTÓN */}
+                        {/* =========================
+                            BOTÓN
+                        ========================= */}
 
                         <button
                             type="button"
@@ -1197,5 +1682,6 @@ function TraditionalProduct() {
     );
 
 }
+
 
 export default TraditionalProduct;

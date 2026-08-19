@@ -1,26 +1,57 @@
+
 import { useNavigate } from "react-router-dom";
 
 function ProductCard({ product }) {
 
     const navigate = useNavigate();
 
-    const firstPrice = product.prices
-        ? Object.values(product.prices)[0]
-        : 0;
+
+    // Obtener el precio correcto
+    let firstPrice = 0;
+
+
+    if (
+        product.type === "alfajor" &&
+        product.sizes?.length
+    ) {
+
+        const presentation =
+            String(product.sizes[0]);
+
+        firstPrice =
+            product.prices?.[presentation] || 0;
+
+    }
+
+    else {
+
+        firstPrice = product.prices
+            ? Object.values(product.prices)[0]
+            : 0;
+
+    }
+
 
     function handleOpen() {
 
         if (product.type === "personalizada") {
 
-            navigate(`/producto/${product.slug}`);
+            navigate(
+                `/producto/${product.slug}`
+            );
 
-        } else {
+        }
 
-            navigate(`/producto/tradicional/${product.slug}`);
+        else {
+
+            navigate(
+                `/producto/tradicional/${product.slug}`
+            );
 
         }
 
     }
+
 
     return (
 
@@ -67,12 +98,15 @@ function ProductCard({ product }) {
                 ) : (
 
                     <span className="text-6xl opacity-50">
+
                         🎂
+
                     </span>
 
                 )}
 
             </div>
+
 
             {/* INFORMACIÓN */}
 
@@ -92,6 +126,7 @@ function ProductCard({ product }) {
 
                 </h2>
 
+
                 <p
                     className="
                         text-[#D08A9B]
@@ -102,7 +137,9 @@ function ProductCard({ product }) {
 
                     Desde $
 
-                    {Number(firstPrice || 0).toLocaleString(
+                    {Number(
+                        firstPrice || 0
+                    ).toLocaleString(
                         "es-AR"
                     )}
 
@@ -116,4 +153,6 @@ function ProductCard({ product }) {
 
 }
 
+
 export default ProductCard;
+

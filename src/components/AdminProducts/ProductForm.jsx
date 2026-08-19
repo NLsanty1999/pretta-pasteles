@@ -7,6 +7,7 @@ import FlavorsSection from "./FlavorsSection";
 import FillingsSection from "./FillingsSection";
 import CoveringsSection from "./CoveringsSection";
 
+
 function ProductForm({
     onClose,
     editingProduct = null
@@ -21,11 +22,7 @@ function ProductForm({
     );
 
     const [category, setCategory] = useState(
-        editingProduct?.category || 1
-    );
-
-    const [type, setType] = useState(
-        editingProduct?.type || "tradicional"
+        Number(editingProduct?.category || 1)
     );
 
     const [sizes, setSizes] = useState(
@@ -69,107 +66,416 @@ function ProductForm({
         editingProduct?.quantity || 35
     );
 
+
+    /*
+     * =============================
+     * BENTO
+     * =============================
+     */
+
+    const [bentoFormas, setBentoFormas] = useState(
+        editingProduct?.bentoFormas?.length
+            ? editingProduct.bentoFormas
+            : [""]
+    );
+
+    const [bentoBizcochuelos, setBentoBizcochuelos] = useState(
+        editingProduct?.bentoBizcochuelos?.length
+            ? editingProduct.bentoBizcochuelos
+            : [""]
+    );
+
+
     const [saving, setSaving] = useState(false);
 
 
-    function handleTypeChange(e) {
+    /*
+     * =============================
+     * CATEGORÍAS
+     * =============================
+     *
+     * 1 = Tortas clásicas
+     * 2 = Tartas
+     * 3 = Mesa dulce
+     * 4 = Alfajores
+     * 5 = Bento Cakes
+     * 6 = Cookies
+     * 7 = Tortas personalizadas
+     */
 
-        const newType = e.target.value;
+    const isMesaDulce =
+        category === 3;
 
-        setType(newType);
+    const isAlfajor =
+        category === 4;
 
-        // Solo las tortas personalizadas
-        // utilizan sabores, rellenos y coberturas.
+    const isBento =
+        category === 5;
 
-        if (newType !== "personalizada") {
+    const isCookies =
+        category === 6;
+
+    const isPersonalizada =
+        category === 7 ||
+        editingProduct?.type === "personalizada";
+
+
+    /*
+     * =============================
+     * CAMBIO DE CATEGORÍA
+     * =============================
+     */
+
+    function handleCategoryChange(e) {
+
+        const newCategory =
+            Number(e.target.value);
+
+        setCategory(newCategory);
+
+
+        /*
+         * Si salimos de personalizada,
+         * limpiamos sus opciones.
+         */
+
+        if (newCategory !== 7) {
 
             setFlavors([""]);
-
             setFillings([""]);
-
             setCoverings([""]);
+
+        }
+
+
+        /*
+         * Mesa dulce
+         */
+
+        if (newCategory === 3) {
+
+            setQuantity(
+                editingProduct?.quantity || 35
+            );
+
+        }
+
+
+        /*
+         * Alfajores / Cookies
+         */
+
+        if (
+            newCategory === 4 ||
+            newCategory === 6
+        ) {
+
+            if (!sizes.length) {
+
+                setSizes([""]);
+
+            }
+
+        }
+
+
+        /*
+         * Bento Cake
+         */
+
+        if (newCategory === 5) {
+
+            if (!bentoFormas.length) {
+
+                setBentoFormas([""]);
+
+            }
+
+            if (!bentoBizcochuelos.length) {
+
+                setBentoBizcochuelos([""]);
+
+            }
 
         }
 
     }
 
 
+    /*
+     * =============================
+     * GUARDAR PRODUCTO
+     * =============================
+     */
+
     async function handleSave() {
 
         if (!name.trim()) {
 
-            alert("Ingresá un nombre para el producto");
+            alert(
+                "Ingresá un nombre para el producto"
+            );
 
             return;
 
         }
 
+
         try {
 
             setSaving(true);
+
+
+            /*
+             * =============================
+             * DETERMINAR TIPO
+             * =============================
+             */
+
+            let productType =
+                "tradicional";
+
+
+            if (isPersonalizada) {
+
+                productType =
+                    "personalizada";
+
+            }
+
+            else if (isAlfajor) {
+
+                productType =
+                    "alfajor";
+
+            }
+
+            else if (isMesaDulce) {
+
+                productType =
+                    "mesaDulce";
+
+            }
+
+            else if (isBento) {
+
+                productType =
+                    "bento";
+
+            }
+
+            else if (isCookies) {
+
+                productType =
+                    "cookies";
+
+            }
+
+
+            /*
+             * =============================
+             * OPCIONES BENTO
+             * =============================
+             */
+
+            const cleanBentoFormas =
+                bentoFormas
+                    .map(forma => forma.trim())
+                    .filter(Boolean);
+
+
+            const cleanBentoBizcochuelos =
+                bentoBizcochuelos
+                    .map(bizcochuelo =>
+                        bizcochuelo.trim()
+                    )
+                    .filter(Boolean);
+
+
+            /*
+             * =============================
+             * PRODUCTO
+             * =============================
+             */
 
             const product = {
 
                 ...editingProduct,
 
-                id: editingProduct?.id || Date.now(),
+
+                id:
+                    editingProduct?.id ||
+                    Date.now(),
+
 
                 slug:
                     editingProduct?.slug ||
                     createSlug(name),
 
+
                 name,
+
 
                 description,
 
+
                 category,
 
-                type,
+
+                type:
+                    productType,
+
+
+                /*
+                 * =============================
+                 * BENTO
+                 * =============================
+                 *
+                 * Guardamos exactamente
+                 * las opciones que cargaste.
+                 */
+
+                bentoFormas:
+                    isBento
+                        ? cleanBentoFormas
+                        : [],
+
+
+                bentoBizcochuelos:
+                    isBento
+                        ? cleanBentoBizcochuelos
+                        : [],
+
+
+                /*
+                 * Alias para compatibilidad
+                 * con el frontend.
+                 */
+
+                bentoForms:
+                    isBento
+                        ? cleanBentoFormas
+                        : [],
+
+
+                /*
+                 * CANTIDAD
+                 */
 
                 quantity:
-                    type === "mesaDulce"
+                    isMesaDulce
                         ? quantity
                         : null,
 
+
+                /*
+                 * IMAGEN
+                 */
+
                 image:
-                    editingProduct?.image || "",
+                    editingProduct?.image ||
+                    "",
+
+
+                /*
+                 * PRECIOS
+                 */
 
                 prices,
 
-                sizes,
+
+                /*
+                 * TAMAÑOS
+                 *
+                 * Bento usa 10 cm.
+                 */
+
+                sizes:
+                    isMesaDulce
+                        ? [String(quantity)]
+                        : isBento
+                            ? ["10"]
+                            : sizes,
+
+
+                /*
+                 * SABORES
+                 *
+                 * Personalizada usa flavors.
+                 */
 
                 flavors:
-                    type === "personalizada"
-                        ? flavors.filter(
-                            flavor =>
-                                flavor.trim() !== ""
-                        )
-                        : [],
+                    isPersonalizada
+                        ? flavors
+                            .map(flavor =>
+                                flavor.trim()
+                            )
+                            .filter(Boolean)
+                        : isBento
+                            ? cleanBentoBizcochuelos
+                            : [],
+
+
+                /*
+                 * RELLENOS
+                 */
 
                 fillings:
-                    type === "personalizada"
-                        ? fillings.filter(
-                            filling =>
-                                filling.trim() !== ""
-                        )
+                    isPersonalizada
+                        ? fillings
+                            .map(filling =>
+                                filling.trim()
+                            )
+                            .filter(Boolean)
                         : [],
+
+
+                /*
+                 * COBERTURAS
+                 */
 
                 coverings:
-                    type === "personalizada"
-                        ? coverings.filter(
-                            covering =>
-                                covering.trim() !== ""
-                        )
+                    isPersonalizada
+                        ? coverings
+                            .map(covering =>
+                                covering.trim()
+                            )
+                            .filter(Boolean)
                         : [],
 
-                extras: extras.filter(
-                    extra =>
-                        extra.name.trim() !== ""
-                )
+
+                /*
+                 * EXTRAS
+                 */
+
+                extras:
+                    extras
+                        .filter(
+                            extra =>
+                                extra.name &&
+                                extra.name.trim() !== ""
+                        )
+                        .map(extra => ({
+                            name:
+                                extra.name.trim(),
+
+                            price:
+                                Number(
+                                    extra.price || 0
+                                )
+                        }))
 
             };
 
+
+            console.log(
+                "PRODUCTO QUE SE VA A GUARDAR:",
+                product
+            );
+
+
             await saveProduct(product);
+
 
             alert(
                 editingProduct
@@ -177,13 +483,17 @@ function ProductForm({
                     : "Producto creado correctamente ✅"
             );
 
+
             onClose();
 
         }
 
         catch (error) {
 
-            console.error(error);
+            console.error(
+                "ERROR GUARDANDO PRODUCTO:",
+                error
+            );
 
             alert(
                 editingProduct
@@ -204,9 +514,20 @@ function ProductForm({
 
     return (
 
-        <div className="bg-white rounded-3xl shadow p-6 mb-8">
+        <div className="
+            bg-white
+            rounded-3xl
+            shadow
+            p-6
+            mb-8
+        ">
 
-            <h2 className="text-3xl font-bold mb-6">
+
+            <h2 className="
+                text-3xl
+                font-bold
+                mb-6
+            ">
 
                 {
                     editingProduct
@@ -220,82 +541,85 @@ function ProductForm({
             <div className="space-y-5">
 
 
+                {/* ============================= */}
                 {/* NOMBRE */}
+                {/* ============================= */}
 
                 <div>
 
                     <label className="font-semibold">
-
                         Nombre
-
                     </label>
 
                     <input
-
                         value={name}
-
                         onChange={(e) =>
                             setName(e.target.value)
                         }
-
-                        className="w-full border rounded-2xl p-3 mt-2"
-
+                        className="
+                            w-full
+                            border
+                            rounded-2xl
+                            p-3
+                            mt-2
+                        "
                     />
 
                 </div>
 
 
+                {/* ============================= */}
                 {/* DESCRIPCIÓN */}
+                {/* ============================= */}
 
                 <div>
 
                     <label className="font-semibold">
-
                         Descripción
-
                     </label>
 
                     <textarea
-
                         value={description}
-
                         onChange={(e) =>
                             setDescription(e.target.value)
                         }
-
                         rows={4}
-
-                        className="w-full border rounded-2xl p-3 mt-2"
-
+                        className="
+                            w-full
+                            border
+                            rounded-2xl
+                            p-3
+                            mt-2
+                        "
                     />
 
                 </div>
 
 
+                {/* ============================= */}
                 {/* CATEGORÍA */}
+                {/* ============================= */}
 
                 <div>
 
                     <label className="font-semibold">
-
                         Categoría
-
                     </label>
 
                     <select
-
                         value={category}
-
-                        onChange={(e) =>
-                            setCategory(Number(e.target.value))
-                        }
-
-                        className="w-full border rounded-2xl p-3 mt-2"
-
+                        onChange={handleCategoryChange}
+                        className="
+                            w-full
+                            border
+                            rounded-2xl
+                            p-3
+                            mt-2
+                        "
                     >
 
                         <option value={1}>
-                            Tortas
+                            Tortas clásicas
                         </option>
 
                         <option value={2}>
@@ -303,150 +627,495 @@ function ProductForm({
                         </option>
 
                         <option value={3}>
-                            Mesa Dulce
+                            Mesa dulce
                         </option>
 
                         <option value={4}>
                             Alfajores
                         </option>
 
-                    </select>
-
-                </div>
-
-
-                {/* TIPO */}
-
-                <div>
-
-                    <label className="font-semibold">
-
-                        Tipo
-
-                    </label>
-
-                    <select
-
-                        value={type}
-
-                        onChange={handleTypeChange}
-
-                        className="w-full border rounded-2xl p-3 mt-2"
-
-                    >
-
-                        <option value="tradicional">
-
-                            Tradicional
-
+                        <option value={5}>
+                            Bento Cakes
                         </option>
 
-                        <option value="personalizada">
-
-                            Personalizada
-
+                        <option value={6}>
+                            Cookies
                         </option>
 
-                        <option value="alfajor">
-
-                            Alfajor
-
-                        </option>
-
-                        <option value="mesaDulce">
-
-                            Mesa Dulce
-
+                        <option value={7}>
+                            Tortas personalizadas
                         </option>
 
                     </select>
 
                 </div>
 
-                {type === "mesaDulce" && (
 
-    <div className="space-y-4">
+                {/* ============================= */}
+                {/* MESA DULCE */}
+                {/* ============================= */}
 
-        <div>
+                {isMesaDulce && (
 
-            <label className="font-semibold">
-                Cantidad
-            </label>
+                    <div className="space-y-4">
 
-            <select
-                value={quantity}
-                onChange={(e) =>
-                    setQuantity(Number(e.target.value))
-                }
-                className="w-full border rounded-2xl p-3 mt-2"
-            >
+                        <div>
 
-                <option value={12}>
-                    12 unidades
-                </option>
+                            <label className="font-semibold">
+                                Cantidad
+                            </label>
 
-                <option value={35}>
-                    35 unidades
-                </option>
+                            <select
+                                value={quantity}
+                                onChange={(e) =>
+                                    setQuantity(
+                                        Number(
+                                            e.target.value
+                                        )
+                                    )
+                                }
+                                className="
+                                    w-full
+                                    border
+                                    rounded-2xl
+                                    p-3
+                                    mt-2
+                                "
+                            >
 
-            </select>
+                                <option value={12}>
+                                    12 unidades
+                                </option>
 
-        </div>
+                                <option value={35}>
+                                    35 unidades
+                                </option>
 
-        <div>
+                            </select>
 
-            <label className="font-semibold">
-                Precio
-            </label>
-
-            <input
-                type="number"
-                value={prices.mesaDulce || ""}
-                onChange={(e) =>
-                    setPrices({
-                        ...prices,
-                        mesaDulce: Number(e.target.value)
-                    })
-                }
-                placeholder="Precio"
-                className="w-full border rounded-2xl p-3 mt-2"
-            />
-
-        </div>
-
-    </div>
-
-)}
+                        </div>
 
 
-                {/* OPCIONES DE TORTA PERSONALIZADA */}
+                        <div>
 
-                {type === "personalizada" && (
+                            <label className="font-semibold">
+                                Precio
+                            </label>
+
+                            <input
+                                type="number"
+                                value={
+                                    prices[String(quantity)]
+                                    || ""
+                                }
+                                onChange={(e) =>
+                                    setPrices({
+
+                                        ...prices,
+
+                                        [String(quantity)]:
+                                            Number(
+                                                e.target.value
+                                            )
+
+                                    })
+                                }
+                                placeholder="Precio"
+                                className="
+                                    w-full
+                                    border
+                                    rounded-2xl
+                                    p-3
+                                    mt-2
+                                "
+                            />
+
+                        </div>
+
+                    </div>
+
+                )}
+
+
+                {/* ============================= */}
+                {/* ALFAJORES / COOKIES */}
+                {/* ============================= */}
+
+                {(isAlfajor || isCookies) && (
+
+                    <SizesSection
+                        sizes={sizes}
+                        setSizes={setSizes}
+                        prices={prices}
+                        setPrices={setPrices}
+                        type={
+                            isCookies
+                                ? "cookies"
+                                : "alfajor"
+                        }
+                    />
+
+                )}
+
+
+                {/* ============================= */}
+                {/* BENTO CAKES */}
+                {/* ============================= */}
+
+                {isBento && (
+
+                    <div className="space-y-6">
+
+
+                        {/* ============================= */}
+                        {/* FORMAS */}
+                        {/* ============================= */}
+
+                        <div>
+
+                            <label className="font-semibold">
+                                Formas
+                            </label>
+
+                            <div className="space-y-3 mt-3">
+
+                                {bentoFormas.map(
+                                    (forma, index) => (
+
+                                        <div
+                                            key={index}
+                                            className="
+                                                flex
+                                                items-center
+                                                gap-3
+                                            "
+                                        >
+
+                                            <input
+                                                type="text"
+                                                value={forma}
+                                                onChange={(e) => {
+
+                                                    const newFormas =
+                                                        [
+                                                            ...bentoFormas
+                                                        ];
+
+                                                    newFormas[index] =
+                                                        e.target.value;
+
+                                                    setBentoFormas(
+                                                        newFormas
+                                                    );
+
+                                                }}
+                                                placeholder="Ej.: Redonda"
+                                                className="
+                                                    flex-1
+                                                    border
+                                                    rounded-2xl
+                                                    p-3
+                                                "
+                                            />
+
+
+                                            {bentoFormas.length > 1 && (
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+
+                                                        setBentoFormas(
+                                                            bentoFormas.filter(
+                                                                (_, i) =>
+                                                                    i !== index
+                                                            )
+                                                        );
+
+                                                    }}
+                                                    className="
+                                                        px-4
+                                                        py-3
+                                                        rounded-2xl
+                                                        bg-red-100
+                                                        text-red-600
+                                                    "
+                                                >
+
+                                                    🗑
+
+                                                </button>
+
+                                            )}
+
+                                        </div>
+
+                                    )
+                                )}
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setBentoFormas([
+                                        ...bentoFormas,
+                                        ""
+                                    ])
+                                }
+                                className="
+                                    mt-3
+                                    text-[#D08A9B]
+                                    font-semibold
+                                "
+                            >
+
+                                ➕ Agregar otra forma
+
+                            </button>
+
+                        </div>
+
+
+                        {/* ============================= */}
+                        {/* BIZCOCHUELOS */}
+                        {/* ============================= */}
+
+                        <div>
+
+                            <label className="font-semibold">
+                                Bizcochuelos
+                            </label>
+
+                            <div className="space-y-3 mt-3">
+
+                                {bentoBizcochuelos.map(
+                                    (
+                                        bizcochuelo,
+                                        index
+                                    ) => (
+
+                                        <div
+                                            key={index}
+                                            className="
+                                                flex
+                                                items-center
+                                                gap-3
+                                            "
+                                        >
+
+                                            <input
+                                                type="text"
+                                                value={
+                                                    bizcochuelo
+                                                }
+                                                onChange={(e) => {
+
+                                                    const newBizcochuelos =
+                                                        [
+                                                            ...bentoBizcochuelos
+                                                        ];
+
+                                                    newBizcochuelos[
+                                                        index
+                                                    ] =
+                                                        e.target.value;
+
+                                                    setBentoBizcochuelos(
+                                                        newBizcochuelos
+                                                    );
+
+                                                }}
+                                                placeholder="Ej.: Vainilla"
+                                                className="
+                                                    flex-1
+                                                    border
+                                                    rounded-2xl
+                                                    p-3
+                                                "
+                                            />
+
+
+                                            {bentoBizcochuelos.length > 1 && (
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+
+                                                        setBentoBizcochuelos(
+                                                            bentoBizcochuelos.filter(
+                                                                (_, i) =>
+                                                                    i !== index
+                                                            )
+                                                        );
+
+                                                    }}
+                                                    className="
+                                                        px-4
+                                                        py-3
+                                                        rounded-2xl
+                                                        bg-red-100
+                                                        text-red-600
+                                                    "
+                                                >
+
+                                                    🗑
+
+                                                </button>
+
+                                            )}
+
+                                        </div>
+
+                                    )
+                                )}
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setBentoBizcochuelos([
+                                        ...bentoBizcochuelos,
+                                        ""
+                                    ])
+                                }
+                                className="
+                                    mt-3
+                                    text-[#D08A9B]
+                                    font-semibold
+                                "
+                            >
+
+                                ➕ Agregar otro bizcochuelo
+
+                            </button>
+
+                        </div>
+
+
+                        {/* ============================= */}
+                        {/* TAMAÑO */}
+                        {/* ============================= */}
+
+                        <div>
+
+                            <label className="font-semibold">
+                                Tamaño
+                            </label>
+
+                            <div className="
+                                w-full
+                                border
+                                rounded-2xl
+                                p-3
+                                mt-2
+                                bg-gray-50
+                                text-gray-600
+                            ">
+
+                                10 cm
+
+                            </div>
+
+                        </div>
+
+
+                        {/* ============================= */}
+                        {/* COBERTURA */}
+                        {/* ============================= */}
+
+                        <div>
+
+                            <label className="font-semibold">
+                                Cobertura
+                            </label>
+
+                            <div className="
+                                w-full
+                                border
+                                rounded-2xl
+                                p-3
+                                mt-2
+                                bg-gray-50
+                                text-gray-600
+                            ">
+
+                                Buttercream
+
+                            </div>
+
+                        </div>
+
+
+                        {/* ============================= */}
+                        {/* PRECIO */}
+                        {/* ============================= */}
+
+                        <div>
+
+                            <label className="font-semibold">
+                                Precio base
+                            </label>
+
+                            <input
+                                type="number"
+                                min="0"
+                                value={
+                                    prices["10"] || ""
+                                }
+                                onChange={(e) =>
+                                    setPrices({
+
+                                        ...prices,
+
+                                        "10":
+                                            Number(
+                                                e.target.value
+                                            )
+
+                                    })
+                                }
+                                placeholder="Precio"
+                                className="
+                                    w-full
+                                    border
+                                    rounded-2xl
+                                    p-3
+                                    mt-2
+                                "
+                            />
+
+                        </div>
+
+                    </div>
+
+                )}
+
+
+                {/* ============================= */}
+                {/* PERSONALIZADA */}
+                {/* ============================= */}
+
+                {isPersonalizada && (
 
                     <>
 
                         <FlavorsSection
-
                             flavors={flavors}
-
                             setFlavors={setFlavors}
-
                         />
 
                         <FillingsSection
-
                             fillings={fillings}
-
                             setFillings={setFillings}
-
                         />
 
                         <CoveringsSection
-
                             coverings={coverings}
-
                             setCoverings={setCoverings}
-
                         />
 
                     </>
@@ -454,44 +1123,57 @@ function ProductForm({
                 )}
 
 
+                {/* ============================= */}
                 {/* EXTRAS */}
+                {/* ============================= */}
 
                 <ExtrasSection
-
                     extras={extras}
-
                     setExtras={setExtras}
-
                 />
 
 
-                {/* TAMAÑOS Y PRECIOS */}
+                {/* ============================= */}
+                {/* TAMAÑOS TRADICIONALES */}
+                {/* ============================= */}
 
-                {type !== "mesaDulce" && (
+                {!isMesaDulce &&
+                 !isAlfajor &&
+                 !isCookies &&
+                 !isPersonalizada &&
+                 !isBento && (
 
-    <SizesSection
-        sizes={sizes}
-        setSizes={setSizes}
-        prices={prices}
-        setPrices={setPrices}
-        type={type}
-    />
+                    <SizesSection
+                        sizes={sizes}
+                        setSizes={setSizes}
+                        prices={prices}
+                        setPrices={setPrices}
+                        type="tradicional"
+                    />
 
-)}
+                )}
 
 
+                {/* ============================= */}
                 {/* BOTONES */}
+                {/* ============================= */}
 
-                <div className="flex gap-4 pt-4">
+                <div className="
+                    flex
+                    gap-4
+                    pt-4
+                ">
 
                     <button
-
+                        type="button"
                         onClick={onClose}
-
                         disabled={saving}
-
-                        className="flex-1 rounded-2xl border py-3"
-
+                        className="
+                            flex-1
+                            rounded-2xl
+                            border
+                            py-3
+                        "
                     >
 
                         Cancelar
@@ -500,32 +1182,29 @@ function ProductForm({
 
 
                     <button
-
+                        type="button"
                         onClick={handleSave}
-
                         disabled={saving}
-
-                        className="flex-1 rounded-2xl bg-[#D08A9B] text-white py-3"
-
+                        className="
+                            flex-1
+                            rounded-2xl
+                            bg-[#D08A9B]
+                            text-white
+                            py-3
+                        "
                     >
 
-                        {
-
-                            saving
-
-                                ? "Guardando..."
-
-                                : editingProduct
-
-                                    ? "Actualizar producto"
-
-                                    : "Guardar producto"
-
+                        {saving
+                            ? "Guardando..."
+                            : editingProduct
+                                ? "Actualizar producto"
+                                : "Guardar producto"
                         }
 
                     </button>
 
                 </div>
+
 
             </div>
 
@@ -534,5 +1213,6 @@ function ProductForm({
     );
 
 }
+
 
 export default ProductForm;

@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { saveProduct } from "../../firebase/products";
+import {
+    saveProduct,
+    deleteProduct
+} from "../../firebase/products";
 
 function ProductEditor({
     product,
@@ -17,6 +20,10 @@ function ProductEditor({
     );
 
 
+    /*
+     * GUARDAR
+     */
+
     async function handleSave() {
 
         try {
@@ -33,7 +40,9 @@ function ProductEditor({
 
             });
 
-            alert("Producto guardado correctamente ✅");
+            alert(
+                "Producto guardado correctamente ✅"
+            );
 
         }
 
@@ -41,7 +50,9 @@ function ProductEditor({
 
             console.error(error);
 
-            alert("Error al guardar");
+            alert(
+                "Error al guardar"
+            );
 
         }
 
@@ -53,6 +64,10 @@ function ProductEditor({
 
     }
 
+
+    /*
+     * CAMBIAR STOCK
+     */
 
     async function handleToggleStock() {
 
@@ -68,11 +83,14 @@ function ProductEditor({
 
                 prices,
 
-                available: newStatus
+                available:
+                    newStatus
 
             });
 
-            setAvailable(newStatus);
+            setAvailable(
+                newStatus
+            );
 
             alert(
 
@@ -90,7 +108,68 @@ function ProductEditor({
 
             console.error(error);
 
-            alert("Error al cambiar el estado del producto");
+            alert(
+                "Error al cambiar el estado del producto"
+            );
+
+        }
+
+        finally {
+
+            setSaving(false);
+
+        }
+
+    }
+
+
+    /*
+     * ELIMINAR PRODUCTO
+     */
+
+    async function handleDelete() {
+
+        const confirmed =
+            window.confirm(
+
+                `¿Seguro que querés eliminar "${product.name}"?\n\n` +
+                "Esta acción no se puede deshacer."
+
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        try {
+
+            setSaving(true);
+
+            await deleteProduct(
+                product.slug
+            );
+
+            alert(
+                "Producto eliminado correctamente 🗑️"
+            );
+
+            /*
+             * Recargamos la página para que
+             * la lista se actualice inmediatamente.
+             */
+
+            window.location.reload();
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Error al eliminar el producto"
+            );
 
         }
 
@@ -107,13 +186,26 @@ function ProductEditor({
 
         <div
 
-            className={`bg-white rounded-3xl shadow p-6 ${
-                !available
-                    ? "border-2 border-red-300"
-                    : ""
-            }`}
+            className={`
+
+                bg-white
+                rounded-3xl
+                shadow
+                p-6
+
+                ${
+                    !available
+                        ? "border-2 border-red-300"
+                        : ""
+                }
+
+            `}
 
         >
+
+            {/* ========================= */}
+            {/* CABECERA */}
+            {/* ========================= */}
 
             <div className="flex items-start justify-between gap-4">
 
@@ -133,13 +225,25 @@ function ProductEditor({
 
                 </div>
 
+
                 <span
 
-                    className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ${
-                        available
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                    }`}
+                    className={`
+
+                        px-3
+                        py-1
+                        rounded-full
+                        text-sm
+                        font-semibold
+                        whitespace-nowrap
+
+                        ${
+                            available
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                        }
+
+                    `}
 
                 >
 
@@ -158,54 +262,92 @@ function ProductEditor({
             </div>
 
 
+            {/* ========================= */}
+            {/* PRECIOS */}
+            {/* ========================= */}
+
             {
 
-                (product.sizes || []).map(size => (
+                (product.sizes || []).map(
+                    size => (
 
-                    <div
+                        <div
 
-                        key={size}
+                            key={size}
 
-                        className="flex items-center justify-between mb-3"
+                            className="
+                                flex
+                                items-center
+                                justify-between
+                                mb-3
+                            "
 
-                    >
+                        >
 
-                        <span>
+                            <span>
 
-                            {size} cm
+                                {
 
-                        </span>
+                                    product.type === "alfajor"
 
-                        <input
+                                        ? `${size} unidades`
 
-                            type="number"
+                                        : product.type === "mesaDulce"
 
-                            value={prices[size] ?? 0}
+                                            ? `${size} unidades`
 
-                            onChange={(e) =>
+                                            : `${size} cm`
 
-                                setPrices({
+                                }
 
-                                    ...prices,
+                            </span>
 
-                                    [size]: Number(
-                                        e.target.value
-                                    )
 
-                                })
+                            <input
 
-                            }
+                                type="number"
 
-                            className="border rounded-xl px-3 py-2 w-32 text-right"
+                                value={
+                                    prices[size] ?? 0
+                                }
 
-                        />
+                                onChange={(e) =>
 
-                    </div>
+                                    setPrices({
 
-                ))
+                                        ...prices,
+
+                                        [size]:
+                                            Number(
+                                                e.target.value
+                                            )
+
+                                    })
+
+                                }
+
+                                className="
+                                    border
+                                    rounded-xl
+                                    px-3
+                                    py-2
+                                    w-32
+                                    text-right
+                                "
+
+                            />
+
+                        </div>
+
+                    )
+                )
 
             }
 
+
+            {/* ========================= */}
+            {/* GUARDAR */}
+            {/* ========================= */}
 
             <button
 
@@ -213,7 +355,15 @@ function ProductEditor({
 
                 disabled={saving}
 
-                className="mt-6 w-full rounded-2xl bg-[#D08A9B] text-white py-3 font-semibold"
+                className="
+                    mt-6
+                    w-full
+                    rounded-2xl
+                    bg-[#D08A9B]
+                    text-white
+                    py-3
+                    font-semibold
+                "
 
             >
 
@@ -230,13 +380,26 @@ function ProductEditor({
             </button>
 
 
+            {/* ========================= */}
+            {/* EDITAR */}
+            {/* ========================= */}
+
             <button
 
-                onClick={() => onEdit(product)}
+                onClick={() =>
+                    onEdit(product)
+                }
 
                 disabled={saving}
 
-                className="mt-3 w-full rounded-2xl border py-3 font-semibold"
+                className="
+                    mt-3
+                    w-full
+                    rounded-2xl
+                    border
+                    py-3
+                    font-semibold
+                "
 
             >
 
@@ -245,17 +408,36 @@ function ProductEditor({
             </button>
 
 
+            {/* ========================= */}
+            {/* STOCK */}
+            {/* ========================= */}
+
             <button
 
-                onClick={handleToggleStock}
+                onClick={
+                    handleToggleStock
+                }
 
                 disabled={saving}
 
-                className={`mt-3 w-full rounded-2xl py-3 font-semibold text-white ${
-                    available
-                        ? "bg-red-500 hover:bg-red-600"
-                        : "bg-green-600 hover:bg-green-700"
-                }`}
+                className={`
+
+                    mt-3
+                    w-full
+                    rounded-2xl
+                    py-3
+                    font-semibold
+                    text-white
+
+                    ${
+                        available
+
+                            ? "bg-red-500 hover:bg-red-600"
+
+                            : "bg-green-600 hover:bg-green-700"
+                    }
+
+                `}
 
             >
 
@@ -268,6 +450,39 @@ function ProductEditor({
                         : "🟢 Habilitar producto"
 
                 }
+
+            </button>
+
+
+            {/* ========================= */}
+            {/* ELIMINAR */}
+            {/* ========================= */}
+
+            <button
+
+                onClick={
+                    handleDelete
+                }
+
+                disabled={saving}
+
+                className="
+                    mt-3
+                    w-full
+                    rounded-2xl
+                    py-3
+                    font-semibold
+                    text-red-600
+                    border
+                    border-red-200
+                    bg-red-50
+                    hover:bg-red-100
+                    transition
+                "
+
+            >
+
+                🗑️ Eliminar producto
 
             </button>
 

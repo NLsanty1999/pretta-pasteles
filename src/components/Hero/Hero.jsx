@@ -19,14 +19,14 @@ function Hero() {
 
             {/* Título centrado en el medio */}
             <div className="absolute inset-0 z-10 flex items-center justify-center text-center px-6">
-                <h1 className="text-white text-2xl sm:text-4xl font-thin tracking-widest leading-snug drop-shadow-md">
-                    ENDULZAMOS <br />
-                    TUS MOMENTOS 
+                <h1 className="text-white text-2xl sm:text-10xl font-thin tracking-widest leading-snug drop-shadow-md">
+                    PEQUEÑOS PLACERES <br />
+                    GRANDES MOMENTOS 
                 </h1>
             </div>
 
             {/* Botón abajo */}
-            <div className="absolute bottom-20 left-0 right-0 z-14 flex justify-center">
+            <div className="absolute bottom-24 left-0 right-0 z-14 flex justify-center">
                 <button
                     onClick={() => navigate("/catalogo")}
                     className="

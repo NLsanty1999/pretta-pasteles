@@ -1,31 +1,48 @@
 import {
     Cake,
-    CupSoda,
     Cookie,
+    CakeSlice,
     PartyPopper,
 } from "lucide-react";
 
 const categories = [
+
     {
         id: 1,
-        name: "Tortas",
+        name: "Tortas clásicas",
         icon: Cake,
     },
+
     {
         id: 2,
-        name: "Cupcakes",
-        icon: CupSoda,
+        name: "Tartas",
+        icon: CakeSlice,
     },
+
     {
         id: 3,
+        name: "Mesa dulce",
+        icon: PartyPopper,
+    },
+
+    {
+        id: 4,
+        name: "Alfajores",
+        icon: Cookie,
+    },
+
+    {
+        id: 5,
+        name: "Bento Cakes",
+        icon: Cake,
+    },
+
+    {
+        id: 6,
         name: "Cookies",
         icon: Cookie,
     },
-    {
-        id: 4,
-        name: "Eventos",
-        icon: PartyPopper,
-    },
+
 ];
 
 export default categories;
