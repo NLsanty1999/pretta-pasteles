@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+
 import categories from "../../data/categories";
 
 import tartaIcon from "../../assets/images/tarta.png";
@@ -9,26 +10,24 @@ import mesaDulceIcon from "../../assets/images/mesadulce.png";
 import cookiesIcon from "../../assets/images/cookies.png";
 import bentoCakeIcon from "../../assets/images/bentocake.png";
 
-
 const icons = {
+
     torta: tradicionalIcon,
     tartas: tartaIcon,
     alfajor: alfajoresIcon,
     mesa: mesaDulceIcon,
     cookies: cookiesIcon,
     bento: bentoCakeIcon,
-};
 
+};
 
 function Categories() {
 
     const navigate = useNavigate();
 
-
     return (
 
         <div className="grid grid-cols-2 gap-3 px-3">
-
 
             {/* ================================= */}
             {/* TORTA PERSONALIZADA */}
@@ -122,11 +121,15 @@ function Categories() {
                 <button
                     key={category.id}
                     type="button"
-                    onClick={() =>
-                        navigate(
-                            `/catalogo/${category.id}`
-                        )
-                    }
+                    onClick={() => {
+
+    if (category.icon === "bento") {
+        navigate("/producto/tradicional/bento");
+        return;
+    }
+
+    navigate(`/catalogo/${category.id}`);
+}}
                     className="
                         bg-white/45
                         backdrop-blur-md
@@ -169,15 +172,17 @@ function Categories() {
 
                         ) : (
 
-                            <div className="
-                                w-14
-                                h-14
-                                flex
-                                items-center
-                                justify-center
-                                text-gray-400
-                                text-xs
-                            ">
+                            <div
+                                className="
+                                    w-14
+                                    h-14
+                                    flex
+                                    items-center
+                                    justify-center
+                                    text-gray-400
+                                    text-xs
+                                "
+                            >
 
                                 Sin icono
 
@@ -219,6 +224,5 @@ function Categories() {
     );
 
 }
-
 
 export default Categories;

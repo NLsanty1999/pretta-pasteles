@@ -515,43 +515,54 @@ function TraditionalProduct() {
         }
 
 
-        addToCart({
+addToCart({
+    id: product.id,
 
-            id: product.id,
+    name: product.name,
 
-            name: product.name,
+    size,
 
-            size,
+    quantity,
 
-            quantity,
+    note,
 
-            note,
+    extras,
 
-            extras,
+    // Precio base del tamaño elegido
+    basePrice,
 
-            /*
-             * Datos Bento
-             */
+    // Guardamos cada extra con su precio
+    extraDetails: extras.map(extraName => {
 
-            bentoForm:
-                isBento
-                    ? bentoForm
-                    : "",
+        const extra = product.extras?.find(
+            e => e.name === extraName
+        );
 
-            flavor:
-                isBento
-                    ? bentoFlavor
-                    : "",
+        return {
+            name: extraName,
+            price: Number(extra?.price ?? 0)
+        };
 
-            covering:
-                isBento
-                    ? bentoCovering
-                    : "",
+    }),
 
-            price
+    bentoForm:
+        isBento
+            ? bentoForm
+            : "",
 
-        });
+    flavor:
+        isBento
+            ? bentoFlavor
+            : "",
 
+    covering:
+        isBento
+            ? bentoCovering
+            : "",
+
+    price
+
+});
 
         alert(
             "Producto agregado al pedido."
@@ -1345,8 +1356,7 @@ function TraditionalProduct() {
                                     mb-4
                                 ">
 
-                                    Podés agregar extras
-                                    a tu pedido.
+                                    ¿queres personalizar tu torta?
 
                                 </p>
 

@@ -10,6 +10,7 @@ function Layout({ children }) {
             <main className="
                 max-w-md
                 mx-auto
+                px-4
                 pb-40
             ">
                 {children}

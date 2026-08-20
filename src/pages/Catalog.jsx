@@ -35,30 +35,52 @@ const filteredProducts = products
 
     .filter((product) => {
 
-        // Si estamos viendo Tortas clásicas
-        // mostramos categoría 1, excepto personalizadas
-        if (Number(category) === 1) {
+        /*
+         * Categorías del producto
+         *
+         * Si tiene categories[],
+         * usamos esas categorías.
+         *
+         * Si es un producto viejo que todavía
+         * no tiene categories[], usamos category.
+         */
 
-            return (
-                product.category === 1 &&
-                product.type !== "personalizada"
-            );
+        const productCategories =
+            product.categories?.length
+                ? product.categories.map(Number)
+                : [Number(product.category)];
 
+
+        /*
+         * Si no estamos dentro de un catálogo,
+         * mostramos todos.
+         */
+
+        if (!category) {
+            return true;
         }
 
-        // Resto de categorías
-        return (
-            !category ||
-            product.category === Number(category)
+
+        /*
+         * Mostramos el producto si pertenece
+         * al catálogo seleccionado.
+         */
+
+        return productCategories.includes(
+            Number(category)
         );
 
     })
 
-    .sort(
-        (a, b) => a.id - b.id
-    );
-
-
+    .sort((a, b) =>
+    a.name.localeCompare(
+        b.name,
+        "es",
+        {
+            sensitivity: "base"
+        }
+    )
+);
     return (
 
         <Layout>

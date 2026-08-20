@@ -2,6 +2,7 @@ import { useState } from "react";
 import { saveProduct, createSlug } from "../../firebase/products";
 
 import SizesSection from "./SizesSection";
+import PersonalizedSizesSection from "./PersonalizedSizesSection";
 import ExtrasSection from "./ExtrasSection";
 import FlavorsSection from "./FlavorsSection";
 import FillingsSection from "./FillingsSection";
@@ -21,9 +22,15 @@ function ProductForm({
         editingProduct?.description || ""
     );
 
-    const [category, setCategory] = useState(
-        Number(editingProduct?.category || 1)
-    );
+    const [categories, setCategories] = useState(
+    editingProduct?.categories?.length
+        ? editingProduct.categories.map(Number)
+        : [
+            Number(editingProduct?.category || 1)
+        ]
+);
+
+const category = categories[0];
 
     const [sizes, setSizes] = useState(
         editingProduct?.sizes || []
@@ -126,80 +133,34 @@ function ProductForm({
      * =============================
      */
 
-    function handleCategoryChange(e) {
+function toggleCategory(categoryId) {
 
-        const newCategory =
-            Number(e.target.value);
+    setCategories(current => {
 
-        setCategory(newCategory);
+        const exists =
+            current.includes(categoryId);
 
+        if (exists) {
 
-        /*
-         * Si salimos de personalizada,
-         * limpiamos sus opciones.
-         */
+            // No permitir que quede sin categoría
+            if (current.length === 1) {
+                return current;
+            }
 
-        if (newCategory !== 7) {
-
-            setFlavors([""]);
-            setFillings([""]);
-            setCoverings([""]);
-
-        }
-
-
-        /*
-         * Mesa dulce
-         */
-
-        if (newCategory === 3) {
-
-            setQuantity(
-                editingProduct?.quantity || 35
+            return current.filter(
+                id => id !== categoryId
             );
 
         }
 
+        return [
+            ...current,
+            categoryId
+        ];
 
-        /*
-         * Alfajores / Cookies
-         */
+    });
 
-        if (
-            newCategory === 4 ||
-            newCategory === 6
-        ) {
-
-            if (!sizes.length) {
-
-                setSizes([""]);
-
-            }
-
-        }
-
-
-        /*
-         * Bento Cake
-         */
-
-        if (newCategory === 5) {
-
-            if (!bentoFormas.length) {
-
-                setBentoFormas([""]);
-
-            }
-
-            if (!bentoBizcochuelos.length) {
-
-                setBentoBizcochuelos([""]);
-
-            }
-
-        }
-
-    }
+}
 
 
     /*
@@ -320,6 +281,8 @@ function ProductForm({
 
 
                 category,
+
+categories,
 
 
                 type:
@@ -600,55 +563,90 @@ function ProductForm({
                 {/* CATEGORÍA */}
                 {/* ============================= */}
 
-                <div>
+<div>
 
-                    <label className="font-semibold">
-                        Categoría
-                    </label>
+    <label className="font-semibold">
+        Catálogos
+    </label>
 
-                    <select
-                        value={category}
-                        onChange={handleCategoryChange}
-                        className="
-                            w-full
-                            border
-                            rounded-2xl
-                            p-3
-                            mt-2
-                        "
-                    >
+    <p className="text-sm text-gray-500 mt-1 mb-3">
+        Podés seleccionar uno o varios catálogos.
+    </p>
 
-                        <option value={1}>
-                            Tortas clásicas
-                        </option>
+    <div className="grid grid-cols-1 gap-3">
 
-                        <option value={2}>
-                            Tartas
-                        </option>
+        {[
+            {
+                id: 1,
+                name: "Tortas clásicas"
+            },
+            {
+                id: 2,
+                name: "Tartas"
+            },
+            {
+                id: 3,
+                name: "Mesa dulce"
+            },
+            {
+                id: 4,
+                name: "Alfajores"
+            },
+            {
+                id: 5,
+                name: "Bento Cakes"
+            },
+            {
+                id: 6,
+                name: "Cookies"
+            },
+            {
+                id: 7,
+                name: "Tortas personalizadas"
+            }
+        ].map(categoryOption => (
 
-                        <option value={3}>
-                            Mesa dulce
-                        </option>
+            <label
+                key={categoryOption.id}
+                className="
+                    flex
+                    items-center
+                    gap-3
+                    border
+                    rounded-2xl
+                    p-4
+                    cursor-pointer
+                    hover:bg-pink-50
+                "
+            >
 
-                        <option value={4}>
-                            Alfajores
-                        </option>
+                <input
+                    type="checkbox"
+                    checked={categories.includes(
+                        categoryOption.id
+                    )}
+                    onChange={() =>
+                        toggleCategory(
+                            categoryOption.id
+                        )
+                    }
+                    className="
+                        w-5
+                        h-5
+                    "
+                />
 
-                        <option value={5}>
-                            Bento Cakes
-                        </option>
+                <span className="font-medium">
+                    {categoryOption.name}
+                </span>
 
-                        <option value={6}>
-                            Cookies
-                        </option>
+            </label>
 
-                        <option value={7}>
-                            Tortas personalizadas
-                        </option>
+        ))}
 
-                    </select>
+    </div>
 
-                </div>
+</div>
 
 
                 {/* ============================= */}
@@ -1100,27 +1098,32 @@ function ProductForm({
                 {/* ============================= */}
 
                 {isPersonalizada && (
+    <>
 
-                    <>
+        <PersonalizedSizesSection
+            sizes={sizes}
+            setSizes={setSizes}
+            prices={prices}
+            setPrices={setPrices}
+        />
 
-                        <FlavorsSection
-                            flavors={flavors}
-                            setFlavors={setFlavors}
-                        />
+        <FlavorsSection
+            flavors={flavors}
+            setFlavors={setFlavors}
+        />
 
-                        <FillingsSection
-                            fillings={fillings}
-                            setFillings={setFillings}
-                        />
+        <FillingsSection
+            fillings={fillings}
+            setFillings={setFillings}
+        />
 
-                        <CoveringsSection
-                            coverings={coverings}
-                            setCoverings={setCoverings}
-                        />
+        <CoveringsSection
+            coverings={coverings}
+            setCoverings={setCoverings}
+        />
 
-                    </>
-
-                )}
+    </>
+)}
 
 
                 {/* ============================= */}

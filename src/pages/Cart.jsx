@@ -16,216 +16,704 @@ function Cart() {
 
     } = useCart();
 
+
     return (
 
-        <Layout>
+    <Layout>
+
+        <div className="max-w-xl mx-auto px-4">
 
             <h1
-    className="
-        text-center
-        text-3xl
-        font-light
-        text-[#5A3B31]
-        pt-15
-        mb-8
-    "
->
-    Mi Pedido
-</h1>
+                className="
+                    text-center
+                    text-3xl
+                    font-light
+                    text-[#5A3B31]
+                    pt-15
+                    mb-8
+                "
+            >
+                Mi Pedido
+            </h1>
+
+            {/* =========================
+                PRODUCTOS
+            ========================= */}
 
             {
 
-                cart.map((item, index) => (
+                cart.map((item, index) => {
 
-                    <div
+                    /*
+                     * Precio base por unidad
+                     *
+                     * Para productos nuevos
+                     * usamos item.basePrice.
+                     *
+                     * Si algún producto viejo
+                     * no lo tiene, hacemos una
+                     * aproximación con item.price.
+                     */
 
-                        key={index}
+                    const basePrice =
+                        Number(
+                            item.basePrice ??
+                            item.price ??
+                            0
+                        );
 
-                        className="bg-white rounded-3xl shadow p-5 mb-5"
 
-                    >
+                    /*
+                     * Extras detallados
+                     */
 
-                        <div className="flex justify-between items-start">
+                    const extraDetails =
+                        item.extraDetails ||
+                        [];
 
-                            <div>
 
-                                <h2 className="text-2xl font-bold">
+                    /*
+                     * Precio total de extras
+                     * por una unidad
+                     */
 
-                                    {item.name}
+                    const extrasUnitPrice =
+                        extraDetails.reduce(
+                            (total, extra) =>
+                                total +
+                                Number(
+                                    extra.price ?? 0
+                                ),
+                            0
+                        );
 
-                                </h2>
 
-                                <p className="text-gray-500">
+                    /*
+                     * Precio final por unidad
+                     */
 
-                                    ${item.price.toLocaleString("es-AR")} c/u
+                    const unitPrice =
+                        Number(
+                            item.price ?? 0
+                        );
 
-                                </p>
 
-                            </div>
+                    return (
 
-                            <button
+                        <div
 
-                                onClick={() => removeFromCart(index)}
+                            key={index}
 
-                                className="text-red-500"
+                            className="
+                                bg-white
+                                rounded-3xl
+                                shadow
+                                p-5
+                                mb-5
+                            "
 
-                            >
+                        >
 
-                                🗑
 
-                            </button>
+                            {/* =========================
+                                NOMBRE
+                            ========================= */}
 
-                        </div>
+                            <div className="
+                                flex
+                                justify-between
+                                items-start
+                            ">
 
-                        {item.size && (
 
-                            <p>
+                                <div>
 
-                                <b>Tamaño:</b> {item.size}
+                                    <h2 className="
+                                        text-2xl
+                                        font-bold
+                                    ">
 
-                            </p>
+                                        {item.name}
 
-                        )}
+                                    </h2>
 
-                        {item.flavor && (
 
-                            <p>
+                                    {/* =========================
+                                        PRECIO BASE
+                                    ========================= */}
 
-                                <b>Bizcochuelo:</b> {item.flavor}
+                                    <p className="
+                                        text-gray-600
+                                        mt-2
+                                    ">
 
-                            </p>
+                                        <span className="
+                                            font-semibold
+                                        ">
 
-                        )}
+                                            Precio base:
 
-                        {item.filling && (
+                                        </span>
 
-                            <p>
+                                        {" "}
 
-                                <b>Relleno:</b> {item.filling}
+                                        $
 
-                            </p>
-
-                        )}
-
-                        {item.covering && (
-
-                            <p>
-
-                                <b>Cobertura:</b> {item.covering}
-
-                            </p>
-
-                        )}
-
-                        {item.deliveryDate && (
-
-                            <p>
-
-                                <b>Entrega:</b>{" "}
-
-                                {new Date(item.deliveryDate).toLocaleDateString("es-AR")}
-
-                            </p>
-
-                        )}
-
-                        {item.deliveryHour && (
-
-                            <p>
-
-                                <b>Horario:</b> {item.deliveryHour}
-
-                            </p>
-
-                        )}
-
-                        {
-
-                            item.extras?.length > 0 && (
-
-                                <>
-
-                                    <p className="mt-3">
-
-                                        <b>Extras</b>
+                                        {basePrice.toLocaleString(
+                                            "es-AR"
+                                        )}
 
                                     </p>
 
-                                    <ul className="list-disc ml-5">
 
-                                        {
+                                    {/* =========================
+                                        EXTRAS
+                                    ========================= */}
 
-                                            item.extras.map(extra => (
+                                    {
 
-                                                <li key={extra}>
+                                        extraDetails.length > 0 && (
 
-                                                    {extra}
+                                            <div className="
+                                                mt-3
+                                            ">
 
-                                                </li>
+                                                <p className="
+                                                    font-semibold
+                                                    text-gray-700
+                                                ">
 
-                                            ))
+                                                    Extras:
 
-                                        }
+                                                </p>
 
-                                    </ul>
 
-                                </>
+                                                <div className="
+                                                    mt-1
+                                                    space-y-1
+                                                ">
 
-                            )
+                                                    {
 
-                        }
+                                                        extraDetails.map(
+                                                            (
+                                                                extra,
+                                                                extraIndex
+                                                            ) => (
 
-                        <div className="flex items-center justify-between mt-5">
+                                                                <div
+                                                                    key={
+                                                                        extraIndex
+                                                                    }
+                                                                    className="
+                                                                        flex
+                                                                        justify-between
+                                                                        items-center
+                                                                        text-sm
+                                                                        text-gray-600
+                                                                    "
+                                                                >
 
-                            <div className="flex items-center gap-3">
+                                                                    <span>
+
+                                                                        {extra.name}
+
+                                                                    </span>
+
+
+                                                                    <span>
+
+                                                                        +$
+
+                                                                        {Number(
+                                                                            extra.price ??
+                                                                            0
+                                                                        ).toLocaleString(
+                                                                            "es-AR"
+                                                                        )}
+
+                                                                    </span>
+
+                                                                </div>
+
+                                                            )
+                                                        )
+
+                                                    }
+
+                                                </div>
+
+
+                                                {/* TOTAL EXTRAS */}
+
+                                                <div className="
+                                                    flex
+                                                    justify-between
+                                                    mt-2
+                                                    pt-2
+                                                    border-t
+                                                    text-sm
+                                                    font-semibold
+                                                    text-gray-700
+                                                ">
+
+                                                    <span>
+
+                                                        Total extras:
+
+                                                    </span>
+
+
+                                                    <span>
+
+                                                        +$
+
+                                                        {extrasUnitPrice.toLocaleString(
+                                                            "es-AR"
+                                                        )}
+
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                        )
+
+                                    }
+
+                                </div>
+
+
+                                {/* ELIMINAR */}
 
                                 <button
 
-                                    onClick={() => decreaseQuantity(index)}
+                                    onClick={() =>
+                                        removeFromCart(index)
+                                    }
 
-                                    className="w-8 h-8 rounded-full bg-gray-200"
-
-                                >
-
-                                    -
-
-                                </button>
-
-                                <span className="text-xl font-bold">
-
-                                    {item.quantity}
-
-                                </span>
-
-                                <button
-
-                                    onClick={() => increaseQuantity(index)}
-
-                                    className="w-8 h-8 rounded-full bg-[#D08A9B] text-white"
+                                    className="
+                                        text-red-500
+                                    "
 
                                 >
 
-                                    +
+                                    🗑
 
                                 </button>
+
 
                             </div>
 
-                            <p className="text-2xl font-bold">
 
-                                $
+                            {/* =========================
+                                TAMAÑO
+                            ========================= */}
 
-                                {(item.price * item.quantity).toLocaleString("es-AR")}
+                            {item.size && (
 
-                            </p>
+                                <p className="mt-3">
 
-                        </div>
+                                    <b>Tamaño:</b>{" "}
+
+                                    {item.size}
+
+                                    {
+                                        item.size &&
+                                        !isNaN(Number(item.size)) &&
+                                        " cm"
+                                    }
+
+                                </p>
+
+                            )}
+
+
+                            {/* =========================
+                                BIZCOCHUELO
+                            ========================= */}
+
+                           {item.flavorsSelected?.length > 1 ? (
+    <div className="mt-2 space-y-1">
+        <p>
+            <b>Bizcochuelo 1:</b>{" "}
+            {item.flavorsSelected[0]}
+        </p>
+
+        <p>
+            <b>Bizcochuelo 2:</b>{" "}
+            {item.flavorsSelected[1]}
+        </p>
+    </div>
+) : (
+    item.flavor && (
+        <p>
+            <b>Bizcochuelo:</b>{" "}
+            {item.flavor}
+        </p>
+    )
+)}
+
+
+                            {/* =========================
+                                RELLENO
+                            ========================= */}
+
+                            {item.fillingsSelected?.length > 1 ? (
+    <div className="mt-2 space-y-1">
+        <p>
+            <b>Relleno bizcochuelo 1:</b>{" "}
+            {item.fillingsSelected[0]}
+        </p>
+
+        <p>
+            <b>Relleno bizcochuelo 2:</b>{" "}
+            {item.fillingsSelected[1]}
+        </p>
+    </div>
+) : (
+    item.filling && (
+        <p>
+            <b>Relleno:</b>{" "}
+            {item.filling}
+        </p>
+    )
+)}
+
+
+                            {/* =========================
+                                COBERTURA
+                            ========================= */}
+
+                            {item.covering && (
+
+                                <p>
+
+                                    <b>Cobertura:</b>{" "}
+
+                                    {item.covering}
+
+                                </p>
+
+                            )}
+
+
+                            {/* =========================
+                                FECHA
+                            ========================= */}
+
+                            {item.deliveryDate && (
+
+                                <p>
+
+                                    <b>Entrega:</b>{" "}
+
+                                    {new Date(
+                                        item.deliveryDate
+                                    ).toLocaleDateString(
+                                        "es-AR"
+                                    )}
+
+                                </p>
+
+                            )}
+
+
+                            {/* =========================
+                                HORARIO
+                            ========================= */}
+
+                            {item.deliveryHour && (
+
+                                <p>
+
+                                    <b>Horario:</b>{" "}
+
+                                    {item.deliveryHour}
+
+                                </p>
+
+                            )}
+
+
+                            {/* =========================
+                                EXTRAS ANTIGUOS
+                            ========================= */}
+
+                            {
+                                extraDetails.length === 0 &&
+                                item.extras?.length > 0 && (
+
+                                    <div className="mt-3">
+
+                                        <p className="
+                                            font-semibold
+                                        ">
+
+                                            Extras
+
+                                        </p>
+
+
+                                        <ul className="
+                                            list-disc
+                                            ml-5
+                                            text-gray-600
+                                        ">
+
+                                            {
+
+                                                item.extras.map(
+                                                    extra => (
+
+                                                        <li key={extra}>
+
+                                                            {extra}
+
+                                                        </li>
+
+                                                    )
+                                                )
+
+                                            }
+
+                                        </ul>
+
+                                    </div>
+
+                                )
+                            }
+
+
+                            {/* =========================
+                                CANTIDAD + TOTAL
+                            ========================= */}
+
+                            <div className="
+                                flex
+                                items-center
+                                justify-between
+                                mt-6
+                                pt-4
+                                border-t
+                            ">
+
+
+                                {/* CANTIDAD */}
+
+                                <div className="
+                                    flex
+                                    items-center
+                                    gap-3
+                                ">
+
+                                    <button
+
+                                        onClick={() =>
+                                            decreaseQuantity(
+                                                index
+                                            )
+                                        }
+
+                                        className="
+                                            w-8
+                                            h-8
+                                            rounded-full
+                                            bg-gray-200
+                                        "
+
+                                    >
+
+                                        -
+
+                                    </button>
+
+
+                                    <span className="
+                                        text-xl
+                                        font-bold
+                                    ">
+
+                                        {item.quantity}
+
+                                    </span>
+
+
+                                    <button
+
+                                        onClick={() =>
+                                            increaseQuantity(
+                                                index
+                                            )
+                                        }
+
+                                        className="
+                                            w-8
+                                            h-8
+                                            rounded-full
+                                            bg-[#D08A9B]
+                                            text-white
+                                        "
+
+                                    >
+
+                                        +
+
+                                    </button>
+
+                                </div>
+
+
+                                {/* TOTAL DEL PRODUCTO */}
+
+<div className="flex-1">
+
+    <h2 className="text-2xl font-bold">
+        {item.name}
+    </h2>
+
+    {/* PRECIO BASE */}
+
+    {item.basePrice !== undefined ? (
+
+        <div className="mt-2 space-y-1">
+
+            <div className="flex justify-between gap-4 text-gray-600">
+
+                <span>
+                    Precio base
+                </span>
+
+                <span>
+                    $
+                    {Number(
+                        item.basePrice
+                    ).toLocaleString("es-AR")}
+                </span>
+
+            </div>
+
+
+            {/* CAMBIOS DE RELLENO */}
+
+            {item.fillingChanges > 0 && (
+
+                <div className="flex justify-between gap-4 text-gray-600">
+
+                    <span>
+                        Cambio de relleno
+                        {item.fillingChanges > 1 &&
+                            ` × ${item.fillingChanges}`
+                        }
+                    </span>
+
+                    <span>
+                        +$
+                        {(
+                            Number(
+                                item.fillingChangePrice || 0
+                            ) *
+                            item.fillingChanges
+                        ).toLocaleString("es-AR")}
+                    </span>
+
+                </div>
+
+            )}
+
+
+            {/* EXTRAS */}
+
+            {item.extrasDetails?.length > 0 && (
+
+                <div className="mt-2">
+
+                    <p className="font-semibold text-gray-700">
+                        Extras
+                    </p>
+
+                    <div className="space-y-1 mt-1">
+
+                        {item.extrasDetails.map(
+                            extra => (
+
+                                <div
+                                    key={extra.name}
+                                    className="flex justify-between gap-4 text-gray-600"
+                                >
+
+                                    <span>
+                                        {extra.name}
+                                    </span>
+
+                                    <span>
+                                        +$
+                                        {Number(
+                                            extra.price || 0
+                                        ).toLocaleString(
+                                            "es-AR"
+                                        )}
+                                    </span>
+
+                                </div>
+
+                            )
+                        )}
 
                     </div>
 
-                ))
+                </div>
+
+            )}
+
+        </div>
+
+    ) : (
+
+        <p className="text-gray-500">
+            ${item.price.toLocaleString("es-AR")} c/u
+        </p>
+
+    )}
+
+
+
+
+                                    <p className="
+                                        text-2xl
+                                        font-bold
+                                    ">
+
+                                        $
+
+                                        {(
+                                            unitPrice *
+                                            item.quantity
+                                        ).toLocaleString(
+                                            "es-AR"
+                                        )}
+
+                                    </p>
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+                    );
+
+                })
 
             }
+
+
+            {/* =========================
+                TOTAL GENERAL
+            ========================= */}
 
             {
 
@@ -233,27 +721,57 @@ function Cart() {
 
                     <>
 
-                        <div className="text-center mt-8">
+                        <div className="
+                            text-center
+                            mt-8
+                        ">
 
-                            <p className="text-3xl font-bold">
+                            <p className="
+                                text-3xl
+                                font-bold
+                            ">
 
                                 Total
 
                             </p>
 
-                            <p className="text-4xl font-bold text-[#D08A9B]">
 
-                                ${totalPrice.toLocaleString("es-AR")}
+                            <p className="
+                                text-4xl
+                                font-bold
+                                text-[#D08A9B]
+                            ">
+
+                                $
+
+                                {totalPrice.toLocaleString(
+                                    "es-AR"
+                                )}
 
                             </p>
 
                         </div>
 
+
+                        {/* =========================
+                            CONTINUAR
+                        ========================= */}
+
                         <button
 
-                            onClick={() => navigate("/checkout")}
+                            onClick={() =>
+                                navigate("/checkout")
+                            }
 
-                            className="w-full rounded-full py-4 bg-[#D08A9B] text-white font-bold mt-6"
+                            className="
+                                w-full
+                                rounded-full
+                                py-4
+                                bg-[#D08A9B]
+                                text-white
+                                font-bold
+                                mt-6
+                            "
 
                         >
 
@@ -266,11 +784,12 @@ function Cart() {
                 )
 
             }
-
+            </div>
         </Layout>
 
     );
 
 }
+
 
 export default Cart;

@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -18,7 +19,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * BUSCAR PRODUCTO
+     * ==========================================
      */
 
     const product = products.find(
@@ -27,14 +30,11 @@ function Product() {
             String(p.slug) === String(id)
     );
 
-    console.log("PRODUCTO:", product);
-console.log("CATEGORY:", product?.category);
-console.log("TYPE:", product?.type);
-console.log("BENTO:", product?.category === 5);
-
 
     /*
+     * ==========================================
      * ESTADOS
+     * ==========================================
      */
 
     const [size, setSize] = useState("");
@@ -53,7 +53,24 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
+     * 20 CM / 5 KG
+     * DOS BIZCOCHUELOS
+     * ==========================================
+     */
+
+    const [secondFlavor, setSecondFlavor] = useState("");
+
+    const [fiveKgFillings, setFiveKgFillings] = useState([
+        "",
+        ""
+    ]);
+
+
+    /*
+     * ==========================================
      * TIPOS DE PRODUCTO
+     * ==========================================
      */
 
     const isPersonalized =
@@ -67,8 +84,8 @@ console.log("BENTO:", product?.category === 5);
         product?.type === "mesaDulce";
 
     const isBento =
-    Number(product?.category) === 5 ||
-    product?.type === "bento";
+        Number(product?.category) === 5 ||
+        product?.type === "bento";
 
     const isCookies =
         product?.category === 6 ||
@@ -76,7 +93,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * VALORES POR DEFECTO
+     * ==========================================
      */
 
     const selectedSize =
@@ -102,7 +121,11 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * PESOS DISPONIBLES
+     *
+     * SOLO PERSONALIZADAS
+     * ==========================================
      */
 
     const availableWeights = useMemo(() => {
@@ -121,7 +144,8 @@ console.log("BENTO:", product?.category === 5);
 
             "20": [
                 "2 kg",
-                "3 kg"
+                "3 kg",
+                "5 kg"
             ],
 
             "24": [
@@ -142,7 +166,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * PESO SELECCIONADO
+     * ==========================================
      */
 
     const selectedWeight =
@@ -152,7 +178,32 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
+     * 20 CM / 5 KG
+     * ==========================================
+     */
+
+    const isFiveKg20cm =
+        isPersonalized &&
+        String(selectedSize) === "20" &&
+        selectedWeight === "5 kg";
+
+
+    /*
+     * ==========================================
+     * RELLENO POR DEFECTO
+     * ==========================================
+     */
+
+    const defaultFilling =
+        product?.fillings?.[0] ||
+        "Dulce de leche";
+
+
+    /*
+     * ==========================================
      * CANTIDAD DE RELLENOS
+     * ==========================================
      */
 
     const fillingLimit = useMemo(() => {
@@ -169,6 +220,7 @@ console.log("BENTO:", product?.category === 5);
 
             "20-2 kg": 1,
             "20-3 kg": 2,
+            "20-5 kg": 2,
 
             "24-2 kg": 1
 
@@ -188,7 +240,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * CAMBIO DE RELLENO ACTIVADO
+     * ==========================================
      */
 
     const fillingChangeActive =
@@ -196,7 +250,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * PRECIO DEL CAMBIO DE RELLENO
+     * ==========================================
      */
 
     const fillingChangePrice =
@@ -206,7 +262,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
-     * CAMBIAR TAMAÑO / PRESENTACIÓN
+     * ==========================================
+     * CAMBIAR TAMAÑO
+     * ==========================================
      */
 
     function handleSizeChange(newSize) {
@@ -225,7 +283,8 @@ console.log("BENTO:", product?.category === 5);
 
                 "20": [
                     "2 kg",
-                    "3 kg"
+                    "3 kg",
+                    "5 kg"
                 ],
 
                 "24": [
@@ -237,11 +296,19 @@ console.log("BENTO:", product?.category === 5);
             const newWeights =
                 weights[String(newSize)] || [];
 
-            setWeight(
-                newWeights[0] || ""
-            );
+            const newWeight =
+                newWeights[0] || "";
+
+            setWeight(newWeight);
 
             setChangedFillings([]);
+
+            setSecondFlavor("");
+
+            setFiveKgFillings([
+                "",
+                ""
+            ]);
 
         }
 
@@ -249,7 +316,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * CAMBIAR PESO
+     * ==========================================
      */
 
     function handleWeightChange(newWeight) {
@@ -258,11 +327,27 @@ console.log("BENTO:", product?.category === 5);
 
         setChangedFillings([]);
 
+        if (
+            String(selectedSize) !== "20" ||
+            newWeight !== "5 kg"
+        ) {
+
+            setSecondFlavor("");
+
+            setFiveKgFillings([
+                "",
+                ""
+            ]);
+
+        }
+
     }
 
 
     /*
+     * ==========================================
      * ACTIVAR / DESACTIVAR EXTRA
+     * ==========================================
      */
 
     function toggleExtra(name) {
@@ -281,6 +366,11 @@ console.log("BENTO:", product?.category === 5);
 
                 setChangedFillings([]);
 
+                setFiveKgFillings([
+                    "",
+                    ""
+                ]);
+
             }
 
         }
@@ -298,7 +388,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
-     * CAMBIAR UN RELLENO
+     * ==========================================
+     * CAMBIAR RELLENO
+     * ==========================================
      */
 
     function handleFillingChange(
@@ -324,19 +416,57 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
-     * CANTIDAD DE RELLENOS CAMBIADOS
+     * ==========================================
+     * CAMBIAR RELLENO 5 KG
+     * ==========================================
      */
 
-    const changedFillingsCount =
-        changedFillings.filter(
-            filling =>
-                filling &&
-                filling !== "Dulce de leche"
-        ).length;
+    function handleFiveKgFillingChange(
+        index,
+        value
+    ) {
+
+        setFiveKgFillings(
+            current => {
+
+                const updated = [
+                    ...current
+                ];
+
+                updated[index] = value;
+
+                return updated;
+
+            }
+        );
+
+    }
 
 
     /*
+     * ==========================================
+     * CANTIDAD DE RELLENOS CAMBIADOS
+     * ==========================================
+     */
+
+    const changedFillingsCount =
+        isFiveKg20cm
+            ? fiveKgFillings.filter(
+                filling =>
+                    filling &&
+                    filling !== defaultFilling
+            ).length
+            : changedFillings.filter(
+                filling =>
+                    filling &&
+                    filling !== defaultFilling
+            ).length;
+
+
+    /*
+     * ==========================================
      * PRECIO DE EXTRAS
+     * ==========================================
      */
 
     const extrasPrice = useMemo(() => {
@@ -397,7 +527,76 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
+     * CLAVE DEL PRECIO
+     * ==========================================
+     *
+     * PERSONALIZADAS
+     *
+     * Firebase guarda:
+     *
+     * 16-1
+     * 16-2
+     * 16-3
+     * 20-2
+     * 20-3
+     * 20-5
+     * 24-2
+     *
+     * Por eso quitamos " kg" del peso.
+     *
+     * EJEMPLO:
+     *
+     * selectedSize = "16"
+     * selectedWeight = "2 kg"
+     *
+     * priceKey = "16-2"
+     *
+     * ------------------------------------------
+     *
+     * CLÁSICAS
+     *
+     * Firebase mantiene:
+     *
+     * "16"
+     * "20"
+     * "24"
+     *
+     * Por eso las clásicas siguen buscando
+     * solamente por centímetros.
+     * ==========================================
+     */
+
+    const numericWeight =
+        String(selectedWeight)
+            .replace(" kg", "")
+            .trim();
+
+
+    const priceKey =
+        isBento
+            ? "10"
+            : isPersonalized
+                ? `${String(selectedSize)}-${numericWeight}`
+                : String(selectedSize);
+
+
+    /*
+     * ==========================================
+     * PRECIO BASE
+     * ==========================================
+     */
+
+    const basePrice =
+        Number(
+            product?.prices?.[priceKey] || 0
+        );
+
+
+    /*
+     * ==========================================
      * PRECIO TOTAL
+     * ==========================================
      */
 
     const totalPrice = useMemo(() => {
@@ -406,36 +605,22 @@ console.log("BENTO:", product?.category === 5);
             return 0;
         }
 
-        /*
-         * Bento Cakes siempre usa
-         * el precio de 10 cm.
-         */
-
-        const priceKey =
-            isBento
-                ? "10"
-                : String(selectedSize);
-
-        const basePrice =
-            Number(
-                product.prices?.[priceKey] || 0
-            );
-
         return (
             basePrice +
             extrasPrice
         );
 
     }, [
-        selectedSize,
-        extrasPrice,
         product,
-        isBento
+        basePrice,
+        extrasPrice
     ]);
 
 
     /*
+     * ==========================================
      * AGREGAR AL PEDIDO
+     * ==========================================
      */
 
     function handleAdd() {
@@ -444,12 +629,122 @@ console.log("BENTO:", product?.category === 5);
             return;
         }
 
+
+        /*
+         * DETALLE DE EXTRAS
+         */
+
+        const extraDetails = extras
+            .filter(
+                name =>
+                    name !== "Cambio de relleno"
+            )
+            .map(name => {
+
+                const extra =
+                    product.extras?.find(
+                        e =>
+                            e.name === name
+                    );
+
+                return {
+
+                    name,
+
+                    price:
+                        Number(
+                            extra?.price || 0
+                        )
+
+                };
+
+            });
+
+
+        /*
+         * CAMBIO DE RELLENO
+         */
+
+        if (
+            fillingChangeActive &&
+            changedFillingsCount > 0
+        ) {
+
+            extraDetails.push({
+
+                name:
+                    `Cambio de relleno${
+                        changedFillingsCount > 1
+                            ? ` × ${changedFillingsCount}`
+                            : ""
+                    }`,
+
+                price:
+                    fillingChangePrice *
+                    changedFillingsCount
+
+            });
+
+        }
+
+
+        /*
+         * ==========================================
+         * CONFIGURACIÓN DE BIZCOCHUELOS
+         * ==========================================
+         */
+
+        const selectedFlavors =
+            isFiveKg20cm
+                ? [
+                    selectedFlavor,
+
+                    secondFlavor ||
+                    product?.flavors?.[0] ||
+                    ""
+                ]
+                : [
+                    selectedFlavor
+                ];
+
+
+        /*
+         * ==========================================
+         * CONFIGURACIÓN DE RELLENOS
+         * ==========================================
+         */
+
+        const selectedFillings =
+            isFiveKg20cm
+                ? [
+
+                    fiveKgFillings[0] ||
+                    defaultFilling,
+
+                    fiveKgFillings[1] ||
+                    defaultFilling
+
+                ]
+                : (
+                    changedFillings.length > 0
+                        ? changedFillings
+                        : []
+                );
+
+
+        /*
+         * ==========================================
+         * AGREGAR AL CARRITO
+         * ==========================================
+         */
+
         addToCart({
 
             ...product,
 
+
             /*
-             * Tamaño
+             * TAMAÑO
              */
 
             size:
@@ -457,8 +752,9 @@ console.log("BENTO:", product?.category === 5);
                     ? "10"
                     : selectedSize,
 
+
             /*
-             * Forma Bento
+             * FORMA BENTO
              */
 
             bentoForm:
@@ -466,8 +762,9 @@ console.log("BENTO:", product?.category === 5);
                     ? selectedBentoForm
                     : "",
 
+
             /*
-             * Peso
+             * PESO
              */
 
             weight:
@@ -475,41 +772,97 @@ console.log("BENTO:", product?.category === 5);
                     ? selectedWeight
                     : "",
 
+
             /*
-             * Bizcochuelo
+             * BIZCOCHUELO PRINCIPAL
              */
 
             flavor:
                 selectedFlavor,
 
+
             /*
-             * Relleno
+             * TODOS LOS BIZCOCHUELOS
+             */
+
+            flavorsSelected:
+                selectedFlavors,
+
+
+            /*
+             * RELLENO PRINCIPAL
              */
 
             filling:
-                "Dulce de leche",
+                isFiveKg20cm
+                    ? selectedFillings[0]
+                    : (
+                        selectedFillings[0] ||
+                        ""
+                    ),
+
 
             /*
-             * Cobertura
+             * TODOS LOS RELLENOS
+             */
+
+            fillingsSelected:
+                selectedFillings,
+
+
+            /*
+             * COBERTURA
              */
 
             covering:
                 selectedCovering,
 
+
             /*
-             * Extras
+             * EXTRAS
              */
 
             extras,
 
-            changedFillings,
+
+            /*
+             * RELLENOS MODIFICADOS
+             */
+
+            changedFillings:
+                isFiveKg20cm
+                    ? selectedFillings
+                    : changedFillings,
 
             fillingChanges:
                 changedFillingsCount,
 
             fillingChangePrice,
 
+
+            /*
+             * ==========================================
+             * DETALLE DE PRECIO
+             * ==========================================
+             */
+
+            basePrice,
+
+            extraDetails,
+
+            priceKey,
+
+
+            /*
+             * OBSERVACIONES
+             */
+
             note,
+
+
+            /*
+             * PRECIO FINAL
+             */
 
             price:
                 totalPrice
@@ -525,7 +878,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * CARGANDO
+     * ==========================================
      */
 
     if (loading) {
@@ -552,7 +907,9 @@ console.log("BENTO:", product?.category === 5);
 
 
     /*
+     * ==========================================
      * PRODUCTO NO ENCONTRADO
+     * ==========================================
      */
 
     if (!product) {
@@ -750,8 +1107,6 @@ console.log("BENTO:", product?.category === 5);
 
                             <>
 
-                                {/* FORMA */}
-
                                 <div>
 
                                     <label className="
@@ -804,8 +1159,6 @@ console.log("BENTO:", product?.category === 5);
                                 </div>
 
 
-                                {/* BIZCOCHUELO */}
-
                                 <div>
 
                                     <label className="
@@ -854,8 +1207,6 @@ console.log("BENTO:", product?.category === 5);
                                 </div>
 
 
-                                {/* TAMAÑO */}
-
                                 <div>
 
                                     <label className="
@@ -884,8 +1235,6 @@ console.log("BENTO:", product?.category === 5);
 
                                 </div>
 
-
-                                {/* COBERTURA */}
 
                                 <div>
 
@@ -940,7 +1289,7 @@ console.log("BENTO:", product?.category === 5);
 
 
                         {/* ================================= */}
-                        {/* PESO */}
+                        {/* PESO PERSONALIZADA */}
                         {/* ================================= */}
 
                         {isPersonalized && (
@@ -959,9 +1308,7 @@ console.log("BENTO:", product?.category === 5);
 
 
                                 <select
-                                    value={
-                                        selectedWeight
-                                    }
+                                    value={selectedWeight}
                                     onChange={(e) =>
                                         handleWeightChange(
                                             e.target.value
@@ -1001,7 +1348,8 @@ console.log("BENTO:", product?.category === 5);
                         {/* BIZCOCHUELO PERSONALIZADA */}
                         {/* ================================= */}
 
-                        {isPersonalized && (
+                        {isPersonalized &&
+                            !isFiveKg20cm && (
 
                             <div>
 
@@ -1054,12 +1402,159 @@ console.log("BENTO:", product?.category === 5);
 
 
                         {/* ================================= */}
-                        {/* RELLENO PERSONALIZADA */}
+                        {/* 20 CM / 5 KG */}
+                        {/* DOS BIZCOCHUELOS */}
                         {/* ================================= */}
 
-                        {isPersonalized && (
+                        {isFiveKg20cm && (
 
-                            <div>
+                            <div className="
+                                space-y-5
+                            ">
+
+                                <div>
+
+                                    <h3 className="
+                                        font-semibold
+                                        text-lg
+                                    ">
+
+                                        Bizcochuelos
+
+                                    </h3>
+
+
+                                    <p className="
+                                        text-sm
+                                        text-gray-500
+                                        mt-1
+                                    ">
+
+                                        Para la torta de 5 kg
+                                        podés elegir dos
+                                        bizcochuelos diferentes.
+
+                                    </p>
+
+                                </div>
+
+
+                                {/* BIZCOCHUELO 1 */}
+
+                                <div>
+
+                                    <label className="
+                                        font-semibold
+                                        block
+                                        mb-2
+                                    ">
+
+                                        Bizcochuelo 1
+
+                                    </label>
+
+
+                                    <select
+                                        value={selectedFlavor}
+                                        onChange={(e) =>
+                                            setFlavor(
+                                                e.target.value
+                                            )
+                                        }
+                                        className="
+                                            w-full
+                                            rounded-xl
+                                            border
+                                            p-4
+                                        "
+                                    >
+
+                                        {product.flavors?.map(
+                                            option => (
+
+                                                <option
+                                                    key={option}
+                                                    value={option}
+                                                >
+
+                                                    {option}
+
+                                                </option>
+
+                                            )
+                                        )}
+
+                                    </select>
+
+                                </div>
+
+
+                                {/* BIZCOCHUELO 2 */}
+
+                                <div>
+
+                                    <label className="
+                                        font-semibold
+                                        block
+                                        mb-2
+                                    ">
+
+                                        Bizcochuelo 2
+
+                                    </label>
+
+
+                                    <select
+                                        value={
+                                            secondFlavor ||
+                                            product?.flavors?.[0] ||
+                                            ""
+                                        }
+                                        onChange={(e) =>
+                                            setSecondFlavor(
+                                                e.target.value
+                                            )
+                                        }
+                                        className="
+                                            w-full
+                                            rounded-xl
+                                            border
+                                            p-4
+                                        "
+                                    >
+
+                                        {product.flavors?.map(
+                                            option => (
+
+                                                <option
+                                                    key={option}
+                                                    value={option}
+                                                >
+
+                                                    {option}
+
+                                                </option>
+
+                                            )
+                                        )}
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+
+                        {/* ================================= */}
+                        {/* RELLENO BASE */}
+                        {/* ================================= */}
+
+                        {isPersonalized &&
+                            !fillingChangeActive && (
+
+                            <div className="mt-6">
 
                                 <label className="
                                     font-semibold
@@ -1071,17 +1566,14 @@ console.log("BENTO:", product?.category === 5);
 
                                 </label>
 
-
                                 <div className="
                                     w-full
                                     rounded-xl
                                     border
                                     p-4
-                                    bg-gray-50
-                                    text-gray-700
                                 ">
 
-                                    Dulce de leche
+                                    {defaultFilling}
 
                                 </div>
 
@@ -1171,6 +1663,63 @@ console.log("BENTO:", product?.category === 5);
                                     gap-3
                                 ">
 
+
+                                    {/* CAMBIO DE RELLENO */}
+
+                                    {isPersonalized && (
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                toggleExtra(
+                                                    "Cambio de relleno"
+                                                )
+                                            }
+                                            className={`
+                                                col-span-2
+                                                rounded-2xl
+                                                border
+                                                p-4
+                                                transition
+                                                ${
+                                                    fillingChangeActive
+                                                        ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+                                                        : "bg-white hover:bg-pink-50"
+                                                }
+                                            `}
+                                        >
+
+                                            <div className="
+                                                font-semibold
+                                            ">
+
+                                                Cambio de relleno
+
+                                            </div>
+
+
+                                            <div className="
+                                                text-sm
+                                                mt-1
+                                            ">
+
+                                                +$
+
+                                                {fillingChangePrice.toLocaleString(
+                                                    "es-AR"
+                                                )}
+
+                                                {" "}c/u
+
+                                            </div>
+
+                                        </button>
+
+                                    )}
+
+
+                                    {/* RESTO DE EXTRAS */}
+
                                     {product.extras
                                         .filter(
                                             extra =>
@@ -1181,9 +1730,7 @@ console.log("BENTO:", product?.category === 5);
                                             extra => (
 
                                                 <button
-                                                    key={
-                                                        extra.name
-                                                    }
+                                                    key={extra.name}
                                                     type="button"
                                                     onClick={() =>
                                                         toggleExtra(
@@ -1191,12 +1738,10 @@ console.log("BENTO:", product?.category === 5);
                                                         )
                                                     }
                                                     className={`
-
                                                         rounded-2xl
                                                         border
                                                         p-4
                                                         transition
-
                                                         ${
                                                             extras.includes(
                                                                 extra.name
@@ -1204,7 +1749,6 @@ console.log("BENTO:", product?.category === 5);
                                                                 ? "bg-[#D08A9B] text-white border-[#D08A9B]"
                                                                 : "bg-white hover:bg-pink-50"
                                                         }
-
                                                     `}
                                                 >
 
@@ -1239,200 +1783,350 @@ console.log("BENTO:", product?.category === 5);
                                         )
                                     }
 
-
-                                    {/* CAMBIO DE RELLENO */}
-
-                                    {isPersonalized && (
-
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                toggleExtra(
-                                                    "Cambio de relleno"
-                                                )
-                                            }
-                                            className={`
-
-                                                rounded-2xl
-                                                border
-                                                p-4
-                                                transition
-
-                                                ${
-                                                    fillingChangeActive
-                                                        ? "bg-[#D08A9B] text-white border-[#D08A9B]"
-                                                        : "bg-white hover:bg-pink-50"
-                                                }
-
-                                            `}
-                                        >
-
-                                            <div className="
-                                                font-semibold
-                                            ">
-
-                                                Cambio de relleno
-
-                                            </div>
-
-
-                                            <div className="
-                                                text-sm
-                                                mt-1
-                                            ">
-
-                                                +$
-
-                                                {fillingChangePrice.toLocaleString(
-                                                    "es-AR"
-                                                )}
-
-                                                {" "}c/u
-
-                                            </div>
-
-                                        </button>
-
-                                    )}
-
                                 </div>
 
 
                                 {/* ================================= */}
-                                {/* RELLENOS */}
+                                {/* RELLENOS NORMALES */}
                                 {/* ================================= */}
 
                                 {isPersonalized &&
-                                    fillingChangeActive && (
+                                    fillingChangeActive &&
+                                    !isFiveKg20cm && (
 
-                                        <div className="
-                                            mt-6
-                                            space-y-4
-                                        ">
+                                    <div className="
+                                        mt-6
+                                        space-y-4
+                                    ">
 
-                                            <div>
+                                        <div>
 
-                                                <h3 className="
-                                                    font-semibold
-                                                    text-lg
-                                                ">
+                                            <h3 className="
+                                                font-semibold
+                                                text-lg
+                                            ">
 
-                                                    Elegí tus rellenos
+                                                Elegí tus rellenos
 
-                                                </h3>
-
-
-                                                <p className="
-                                                    text-sm
-                                                    text-gray-500
-                                                    mt-1
-                                                ">
-
-                                                    Podés cambiar hasta{" "}
-
-                                                    {fillingLimit}
-
-                                                    {" "}
-
-                                                    {
-                                                        fillingLimit === 1
-                                                            ? "relleno"
-                                                            : "rellenos"
-                                                    }.
-
-                                                </p>
-
-                                            </div>
+                                            </h3>
 
 
-                                            {Array.from({
-                                                length:
-                                                    fillingLimit
-                                            }).map(
-                                                (_, index) => (
+                                            <p className="
+                                                text-sm
+                                                text-gray-500
+                                                mt-1
+                                            ">
 
-                                                    <div
-                                                        key={index}
-                                                    >
+                                                Podés cambiar hasta{" "}
 
-                                                        <label className="
-                                                            font-semibold
-                                                            block
-                                                            mb-2
-                                                        ">
+                                                {fillingLimit}
 
-                                                            Relleno{" "}
-                                                            {index + 1}
+                                                {" "}
 
-                                                        </label>
+                                                {
+                                                    fillingLimit === 1
+                                                        ? "relleno"
+                                                        : "rellenos"
+                                                }.
 
-
-                                                        <select
-                                                            value={
-                                                                changedFillings[
-                                                                    index
-                                                                ] ||
-                                                                "Dulce de leche"
-                                                            }
-                                                            onChange={(e) =>
-                                                                handleFillingChange(
-                                                                    index,
-                                                                    e.target.value
-                                                                )
-                                                            }
-                                                            className="
-                                                                w-full
-                                                                rounded-xl
-                                                                border
-                                                                p-4
-                                                            "
-                                                        >
-
-                                                            <option
-                                                                value="Dulce de leche"
-                                                            >
-
-                                                                Dulce de leche
-
-                                                            </option>
-
-
-                                                            {product.fillings
-                                                                ?.filter(
-                                                                    filling =>
-                                                                        filling !==
-                                                                        "Dulce de leche"
-                                                                )
-                                                                .map(
-                                                                    filling => (
-
-                                                                        <option
-                                                                            key={
-                                                                                filling
-                                                                            }
-                                                                            value={
-                                                                                filling
-                                                                            }
-                                                                        >
-
-                                                                            {filling}
-
-                                                                        </option>
-
-                                                                    )
-                                                                )
-                                                            }
-
-                                                        </select>
-
-                                                    </div>
-
-                                                )
-                                            )}
+                                            </p>
 
                                         </div>
 
-                                    )}
+
+                                        {Array.from({
+                                            length:
+                                                fillingLimit
+                                        }).map(
+                                            (_, index) => (
+
+                                                <div
+                                                    key={index}
+                                                >
+
+                                                    <label className="
+                                                        font-semibold
+                                                        block
+                                                        mb-2
+                                                    ">
+
+                                                        Relleno{" "}
+                                                        {index + 1}
+
+                                                    </label>
+
+
+                                                    <select
+                                                        value={
+                                                            changedFillings[
+                                                                index
+                                                            ] ||
+                                                            defaultFilling
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleFillingChange(
+                                                                index,
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className="
+                                                            w-full
+                                                            rounded-xl
+                                                            border
+                                                            p-4
+                                                        "
+                                                    >
+
+                                                        <option
+                                                            value={
+                                                                defaultFilling
+                                                            }
+                                                        >
+
+                                                            {
+                                                                defaultFilling
+                                                            }
+
+                                                        </option>
+
+
+                                                        {product.fillings
+                                                            ?.filter(
+                                                                filling =>
+                                                                    filling !==
+                                                                    defaultFilling
+                                                            )
+                                                            .map(
+                                                                filling => (
+
+                                                                    <option
+                                                                        key={
+                                                                            filling
+                                                                        }
+                                                                        value={
+                                                                            filling
+                                                                        }
+                                                                    >
+
+                                                                        {filling}
+
+                                                                    </option>
+
+                                                                )
+                                                            )
+                                                        }
+
+                                                    </select>
+
+                                                </div>
+
+                                            )
+                                        )}
+
+                                    </div>
+
+                                )}
+
+
+                                {/* ================================= */}
+                                {/* RELLENOS 20 CM / 5 KG */}
+                                {/* ================================= */}
+
+                                {isFiveKg20cm &&
+                                    fillingChangeActive && (
+
+                                    <div className="
+                                        mt-6
+                                        space-y-4
+                                    ">
+
+                                        <div>
+
+                                            <h3 className="
+                                                font-semibold
+                                                text-lg
+                                            ">
+
+                                                Elegí tus rellenos
+
+                                            </h3>
+
+
+                                            <p className="
+                                                text-sm
+                                                text-gray-500
+                                                mt-1
+                                            ">
+
+                                                Cada bizcochuelo
+                                                puede tener un
+                                                solo relleno.
+
+                                            </p>
+
+                                        </div>
+
+
+                                        {/* RELLENO 1 */}
+
+                                        <div>
+
+                                            <label className="
+                                                font-semibold
+                                                block
+                                                mb-2
+                                            ">
+
+                                                Relleno del
+                                                bizcochuelo 1
+
+                                            </label>
+
+
+                                            <select
+                                                value={
+                                                    fiveKgFillings[0] ||
+                                                    defaultFilling
+                                                }
+                                                onChange={(e) =>
+                                                    handleFiveKgFillingChange(
+                                                        0,
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="
+                                                    w-full
+                                                    rounded-xl
+                                                    border
+                                                    p-4
+                                                "
+                                            >
+
+                                                <option
+                                                    value={
+                                                        defaultFilling
+                                                    }
+                                                >
+
+                                                    {
+                                                        defaultFilling
+                                                    }
+
+                                                </option>
+
+
+                                                {product.fillings
+                                                    ?.filter(
+                                                        filling =>
+                                                            filling !==
+                                                            defaultFilling
+                                                    )
+                                                    .map(
+                                                        filling => (
+
+                                                            <option
+                                                                key={
+                                                                    filling
+                                                                }
+                                                                value={
+                                                                    filling
+                                                                }
+                                                            >
+
+                                                                {filling}
+
+                                                            </option>
+
+                                                        )
+                                                    )
+                                                }
+
+                                            </select>
+
+                                        </div>
+
+
+                                        {/* RELLENO 2 */}
+
+                                        <div>
+
+                                            <label className="
+                                                font-semibold
+                                                block
+                                                mb-2
+                                            ">
+
+                                                Relleno del
+                                                bizcochuelo 2
+
+                                            </label>
+
+
+                                            <select
+                                                value={
+                                                    fiveKgFillings[1] ||
+                                                    defaultFilling
+                                                }
+                                                onChange={(e) =>
+                                                    handleFiveKgFillingChange(
+                                                        1,
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="
+                                                    w-full
+                                                    rounded-xl
+                                                    border
+                                                    p-4
+                                                "
+                                            >
+
+                                                <option
+                                                    value={
+                                                        defaultFilling
+                                                    }
+                                                >
+
+                                                    {
+                                                        defaultFilling
+                                                    }
+
+                                                </option>
+
+
+                                                {product.fillings
+                                                    ?.filter(
+                                                        filling =>
+                                                            filling !==
+                                                            defaultFilling
+                                                    )
+                                                    .map(
+                                                        filling => (
+
+                                                            <option
+                                                                key={
+                                                                    filling
+                                                                }
+                                                                value={
+                                                                    filling
+                                                                }
+                                                            >
+
+                                                                {filling}
+
+                                                            </option>
+
+                                                        )
+                                                    )
+                                                }
+
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                )}
 
                             </div>
 
@@ -1562,3 +2256,4 @@ console.log("BENTO:", product?.category === 5);
 }
 
 export default Product;
+
