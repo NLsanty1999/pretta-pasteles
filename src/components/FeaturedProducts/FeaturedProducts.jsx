@@ -324,7 +324,7 @@ function handleTouchEnd(e) {
                 items-center
                 justify-center
                 gap-1.5
-                mt-3
+                mt-4
                 translate-y-23
             "
         >
