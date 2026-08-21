@@ -253,13 +253,15 @@ function handleTouchEnd(e) {
 
     <div className="h-[80px] flex items-end justify-center">
 
-        <p className="
-            text-white
-            text-3xl
-            font-light
-            leading-tight
-            drop-shadow-md
-        ">
+        <p
+            className="
+                text-white
+                text-3xl
+                font-light
+                leading-tight
+                drop-shadow-md
+            "
+        >
             {item.featuredTitle || item.name}
         </p>
 
@@ -270,12 +272,14 @@ function handleTouchEnd(e) {
 
     {item.featuredSubtitle && (
 
-        <p className="
-            text-white/85
-            text-sm
-            font-light
-            mt-2
-        ">
+        <p
+            className="
+                text-white/85
+                text-sm
+                font-light
+                mt-2
+            "
+        >
             {item.featuredSubtitle}
         </p>
 
@@ -309,52 +313,54 @@ function handleTouchEnd(e) {
 
     </div>
 
+
+    {/* PUNTITOS */}
+
+    {featured.length > 1 && (
+
+        <div
+            className="
+                flex
+                items-center
+                justify-center
+                gap-1.5
+                mt-3
+                translate-y-23
+            "
+        >
+
+            {featured.map((_, index) => (
+
+                <button
+                    key={index}
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrent(index);
+                    }}
+                    aria-label={`Ver producto ${index + 1}`}
+                    className={`
+                        rounded-full
+                        transition-all
+                        duration-300
+                        ${
+                            current === index
+                                ? "w-2 h-2 bg-white"
+                                : "w-1.5 h-1.5 bg-white/50"
+                        }
+                    `}
+                />
+
+            ))}
+
+        </div>
+
+    )}
+
 </div>
 
-            </button>
+</button>
 
-
-            {/* PUNTITOS */}
-
-{featured.length > 1 && (
-
-    <div
-        className="
-            absolute
-            bottom-5
-            left-1/2
-            -translate-x-1/2
-            z-20
-            flex
-            items-center
-            gap-1.5
-        "
-    >
-
-        {featured.map((_, index) => (
-
-            <button
-                key={index}
-                type="button"
-                onClick={() => setCurrent(index)}
-                aria-label={`Ver producto ${index + 1}`}
-                className={`
-                    rounded-full
-                    transition-all
-                    duration-300
-                    ${
-                        current === index
-                            ? "w-2 h-2 bg-white"
-                            : "w-1.5 h-1.5 bg-white/50"
-                    }
-                `}
-            />
-
-        ))}
-
-    </div>
-
-)}
 
 {/* =========================
     FIRMA
@@ -373,6 +379,7 @@ function handleTouchEnd(e) {
             leading-none
         "
     >
+
         <span>
             C
         </span>
@@ -380,7 +387,9 @@ function handleTouchEnd(e) {
         <span>
             Y
         </span>
+
     </div>
+
 
     {/* Corazón de línea */}
 
@@ -392,6 +401,7 @@ function handleTouchEnd(e) {
         xmlns="http://www.w3.org/2000/svg"
         className="mt-1 text-[#D08A9B]/40"
     >
+
         <path
             d="M20.84 4.61C19.84 3.61 18.48 3 17 3C15.52 3 14.16 3.61 13.16 4.61L12 5.77L10.84 4.61C9.84 3.61 8.48 3 7 3C5.52 3 4.16 3.61 3.16 4.61C1.05 6.72 1.05 10.14 3.16 12.25L12 21L20.84 12.25C22.95 10.14 22.95 6.72 20.84 4.61Z"
             stroke="currentColor"
@@ -399,11 +409,13 @@ function handleTouchEnd(e) {
             strokeLinecap="round"
             strokeLinejoin="round"
         />
+
     </svg>
 
 </div>
 
-        </section>
+
+</section>
     );
 }
 
