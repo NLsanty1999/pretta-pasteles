@@ -373,7 +373,6 @@ function handleTouchEnd(e) {
             relative
             text-[#5A3B31]/35
             font-serif
-            italic
             text-3xl
             tracking-normal
             leading-none
