@@ -19,7 +19,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * BUSCAR PRODUCTO
+     * ==========================================
      */
 
     const product = products.find(
@@ -30,7 +32,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * ESTADOS
+     * ==========================================
      */
 
     const [size, setSize] = useState("");
@@ -49,29 +53,72 @@ function Product() {
 
 
     /*
-     * GALERÍA
-     */
-
-    const [selectedImage, setSelectedImage] = useState(0);
-
-    const [isImageOpen, setIsImageOpen] = useState(false);
-
-
-    /*
+     * ==========================================
      * 20 CM / 5 KG
-     * DOS BIZCOCHUELOS
+     * CUATRO RELLENOS
+     *
+     * Bizcochuelo 1:
+     *   relleno 1
+     *   relleno 2
+     *
+     * Bizcochuelo 2:
+     *   relleno 3
+     *   relleno 4
+     * ==========================================
      */
 
     const [secondFlavor, setSecondFlavor] = useState("");
 
     const [fiveKgFillings, setFiveKgFillings] = useState([
         "",
+        "",
+        "",
         ""
     ]);
 
 
     /*
+     * ==========================================
+     * GALERÍA
+     * ==========================================
+     */
+
+    const galleryImages = useMemo(() => {
+
+        if (!product) {
+            return [];
+        }
+
+        const images = Array.isArray(product.images)
+            ? product.images.filter(Boolean)
+            : [];
+
+        /*
+         * Si image existe y no está dentro de images,
+         * también la agregamos.
+         */
+
+        if (
+            product.image &&
+            !images.includes(product.image)
+        ) {
+            images.unshift(product.image);
+        }
+
+        return images;
+
+    }, [product]);
+
+
+    const [selectedImage, setSelectedImage] = useState(0);
+
+    const [galleryOpen, setGalleryOpen] = useState(false);
+
+
+    /*
+     * ==========================================
      * TIPOS DE PRODUCTO
+     * ==========================================
      */
 
     const isPersonalized =
@@ -94,104 +141,9 @@ function Product() {
 
 
     /*
-     * GALERÍA DE IMÁGENES
-     *
-     * Usa:
-     *
-     * product.image
-     *
-     * + todas las imágenes de:
-     *
-     * product.images
-     *
-     * Se eliminan imágenes repetidas.
-     */
-
-    const productImages = useMemo(() => {
-
-        if (!product) {
-            return [];
-        }
-
-        const images = [];
-
-        if (product.image) {
-            images.push(product.image);
-        }
-
-        if (Array.isArray(product.images)) {
-            images.push(
-                ...product.images.filter(Boolean)
-            );
-        }
-
-        return [...new Set(images)];
-
-    }, [product]);
-
-
-    /*
-     * CAMBIAR IMAGEN PRINCIPAL
-     */
-
-    function handleImageChange(index) {
-
-        if (
-            index < 0 ||
-            index >= productImages.length
-        ) {
-            return;
-        }
-
-        setSelectedImage(index);
-
-    }
-
-
-    /*
-     * SIGUIENTE IMAGEN
-     */
-
-    function nextImage() {
-
-        if (productImages.length <= 1) {
-            return;
-        }
-
-        setSelectedImage(
-            current =>
-                (current + 1) %
-                productImages.length
-        );
-
-    }
-
-
-    /*
-     * IMAGEN ANTERIOR
-     */
-
-    function previousImage() {
-
-        if (productImages.length <= 1) {
-            return;
-        }
-
-        setSelectedImage(
-            current =>
-                (
-                    current -
-                    1 +
-                    productImages.length
-                ) %
-                productImages.length
-        );
-
-    }
-
-
-    /*
+     * ==========================================
      * VALORES POR DEFECTO
+     * ==========================================
      */
 
     const selectedSize =
@@ -217,7 +169,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * PESOS DISPONIBLES
+     * ==========================================
      */
 
     const availableWeights = useMemo(() => {
@@ -258,7 +212,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * PESO SELECCIONADO
+     * ==========================================
      */
 
     const selectedWeight =
@@ -268,7 +224,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * 20 CM / 5 KG
+     * ==========================================
      */
 
     const isFiveKg20cm =
@@ -278,7 +236,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * RELLENO POR DEFECTO
+     * ==========================================
      */
 
     const defaultFilling =
@@ -287,7 +247,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * CANTIDAD DE RELLENOS
+     * ==========================================
      */
 
     const fillingLimit = useMemo(() => {
@@ -304,7 +266,13 @@ function Product() {
 
             "20-2 kg": 1,
             "20-3 kg": 2,
-            "20-5 kg": 2,
+
+            /*
+             * En 5 kg tenemos 4 rellenos:
+             * 2 por cada bizcochuelo.
+             */
+
+            "20-5 kg": 4,
 
             "24-2 kg": 1
 
@@ -324,7 +292,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * CAMBIO DE RELLENO ACTIVADO
+     * ==========================================
      */
 
     const fillingChangeActive =
@@ -332,7 +302,9 @@ function Product() {
 
 
     /*
-     * PRECIO DEL CAMBIO DE RELLENO
+     * ==========================================
+     * PRECIO CAMBIO DE RELLENO
+     * ==========================================
      */
 
     const fillingChangePrice =
@@ -342,7 +314,9 @@ function Product() {
 
 
     /*
-     * CAMBIAR TAMAÑO / PRESENTACIÓN
+     * ==========================================
+     * CAMBIAR TAMAÑO
+     * ==========================================
      */
 
     function handleSizeChange(newSize) {
@@ -385,6 +359,8 @@ function Product() {
 
             setFiveKgFillings([
                 "",
+                "",
+                "",
                 ""
             ]);
 
@@ -394,7 +370,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * CAMBIAR PESO
+     * ==========================================
      */
 
     function handleWeightChange(newWeight) {
@@ -412,6 +390,8 @@ function Product() {
 
             setFiveKgFillings([
                 "",
+                "",
+                "",
                 ""
             ]);
 
@@ -421,7 +401,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * ACTIVAR / DESACTIVAR EXTRA
+     * ==========================================
      */
 
     function toggleExtra(name) {
@@ -441,6 +423,8 @@ function Product() {
                 setChangedFillings([]);
 
                 setFiveKgFillings([
+                    "",
+                    "",
                     "",
                     ""
                 ]);
@@ -462,7 +446,9 @@ function Product() {
 
 
     /*
-     * CAMBIAR UN RELLENO
+     * ==========================================
+     * CAMBIAR RELLENO NORMAL
+     * ==========================================
      */
 
     function handleFillingChange(
@@ -488,7 +474,9 @@ function Product() {
 
 
     /*
-     * CAMBIAR RELLENO PARA 5 KG
+     * ==========================================
+     * CAMBIAR RELLENO 5 KG
+     * ==========================================
      */
 
     function handleFiveKgFillingChange(
@@ -514,7 +502,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * CANTIDAD DE RELLENOS CAMBIADOS
+     * ==========================================
      */
 
     const changedFillingsCount =
@@ -532,7 +522,9 @@ function Product() {
 
 
     /*
-     * PRECIO DE EXTRAS
+     * ==========================================
+     * PRECIO EXTRAS
+     * ==========================================
      */
 
     const extrasPrice = useMemo(() => {
@@ -593,19 +585,43 @@ function Product() {
 
 
     /*
-     * PRECIO BASE
+     * ==========================================
+     * CLAVE DEL PRECIO
+     * ==========================================
+     *
+     * FIREBASE:
+     *
+     * 16     → 18000
+     * 16-1   → 10000
+     * 16-2   → 20000
+     * 16-3   → 30000
+     *
+     * 20     → 25000
+     * 20-2   → 20001
+     * 20-3   → 30001
+     * 20-5   → 50001
+     *
+     * 24     → 32000
+     * 24-2   → 20001
+     *
+     * Para personalizada usamos cm + kg.
      */
 
     const priceKey =
         isBento
             ? "10"
             : isPersonalized
-                ? `${selectedSize}-${selectedWeight}`
+                ? `${selectedSize}-${selectedWeight.replace(
+                    " kg",
+                    ""
+                )}`
                 : String(selectedSize);
 
 
     /*
+     * ==========================================
      * PRECIO BASE
+     * ==========================================
      */
 
     const basePrice =
@@ -615,7 +631,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * PRECIO TOTAL
+     * ==========================================
      */
 
     const totalPrice = useMemo(() => {
@@ -637,7 +655,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * AGREGAR AL PEDIDO
+     * ==========================================
      */
 
     function handleAdd() {
@@ -679,7 +699,7 @@ function Product() {
 
 
         /*
-         * AGREGAR CAMBIO DE RELLENO
+         * CAMBIO DE RELLENO
          */
 
         if (
@@ -706,7 +726,9 @@ function Product() {
 
 
         /*
-         * CONFIGURACIÓN DE BIZCOCHUELOS
+         * ==========================================
+         * BIZCOCHUELOS
+         * ==========================================
          */
 
         const selectedFlavors =
@@ -724,19 +746,32 @@ function Product() {
 
 
         /*
-         * CONFIGURACIÓN DE RELLENOS
+         * ==========================================
+         * RELLENOS
+         * ==========================================
+         *
+         * 5 kg:
+         *
+         * [0] = bizcochuelo 1 - relleno 1
+         * [1] = bizcochuelo 1 - relleno 2
+         * [2] = bizcochuelo 2 - relleno 1
+         * [3] = bizcochuelo 2 - relleno 2
          */
 
         const selectedFillings =
             isFiveKg20cm
                 ? [
-
                     fiveKgFillings[0] ||
                     defaultFilling,
 
                     fiveKgFillings[1] ||
-                    defaultFilling
+                    defaultFilling,
 
+                    fiveKgFillings[2] ||
+                    defaultFilling,
+
+                    fiveKgFillings[3] ||
+                    defaultFilling
                 ]
                 : (
                     changedFillings.length > 0
@@ -746,33 +781,65 @@ function Product() {
 
 
         /*
+         * ==========================================
          * AGREGAR AL CARRITO
+         * ==========================================
          */
 
         addToCart({
 
             ...product,
 
+
+            /*
+             * Tamaño
+             */
+
             size:
                 isBento
                     ? "10"
                     : selectedSize,
+
+
+            /*
+             * Forma Bento
+             */
 
             bentoForm:
                 isBento
                     ? selectedBentoForm
                     : "",
 
+
+            /*
+             * Peso
+             */
+
             weight:
                 isPersonalized
                     ? selectedWeight
                     : "",
 
+
+            /*
+             * Bizcochuelo principal
+             */
+
             flavor:
                 selectedFlavor,
 
+
+            /*
+             * Todos los bizcochuelos
+             */
+
             flavorsSelected:
                 selectedFlavors,
+
+
+            /*
+             * Relleno principal
+             */
 
             filling:
                 isFiveKg20cm
@@ -782,31 +849,72 @@ function Product() {
                         ""
                     ),
 
+
+            /*
+             * Todos los rellenos
+             */
+
             fillingsSelected:
                 selectedFillings,
+
+
+            /*
+             * Cobertura
+             */
 
             covering:
                 selectedCovering,
 
+
+            /*
+             * Extras
+             */
+
             extras,
+
+
+            /*
+             * Rellenos modificados
+             */
 
             changedFillings:
                 isFiveKg20cm
                     ? selectedFillings
                     : changedFillings,
 
+
             fillingChanges:
                 changedFillingsCount,
 
             fillingChangePrice,
 
+
+            /*
+             * Detalle de precios
+             */
+
             basePrice,
 
             extraDetails,
 
+
+            /*
+             * Clave del precio
+             */
+
             priceKey,
 
+
+            /*
+             * Observaciones
+             */
+
             note,
+
+
+            /*
+             * Precio final
+             */
 
             price:
                 totalPrice
@@ -822,7 +930,49 @@ function Product() {
 
 
     /*
+     * ==========================================
+     * GALERÍA
+     * ==========================================
+     */
+
+    function nextImage() {
+
+        if (galleryImages.length <= 1) {
+            return;
+        }
+
+        setSelectedImage(
+            current =>
+                (current + 1) %
+                galleryImages.length
+        );
+
+    }
+
+
+    function previousImage() {
+
+        if (galleryImages.length <= 1) {
+            return;
+        }
+
+        setSelectedImage(
+            current =>
+                (
+                    current -
+                    1 +
+                    galleryImages.length
+                ) %
+                galleryImages.length
+        );
+
+    }
+
+
+    /*
+     * ==========================================
      * CARGANDO
+     * ==========================================
      */
 
     if (loading) {
@@ -834,7 +984,9 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-2xl font-bold">
+
                         Cargando producto...
+
                     </h2>
 
                 </div>
@@ -847,7 +999,9 @@ function Product() {
 
 
     /*
+     * ==========================================
      * PRODUCTO NO ENCONTRADO
+     * ==========================================
      */
 
     if (!product) {
@@ -859,7 +1013,9 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-3xl font-bold">
+
                         Producto no encontrado
+
                     </h2>
 
                 </div>
@@ -879,42 +1035,33 @@ function Product() {
 
 
                 {/* ================================= */}
-                {/* GALERÍA DE IMÁGENES */}
+                {/* GALERÍA */}
                 {/* ================================= */}
 
-                <div className="relative">
+                <div>
 
                     <div
                         className="
-                            w-full
+                            relative
+                            rounded-3xl
                             overflow-hidden
                             bg-[#F8F3F0]
                             cursor-pointer
                         "
-                        onClick={() => {
-
-                            if (
-                                productImages.length > 0
-                            ) {
-                                setIsImageOpen(true);
-                            }
-
-                        }}
+                        onClick={() =>
+                            setGalleryOpen(true)
+                        }
                     >
 
-                        {productImages.length > 0 ? (
+                        {galleryImages.length > 0 ? (
 
                             <img
                                 src={
-                                    productImages[
+                                    galleryImages[
                                         selectedImage
                                     ]
                                 }
-                                alt={
-                                    `${product.name} ${
-                                        selectedImage + 1
-                                    }`
-                                }
+                                alt={product.name}
                                 className="
                                     w-full
                                     h-auto
@@ -940,93 +1087,178 @@ function Product() {
 
                         )}
 
+
+                        {/* Flecha anterior */}
+
+                        {galleryImages.length > 1 && (
+
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    previousImage();
+                                }}
+                                className="
+                                    absolute
+                                    left-3
+                                    top-1/2
+                                    -translate-y-1/2
+                                    w-10
+                                    h-10
+                                    rounded-full
+                                    bg-white/80
+                                    backdrop-blur
+                                    shadow
+                                    flex
+                                    items-center
+                                    justify-center
+                                    text-xl
+                                "
+                            >
+
+                                ‹
+
+                            </button>
+
+                        )}
+
+
+                        {/* Flecha siguiente */}
+
+                        {galleryImages.length > 1 && (
+
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    nextImage();
+                                }}
+                                className="
+                                    absolute
+                                    right-3
+                                    top-1/2
+                                    -translate-y-1/2
+                                    w-10
+                                    h-10
+                                    rounded-full
+                                    bg-white/80
+                                    backdrop-blur
+                                    shadow
+                                    flex
+                                    items-center
+                                    justify-center
+                                    text-xl
+                                "
+                            >
+
+                                ›
+
+                            </button>
+
+                        )}
+
+
+                        {/* Indicadores */}
+
+                        {galleryImages.length > 1 && (
+
+                            <div className="
+                                absolute
+                                bottom-4
+                                left-0
+                                right-0
+                                flex
+                                justify-center
+                                gap-2
+                            ">
+
+                                {galleryImages.map(
+                                    (_, index) => (
+
+                                        <button
+                                            key={index}
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedImage(index);
+                                            }}
+                                            className={`
+                                                w-2.5
+                                                h-2.5
+                                                rounded-full
+                                                transition
+                                                ${
+                                                    selectedImage === index
+                                                        ? "bg-white"
+                                                        : "bg-white/50"
+                                                }
+                                            `}
+                                        />
+
+                                    )
+                                )}
+
+                            </div>
+
+                        )}
+
                     </div>
 
 
-                    {/* ================================= */}
-                    {/* FLECHA ANTERIOR */}
-                    {/* ================================= */}
+                    {/* Miniaturas */}
 
-                    {productImages.length > 1 && (
+                    {galleryImages.length > 1 && (
 
-                        <button
-                            type="button"
-                            aria-label="Imagen anterior"
-                            onClick={(e) => {
+                        <div className="
+                            flex
+                            gap-3
+                            mt-3
+                            overflow-x-auto
+                            pb-2
+                        ">
 
-                                e.stopPropagation();
+                            {galleryImages.map(
+                                (image, index) => (
 
-                                previousImage();
+                                    <button
+                                        key={image}
+                                        type="button"
+                                        onClick={() =>
+                                            setSelectedImage(
+                                                index
+                                            )
+                                        }
+                                        className={`
+                                            flex-shrink-0
+                                            w-20
+                                            h-20
+                                            rounded-xl
+                                            overflow-hidden
+                                            border-2
+                                            ${
+                                                selectedImage === index
+                                                    ? "border-[#D08A9B]"
+                                                    : "border-transparent"
+                                            }
+                                        `}
+                                    >
 
-                            }}
-                            className="
-                                absolute
-                                left-3
-                                top-1/2
-                                -translate-y-1/2
-                                w-10
-                                h-10
-                                rounded-full
-                                bg-white/85
-                                backdrop-blur-sm
-                                shadow
-                                flex
-                                items-center
-                                justify-center
-                                text-xl
-                                text-[#5A3B31]
-                                hover:bg-white
-                                transition
-                            "
-                        >
+                                        <img
+                                            src={image}
+                                            alt={`${product.name} ${index + 1}`}
+                                            className="
+                                                w-full
+                                                h-full
+                                                object-cover
+                                            "
+                                        />
 
-                            ‹
+                                    </button>
 
-                        </button>
+                                )
+                            )}
 
-                    )}
-
-
-                    {/* ================================= */}
-                    {/* FLECHA SIGUIENTE */}
-                    {/* ================================= */}
-
-                    {productImages.length > 1 && (
-
-                        <button
-                            type="button"
-                            aria-label="Siguiente imagen"
-                            onClick={(e) => {
-
-                                e.stopPropagation();
-
-                                nextImage();
-
-                            }}
-                            className="
-                                absolute
-                                right-3
-                                top-1/2
-                                -translate-y-1/2
-                                w-10
-                                h-10
-                                rounded-full
-                                bg-white/85
-                                backdrop-blur-sm
-                                shadow
-                                flex
-                                items-center
-                                justify-center
-                                text-xl
-                                text-[#5A3B31]
-                                hover:bg-white
-                                transition
-                            "
-                        >
-
-                            ›
-
-                        </button>
+                        </div>
 
                     )}
 
@@ -1034,122 +1266,10 @@ function Product() {
 
 
                 {/* ================================= */}
-                {/* PUNTOS DE LA GALERÍA */}
+                {/* VISOR DE IMAGEN GRANDE */}
                 {/* ================================= */}
 
-                {productImages.length > 1 && (
-
-                    <div className="
-                        flex
-                        justify-center
-                        items-center
-                        gap-2
-                        mt-4
-                    ">
-
-                        {productImages.map(
-                            (image, index) => (
-
-                                <button
-                                    key={`${image}-${index}`}
-                                    type="button"
-                                    aria-label={
-                                        `Ver imagen ${
-                                            index + 1
-                                        }`
-                                    }
-                                    onClick={() =>
-                                        handleImageChange(
-                                            index
-                                        )
-                                    }
-                                    className={`
-                                        w-2
-                                        h-2
-                                        rounded-full
-                                        transition-all
-                                        ${
-                                            selectedImage === index
-                                                ? "bg-[#D08A9B] scale-125"
-                                                : "bg-[#D8C7C0]"
-                                        }
-                                    `}
-                                />
-
-                            )
-                        )}
-
-                    </div>
-
-                )}
-
-
-                {/* ================================= */}
-                {/* MINIATURAS */}
-                {/* ================================= */}
-
-                {productImages.length > 1 && (
-
-                    <div className="
-                        flex
-                        gap-3
-                        mt-4
-                        overflow-x-auto
-                        pb-2
-                    ">
-
-                        {productImages.map(
-                            (image, index) => (
-
-                                <button
-                                    key={`thumbnail-${image}-${index}`}
-                                    type="button"
-                                    onClick={() =>
-                                        handleImageChange(
-                                            index
-                                        )
-                                    }
-                                    className={`
-                                        flex-shrink-0
-                                        w-20
-                                        h-20
-                                        overflow-hidden
-                                        border-2
-                                        transition
-                                        ${
-                                            selectedImage === index
-                                                ? "border-[#D08A9B]"
-                                                : "border-transparent"
-                                        }
-                                    `}
-                                >
-
-                                    <img
-                                        src={image}
-                                        alt=""
-                                        className="
-                                            w-full
-                                            h-full
-                                            object-cover
-                                        "
-                                    />
-
-                                </button>
-
-                            )
-                        )}
-
-                    </div>
-
-                )}
-
-
-                {/* ================================= */}
-                {/* IMAGEN EN GRANDE */}
-                {/* ================================= */}
-
-                {isImageOpen &&
-                    productImages.length > 0 && (
+                {galleryOpen && galleryImages.length > 0 && (
 
                     <div
                         className="
@@ -1163,33 +1283,29 @@ function Product() {
                             p-4
                         "
                         onClick={() =>
-                            setIsImageOpen(false)
+                            setGalleryOpen(false)
                         }
                     >
 
-                        {/* CERRAR */}
-
                         <button
                             type="button"
-                            aria-label="Cerrar"
                             onClick={() =>
-                                setIsImageOpen(false)
+                                setGalleryOpen(false)
                             }
                             className="
                                 absolute
                                 top-5
                                 right-5
-                                z-[110]
                                 w-10
                                 h-10
                                 rounded-full
-                                bg-white/90
-                                text-[#5A3B31]
+                                bg-white
+                                text-black
                                 text-2xl
                                 flex
                                 items-center
                                 justify-center
-                                shadow-lg
+                                z-20
                             "
                         >
 
@@ -1198,57 +1314,29 @@ function Product() {
                         </button>
 
 
-                        {/* IMAGEN */}
-
-                        <img
-                            src={
-                                productImages[
-                                    selectedImage
-                                ]
-                            }
-                            alt={product.name}
-                            className="
-                                max-w-full
-                                max-h-[90vh]
-                                object-contain
-                                select-none
-                            "
-                            onClick={(e) =>
-                                e.stopPropagation()
-                            }
-                        />
-
-
-                        {/* ANTERIOR */}
-
-                        {productImages.length > 1 && (
+                        {galleryImages.length > 1 && (
 
                             <button
                                 type="button"
-                                aria-label="Imagen anterior"
                                 onClick={(e) => {
-
                                     e.stopPropagation();
-
                                     previousImage();
-
                                 }}
                                 className="
                                     absolute
-                                    left-3
-                                    sm:left-6
+                                    left-4
                                     top-1/2
                                     -translate-y-1/2
-                                    w-11
-                                    h-11
+                                    w-12
+                                    h-12
                                     rounded-full
                                     bg-white/90
-                                    text-[#5A3B31]
+                                    text-black
                                     text-3xl
                                     flex
                                     items-center
                                     justify-center
-                                    shadow-lg
+                                    z-20
                                 "
                             >
 
@@ -1259,68 +1347,53 @@ function Product() {
                         )}
 
 
-                        {/* SIGUIENTE */}
+                        <img
+                            src={
+                                galleryImages[
+                                    selectedImage
+                                ]
+                            }
+                            alt={product.name}
+                            className="
+                                max-w-full
+                                max-h-[90vh]
+                                object-contain
+                            "
+                            onClick={(e) =>
+                                e.stopPropagation()
+                            }
+                        />
 
-                        {productImages.length > 1 && (
+
+                        {galleryImages.length > 1 && (
 
                             <button
                                 type="button"
-                                aria-label="Siguiente imagen"
                                 onClick={(e) => {
-
                                     e.stopPropagation();
-
                                     nextImage();
-
                                 }}
                                 className="
                                     absolute
-                                    right-3
-                                    sm:right-6
+                                    right-4
                                     top-1/2
                                     -translate-y-1/2
-                                    w-11
-                                    h-11
+                                    w-12
+                                    h-12
                                     rounded-full
                                     bg-white/90
-                                    text-[#5A3B31]
+                                    text-black
                                     text-3xl
                                     flex
                                     items-center
                                     justify-center
-                                    shadow-lg
+                                    z-20
                                 "
                             >
 
                                 ›
 
                             </button>
-
-                        )}
-
-
-                        {/* CONTADOR */}
-
-                        {productImages.length > 1 && (
-
-                            <div className="
-                                absolute
-                                bottom-6
-                                left-1/2
-                                -translate-x-1/2
-                                bg-black/60
-                                text-white
-                                text-sm
-                                px-4
-                                py-2
-                                rounded-full
-                            ">
-
-                                {selectedImage + 1}
-                                {" / "}
-                                {productImages.length}
-
-                            </div>
 
                         )}
 
@@ -1445,7 +1518,7 @@ function Product() {
 
 
                         {/* ================================= */}
-                        {/* BENTO CAKES */}
+                        {/* BENTO */}
                         {/* ================================= */}
 
                         {isBento && (
@@ -1748,6 +1821,7 @@ function Product() {
 
                         {/* ================================= */}
                         {/* 20 CM / 5 KG */}
+                        {/* DOS BIZCOCHUELOS */}
                         {/* ================================= */}
 
                         {isFiveKg20cm && (
@@ -2274,6 +2348,7 @@ function Product() {
 
                                 {/* ================================= */}
                                 {/* RELLENOS 20 CM / 5 KG */}
+                                {/* 4 RELLENOS */}
                                 {/* ================================= */}
 
                                 {isFiveKg20cm &&
@@ -2281,7 +2356,7 @@ function Product() {
 
                                     <div className="
                                         mt-6
-                                        space-y-4
+                                        space-y-5
                                     ">
 
                                         <div>
@@ -2303,168 +2378,360 @@ function Product() {
                                             ">
 
                                                 Cada bizcochuelo
-                                                puede tener un
-                                                solo relleno.
+                                                puede tener hasta
+                                                dos rellenos.
 
                                             </p>
 
                                         </div>
 
 
-                                        {/* RELLENO 1 */}
+                                        {/* ================================= */}
+                                        {/* BIZCOCHUELO 1 */}
+                                        {/* ================================= */}
 
-                                        <div>
+                                        <div className="
+                                            space-y-4
+                                        ">
 
-                                            <label className="
+                                            <h4 className="
                                                 font-semibold
-                                                block
-                                                mb-2
                                             ">
 
-                                                Relleno del
-                                                bizcochuelo 1
+                                                Bizcochuelo 1
 
-                                            </label>
+                                            </h4>
 
 
-                                            <select
-                                                value={
-                                                    fiveKgFillings[0] ||
-                                                    defaultFilling
-                                                }
-                                                onChange={(e) =>
-                                                    handleFiveKgFillingChange(
-                                                        0,
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="
-                                                    w-full
-                                                    rounded-xl
-                                                    border
-                                                    p-4
-                                                "
-                                            >
+                                            {/* RELLENO 1 */}
 
-                                                <option
+                                            <div>
+
+                                                <label className="
+                                                    font-semibold
+                                                    block
+                                                    mb-2
+                                                ">
+
+                                                    Relleno 1
+
+                                                </label>
+
+
+                                                <select
                                                     value={
+                                                        fiveKgFillings[0] ||
                                                         defaultFilling
                                                     }
+                                                    onChange={(e) =>
+                                                        handleFiveKgFillingChange(
+                                                            0,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="
+                                                        w-full
+                                                        rounded-xl
+                                                        border
+                                                        p-4
+                                                    "
                                                 >
 
-                                                    {
-                                                        defaultFilling
+                                                    <option
+                                                        value={
+                                                            defaultFilling
+                                                        }
+                                                    >
+
+                                                        {
+                                                            defaultFilling
+                                                        }
+
+                                                    </option>
+
+
+                                                    {product.fillings
+                                                        ?.filter(
+                                                            filling =>
+                                                                filling !==
+                                                                defaultFilling
+                                                        )
+                                                        .map(
+                                                            filling => (
+
+                                                                <option
+                                                                    key={
+                                                                        filling
+                                                                    }
+                                                                    value={
+                                                                        filling
+                                                                    }
+                                                                >
+
+                                                                    {filling}
+
+                                                                </option>
+
+                                                            )
+                                                        )
                                                     }
 
-                                                </option>
+                                                </select>
+
+                                            </div>
 
 
-                                                {product.fillings
-                                                    ?.filter(
-                                                        filling =>
-                                                            filling !==
-                                                            defaultFilling
-                                                    )
-                                                    .map(
-                                                        filling => (
+                                            {/* RELLENO 2 */}
 
-                                                            <option
-                                                                key={
-                                                                    filling
-                                                                }
-                                                                value={
-                                                                    filling
-                                                                }
-                                                            >
+                                            <div>
 
-                                                                {filling}
+                                                <label className="
+                                                    font-semibold
+                                                    block
+                                                    mb-2
+                                                ">
 
-                                                            </option>
+                                                    Relleno 2
 
+                                                </label>
+
+
+                                                <select
+                                                    value={
+                                                        fiveKgFillings[1] ||
+                                                        defaultFilling
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleFiveKgFillingChange(
+                                                            1,
+                                                            e.target.value
                                                         )
-                                                    )
-                                                }
+                                                    }
+                                                    className="
+                                                        w-full
+                                                        rounded-xl
+                                                        border
+                                                        p-4
+                                                    "
+                                                >
 
-                                            </select>
+                                                    <option
+                                                        value={
+                                                            defaultFilling
+                                                        }
+                                                    >
+
+                                                        {
+                                                            defaultFilling
+                                                        }
+
+                                                    </option>
+
+
+                                                    {product.fillings
+                                                        ?.filter(
+                                                            filling =>
+                                                                filling !==
+                                                                defaultFilling
+                                                        )
+                                                        .map(
+                                                            filling => (
+
+                                                                <option
+                                                                    key={
+                                                                        filling
+                                                                    }
+                                                                    value={
+                                                                        filling
+                                                                    }
+                                                                >
+
+                                                                    {filling}
+
+                                                                </option>
+
+                                                            )
+                                                        )
+                                                    }
+
+                                                </select>
+
+                                            </div>
 
                                         </div>
 
 
-                                        {/* RELLENO 2 */}
+                                        {/* ================================= */}
+                                        {/* BIZCOCHUELO 2 */}
+                                        {/* ================================= */}
 
-                                        <div>
+                                        <div className="
+                                            space-y-4
+                                        ">
 
-                                            <label className="
+                                            <h4 className="
                                                 font-semibold
-                                                block
-                                                mb-2
                                             ">
 
-                                                Relleno del
-                                                bizcochuelo 2
+                                                Bizcochuelo 2
 
-                                            </label>
+                                            </h4>
 
 
-                                            <select
-                                                value={
-                                                    fiveKgFillings[1] ||
-                                                    defaultFilling
-                                                }
-                                                onChange={(e) =>
-                                                    handleFiveKgFillingChange(
-                                                        1,
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="
-                                                    w-full
-                                                    rounded-xl
-                                                    border
-                                                    p-4
-                                                "
-                                            >
+                                            {/* RELLENO 1 */}
 
-                                                <option
+                                            <div>
+
+                                                <label className="
+                                                    font-semibold
+                                                    block
+                                                    mb-2
+                                                ">
+
+                                                    Relleno 1
+
+                                                </label>
+
+
+                                                <select
                                                     value={
+                                                        fiveKgFillings[2] ||
                                                         defaultFilling
                                                     }
+                                                    onChange={(e) =>
+                                                        handleFiveKgFillingChange(
+                                                            2,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="
+                                                        w-full
+                                                        rounded-xl
+                                                        border
+                                                        p-4
+                                                    "
                                                 >
 
-                                                    {
-                                                        defaultFilling
+                                                    <option
+                                                        value={
+                                                            defaultFilling
+                                                        }
+                                                    >
+
+                                                        {
+                                                            defaultFilling
+                                                        }
+
+                                                    </option>
+
+
+                                                    {product.fillings
+                                                        ?.filter(
+                                                            filling =>
+                                                                filling !==
+                                                                defaultFilling
+                                                        )
+                                                        .map(
+                                                            filling => (
+
+                                                                <option
+                                                                    key={
+                                                                        filling
+                                                                    }
+                                                                    value={
+                                                                        filling
+                                                                    }
+                                                                >
+
+                                                                    {filling}
+
+                                                                </option>
+
+                                                            )
+                                                        )
                                                     }
 
-                                                </option>
+                                                </select>
+
+                                            </div>
 
 
-                                                {product.fillings
-                                                    ?.filter(
-                                                        filling =>
-                                                            filling !==
-                                                            defaultFilling
-                                                    )
-                                                    .map(
-                                                        filling => (
+                                            {/* RELLENO 2 */}
 
-                                                            <option
-                                                                key={
-                                                                    filling
-                                                                }
-                                                                value={
-                                                                    filling
-                                                                }
-                                                            >
+                                            <div>
 
-                                                                {filling}
+                                                <label className="
+                                                    font-semibold
+                                                    block
+                                                    mb-2
+                                                ">
 
-                                                            </option>
+                                                    Relleno 2
 
+                                                </label>
+
+
+                                                <select
+                                                    value={
+                                                        fiveKgFillings[3] ||
+                                                        defaultFilling
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleFiveKgFillingChange(
+                                                            3,
+                                                            e.target.value
                                                         )
-                                                    )
-                                                }
+                                                    }
+                                                    className="
+                                                        w-full
+                                                        rounded-xl
+                                                        border
+                                                        p-4
+                                                    "
+                                                >
 
-                                            </select>
+                                                    <option
+                                                        value={
+                                                            defaultFilling
+                                                        }
+                                                    >
+
+                                                        {
+                                                            defaultFilling
+                                                        }
+
+                                                    </option>
+
+
+                                                    {product.fillings
+                                                        ?.filter(
+                                                            filling =>
+                                                                filling !==
+                                                                defaultFilling
+                                                        )
+                                                        .map(
+                                                            filling => (
+
+                                                                <option
+                                                                    key={
+                                                                        filling
+                                                                    }
+                                                                    value={
+                                                                        filling
+                                                                    }
+                                                                >
+
+                                                                    {filling}
+
+                                                                </option>
+
+                                                            )
+                                                        )
+                                                    }
+
+                                                </select>
+
+                                            </div>
 
                                         </div>
 

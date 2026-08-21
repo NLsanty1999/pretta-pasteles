@@ -360,8 +360,28 @@ function Cart() {
                                 RELLENO
                             ========================= */}
 
-                            {item.fillingsSelected?.length > 1 ? (
+                            {item.fillingsSelected?.length === 4 ? (
+
     <div className="mt-2 space-y-1">
+
+        <p>
+            <b>Rellenos bizcochuelo 1:</b>{" "}
+            {item.fillingsSelected[0]} y{" "}
+            {item.fillingsSelected[1]}
+        </p>
+
+        <p>
+            <b>Rellenos bizcochuelo 2:</b>{" "}
+            {item.fillingsSelected[2]} y{" "}
+            {item.fillingsSelected[3]}
+        </p>
+
+    </div>
+
+) : item.fillingsSelected?.length > 1 ? (
+
+    <div className="mt-2 space-y-1">
+
         <p>
             <b>Relleno bizcochuelo 1:</b>{" "}
             {item.fillingsSelected[0]}
@@ -371,14 +391,18 @@ function Cart() {
             <b>Relleno bizcochuelo 2:</b>{" "}
             {item.fillingsSelected[1]}
         </p>
+
     </div>
+
 ) : (
+
     item.filling && (
         <p>
             <b>Relleno:</b>{" "}
             {item.filling}
         </p>
     )
+
 )}
 
 
