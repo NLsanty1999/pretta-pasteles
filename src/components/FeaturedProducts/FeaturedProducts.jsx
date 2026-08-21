@@ -366,7 +366,7 @@ function handleTouchEnd(e) {
     FIRMA
 ========================= */}
 
-<div className="flex flex-col items-center justify-center mt-8 mb-2">
+<div className="flex flex-col items-center justify-center mt-2 mb-2 translate-y-8">
 
     <div
         className="
@@ -393,12 +393,12 @@ function handleTouchEnd(e) {
     {/* Corazón de línea */}
 
     <svg
-        width="28"
-        height="24"
+        width="22"
+        height="19"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="mt-1 text-[#D08A9B]/40"
+        className="mt-0 text-[#D08A9B]/40"
     >
 
         <path
