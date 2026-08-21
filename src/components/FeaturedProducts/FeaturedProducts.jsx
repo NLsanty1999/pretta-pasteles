@@ -356,6 +356,53 @@ function handleTouchEnd(e) {
 
 )}
 
+{/* =========================
+    FIRMA
+========================= */}
+
+<div className="flex flex-col items-center justify-center mt-8 mb-2">
+
+    <div
+        className="
+            relative
+            text-[#5A3B31]/35
+            font-serif
+            italic
+            text-3xl
+            tracking-normal
+            leading-none
+        "
+    >
+        <span>
+            C
+        </span>
+
+        <span>
+            Y
+        </span>
+    </div>
+
+    {/* Corazón de línea */}
+
+    <svg
+        width="28"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="mt-1 text-[#D08A9B]/40"
+    >
+        <path
+            d="M20.84 4.61C19.84 3.61 18.48 3 17 3C15.52 3 14.16 3.61 13.16 4.61L12 5.77L10.84 4.61C9.84 3.61 8.48 3 7 3C5.52 3 4.16 3.61 3.16 4.61C1.05 6.72 1.05 10.14 3.16 12.25L12 21L20.84 12.25C22.95 10.14 22.95 6.72 20.84 4.61Z"
+            stroke="currentColor"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+
+</div>
+
         </section>
     );
 }

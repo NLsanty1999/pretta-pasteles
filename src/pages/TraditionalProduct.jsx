@@ -1356,7 +1356,7 @@ addToCart({
                                     mb-4
                                 ">
 
-                                    ¿queres personalizar tu torta?
+                                    ¿Querés personalizar tu torta?
 
                                 </p>
 
@@ -1537,7 +1537,7 @@ addToCart({
                                 text-left
                                 align-top
                             "
-                            placeholder="Ej.: Sin nueces, escribir dedicatoria..."
+                            placeholder="Ej: frase en la torta, colores, etc."
                         />
 
 

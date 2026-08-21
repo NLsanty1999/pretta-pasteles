@@ -56,14 +56,6 @@ function Product() {
      * ==========================================
      * 20 CM / 5 KG
      * CUATRO RELLENOS
-     *
-     * Bizcochuelo 1:
-     *   relleno 1
-     *   relleno 2
-     *
-     * Bizcochuelo 2:
-     *   relleno 3
-     *   relleno 4
      * ==========================================
      */
 
@@ -92,11 +84,6 @@ function Product() {
         const images = Array.isArray(product.images)
             ? product.images.filter(Boolean)
             : [];
-
-        /*
-         * Si image existe y no está dentro de images,
-         * también la agregamos.
-         */
 
         if (
             product.image &&
@@ -166,6 +153,39 @@ function Product() {
         product?.bentoForms?.[0] ||
         product?.forms?.[0] ||
         "";
+
+
+    /*
+     * ==========================================
+     * AVISO RELLENO CON FRUTAS
+     * ==========================================
+     */
+
+    const isFruitFillingSelected = (filling) =>
+        filling ===
+        "Chantillí con fruta a elección (duraznos, cerezas, frutillas, arándanos o mix de frutos rojos)";
+
+
+    function FruitFillingNotice({ filling }) {
+
+        if (!isFruitFillingSelected(filling)) {
+            return null;
+        }
+
+        return (
+            <p className="
+                mt-2
+                text-sm
+                text-[#D08A9B]
+                bg-pink-50
+                rounded-xl
+                p-3
+            ">
+                🍓 Recordatorio: Indica en observaciones que fruta elegís.
+            </p>
+        );
+
+    }
 
 
     /*
@@ -266,11 +286,6 @@ function Product() {
 
             "20-2 kg": 1,
             "20-3 kg": 2,
-
-            /*
-             * En 5 kg tenemos 4 rellenos:
-             * 2 por cada bizcochuelo.
-             */
 
             "20-5 kg": 4,
 
@@ -588,23 +603,6 @@ function Product() {
      * ==========================================
      * CLAVE DEL PRECIO
      * ==========================================
-     *
-     * FIREBASE:
-     *
-     * 16     → 18000
-     * 16-1   → 10000
-     * 16-2   → 20000
-     * 16-3   → 30000
-     *
-     * 20     → 25000
-     * 20-2   → 20001
-     * 20-3   → 30001
-     * 20-5   → 50001
-     *
-     * 24     → 32000
-     * 24-2   → 20001
-     *
-     * Para personalizada usamos cm + kg.
      */
 
     const priceKey =
@@ -749,13 +747,6 @@ function Product() {
          * ==========================================
          * RELLENOS
          * ==========================================
-         *
-         * 5 kg:
-         *
-         * [0] = bizcochuelo 1 - relleno 1
-         * [1] = bizcochuelo 1 - relleno 2
-         * [2] = bizcochuelo 2 - relleno 1
-         * [3] = bizcochuelo 2 - relleno 2
          */
 
         const selectedFillings =
@@ -790,56 +781,26 @@ function Product() {
 
             ...product,
 
-
-            /*
-             * Tamaño
-             */
-
             size:
                 isBento
                     ? "10"
                     : selectedSize,
-
-
-            /*
-             * Forma Bento
-             */
 
             bentoForm:
                 isBento
                     ? selectedBentoForm
                     : "",
 
-
-            /*
-             * Peso
-             */
-
             weight:
                 isPersonalized
                     ? selectedWeight
                     : "",
 
-
-            /*
-             * Bizcochuelo principal
-             */
-
             flavor:
                 selectedFlavor,
 
-
-            /*
-             * Todos los bizcochuelos
-             */
-
             flavorsSelected:
                 selectedFlavors,
-
-
-            /*
-             * Relleno principal
-             */
 
             filling:
                 isFiveKg20cm
@@ -849,72 +810,31 @@ function Product() {
                         ""
                     ),
 
-
-            /*
-             * Todos los rellenos
-             */
-
             fillingsSelected:
                 selectedFillings,
-
-
-            /*
-             * Cobertura
-             */
 
             covering:
                 selectedCovering,
 
-
-            /*
-             * Extras
-             */
-
             extras,
-
-
-            /*
-             * Rellenos modificados
-             */
 
             changedFillings:
                 isFiveKg20cm
                     ? selectedFillings
                     : changedFillings,
 
-
             fillingChanges:
                 changedFillingsCount,
 
             fillingChangePrice,
 
-
-            /*
-             * Detalle de precios
-             */
-
             basePrice,
 
             extraDetails,
 
-
-            /*
-             * Clave del precio
-             */
-
             priceKey,
 
-
-            /*
-             * Observaciones
-             */
-
             note,
-
-
-            /*
-             * Precio final
-             */
 
             price:
                 totalPrice
@@ -984,9 +904,7 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-2xl font-bold">
-
                         Cargando producto...
-
                     </h2>
 
                 </div>
@@ -1013,9 +931,7 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-3xl font-bold">
-
                         Producto no encontrado
-
                     </h2>
 
                 </div>
@@ -1995,6 +1911,10 @@ function Product() {
 
                                 </div>
 
+                                <FruitFillingNotice
+                                    filling={defaultFilling}
+                                />
+
                             </div>
 
                         )}
@@ -2336,6 +2256,15 @@ function Product() {
 
                                                     </select>
 
+                                                    <FruitFillingNotice
+                                                        filling={
+                                                            changedFillings[
+                                                                index
+                                                            ] ||
+                                                            defaultFilling
+                                                        }
+                                                    />
+
                                                 </div>
 
                                             )
@@ -2478,6 +2407,13 @@ function Product() {
 
                                                 </select>
 
+                                                <FruitFillingNotice
+                                                    filling={
+                                                        fiveKgFillings[0] ||
+                                                        defaultFilling
+                                                    }
+                                                />
+
                                             </div>
 
 
@@ -2555,6 +2491,13 @@ function Product() {
                                                     }
 
                                                 </select>
+
+                                                <FruitFillingNotice
+                                                    filling={
+                                                        fiveKgFillings[1] ||
+                                                        defaultFilling
+                                                    }
+                                                />
 
                                             </div>
 
@@ -2653,6 +2596,13 @@ function Product() {
 
                                                 </select>
 
+                                                <FruitFillingNotice
+                                                    filling={
+                                                        fiveKgFillings[2] ||
+                                                        defaultFilling
+                                                    }
+                                                />
+
                                             </div>
 
 
@@ -2731,6 +2681,13 @@ function Product() {
 
                                                 </select>
 
+                                                <FruitFillingNotice
+                                                    filling={
+                                                        fiveKgFillings[3] ||
+                                                        defaultFilling
+                                                    }
+                                                />
+
                                             </div>
 
                                         </div>
@@ -2768,7 +2725,7 @@ function Product() {
                                         e.target.value
                                     )
                                 }
-                                placeholder="Ej.: Sin azúcar, nombre para la torta, colores, etc."
+                                placeholder="ej: ideas, colores de preferencia, tarjeta de regalo, lo que quierasss :)"
                                 className="
                                     w-full
                                     h-32
@@ -2867,4 +2824,3 @@ function Product() {
 }
 
 export default Product;
-
