@@ -6,7 +6,7 @@ import FeaturedProducts from "../components/FeaturedProducts/FeaturedProducts";
 function Home() {
 
     return (
-        <Layout>
+        <Layout fullWidth>
 
             <Hero />
 
