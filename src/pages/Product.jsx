@@ -19,9 +19,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * BUSCAR PRODUCTO
-     * ==========================================
      */
 
     const product = products.find(
@@ -32,9 +30,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * ESTADOS
-     * ==========================================
      */
 
     const [size, setSize] = useState("");
@@ -53,10 +49,17 @@ function Product() {
 
 
     /*
-     * ==========================================
+     * GALERÍA
+     */
+
+    const [selectedImage, setSelectedImage] = useState(0);
+
+    const [isImageOpen, setIsImageOpen] = useState(false);
+
+
+    /*
      * 20 CM / 5 KG
      * DOS BIZCOCHUELOS
-     * ==========================================
      */
 
     const [secondFlavor, setSecondFlavor] = useState("");
@@ -68,9 +71,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * TIPOS DE PRODUCTO
-     * ==========================================
      */
 
     const isPersonalized =
@@ -93,9 +94,104 @@ function Product() {
 
 
     /*
-     * ==========================================
+     * GALERÍA DE IMÁGENES
+     *
+     * Usa:
+     *
+     * product.image
+     *
+     * + todas las imágenes de:
+     *
+     * product.images
+     *
+     * Se eliminan imágenes repetidas.
+     */
+
+    const productImages = useMemo(() => {
+
+        if (!product) {
+            return [];
+        }
+
+        const images = [];
+
+        if (product.image) {
+            images.push(product.image);
+        }
+
+        if (Array.isArray(product.images)) {
+            images.push(
+                ...product.images.filter(Boolean)
+            );
+        }
+
+        return [...new Set(images)];
+
+    }, [product]);
+
+
+    /*
+     * CAMBIAR IMAGEN PRINCIPAL
+     */
+
+    function handleImageChange(index) {
+
+        if (
+            index < 0 ||
+            index >= productImages.length
+        ) {
+            return;
+        }
+
+        setSelectedImage(index);
+
+    }
+
+
+    /*
+     * SIGUIENTE IMAGEN
+     */
+
+    function nextImage() {
+
+        if (productImages.length <= 1) {
+            return;
+        }
+
+        setSelectedImage(
+            current =>
+                (current + 1) %
+                productImages.length
+        );
+
+    }
+
+
+    /*
+     * IMAGEN ANTERIOR
+     */
+
+    function previousImage() {
+
+        if (productImages.length <= 1) {
+            return;
+        }
+
+        setSelectedImage(
+            current =>
+                (
+                    current -
+                    1 +
+                    productImages.length
+                ) %
+                productImages.length
+        );
+
+    }
+
+
+    /*
      * VALORES POR DEFECTO
-     * ==========================================
      */
 
     const selectedSize =
@@ -121,11 +217,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * PESOS DISPONIBLES
-     *
-     * SOLO PERSONALIZADAS
-     * ==========================================
      */
 
     const availableWeights = useMemo(() => {
@@ -166,9 +258,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * PESO SELECCIONADO
-     * ==========================================
      */
 
     const selectedWeight =
@@ -178,9 +268,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * 20 CM / 5 KG
-     * ==========================================
      */
 
     const isFiveKg20cm =
@@ -190,9 +278,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * RELLENO POR DEFECTO
-     * ==========================================
      */
 
     const defaultFilling =
@@ -201,9 +287,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * CANTIDAD DE RELLENOS
-     * ==========================================
      */
 
     const fillingLimit = useMemo(() => {
@@ -240,9 +324,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * CAMBIO DE RELLENO ACTIVADO
-     * ==========================================
      */
 
     const fillingChangeActive =
@@ -250,9 +332,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * PRECIO DEL CAMBIO DE RELLENO
-     * ==========================================
      */
 
     const fillingChangePrice =
@@ -262,9 +342,7 @@ function Product() {
 
 
     /*
-     * ==========================================
-     * CAMBIAR TAMAÑO
-     * ==========================================
+     * CAMBIAR TAMAÑO / PRESENTACIÓN
      */
 
     function handleSizeChange(newSize) {
@@ -316,9 +394,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * CAMBIAR PESO
-     * ==========================================
      */
 
     function handleWeightChange(newWeight) {
@@ -345,9 +421,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * ACTIVAR / DESACTIVAR EXTRA
-     * ==========================================
      */
 
     function toggleExtra(name) {
@@ -388,9 +462,7 @@ function Product() {
 
 
     /*
-     * ==========================================
-     * CAMBIAR RELLENO
-     * ==========================================
+     * CAMBIAR UN RELLENO
      */
 
     function handleFillingChange(
@@ -416,9 +488,7 @@ function Product() {
 
 
     /*
-     * ==========================================
-     * CAMBIAR RELLENO 5 KG
-     * ==========================================
+     * CAMBIAR RELLENO PARA 5 KG
      */
 
     function handleFiveKgFillingChange(
@@ -444,9 +514,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * CANTIDAD DE RELLENOS CAMBIADOS
-     * ==========================================
      */
 
     const changedFillingsCount =
@@ -464,9 +532,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * PRECIO DE EXTRAS
-     * ==========================================
      */
 
     const extrasPrice = useMemo(() => {
@@ -527,64 +593,19 @@ function Product() {
 
 
     /*
-     * ==========================================
-     * CLAVE DEL PRECIO
-     * ==========================================
-     *
-     * PERSONALIZADAS
-     *
-     * Firebase guarda:
-     *
-     * 16-1
-     * 16-2
-     * 16-3
-     * 20-2
-     * 20-3
-     * 20-5
-     * 24-2
-     *
-     * Por eso quitamos " kg" del peso.
-     *
-     * EJEMPLO:
-     *
-     * selectedSize = "16"
-     * selectedWeight = "2 kg"
-     *
-     * priceKey = "16-2"
-     *
-     * ------------------------------------------
-     *
-     * CLÁSICAS
-     *
-     * Firebase mantiene:
-     *
-     * "16"
-     * "20"
-     * "24"
-     *
-     * Por eso las clásicas siguen buscando
-     * solamente por centímetros.
-     * ==========================================
+     * PRECIO BASE
      */
-
-    const numericWeight =
-        String(selectedWeight)
-            .replace(" kg", "")
-            .trim();
-
 
     const priceKey =
         isBento
             ? "10"
             : isPersonalized
-                ? `${String(selectedSize)}-${numericWeight}`
+                ? `${selectedSize}-${selectedWeight}`
                 : String(selectedSize);
 
 
     /*
-     * ==========================================
      * PRECIO BASE
-     * ==========================================
      */
 
     const basePrice =
@@ -594,9 +615,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * PRECIO TOTAL
-     * ==========================================
      */
 
     const totalPrice = useMemo(() => {
@@ -618,9 +637,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * AGREGAR AL PEDIDO
-     * ==========================================
      */
 
     function handleAdd() {
@@ -662,7 +679,7 @@ function Product() {
 
 
         /*
-         * CAMBIO DE RELLENO
+         * AGREGAR CAMBIO DE RELLENO
          */
 
         if (
@@ -689,9 +706,7 @@ function Product() {
 
 
         /*
-         * ==========================================
          * CONFIGURACIÓN DE BIZCOCHUELOS
-         * ==========================================
          */
 
         const selectedFlavors =
@@ -709,9 +724,7 @@ function Product() {
 
 
         /*
-         * ==========================================
          * CONFIGURACIÓN DE RELLENOS
-         * ==========================================
          */
 
         const selectedFillings =
@@ -733,65 +746,33 @@ function Product() {
 
 
         /*
-         * ==========================================
          * AGREGAR AL CARRITO
-         * ==========================================
          */
 
         addToCart({
 
             ...product,
 
-
-            /*
-             * TAMAÑO
-             */
-
             size:
                 isBento
                     ? "10"
                     : selectedSize,
-
-
-            /*
-             * FORMA BENTO
-             */
 
             bentoForm:
                 isBento
                     ? selectedBentoForm
                     : "",
 
-
-            /*
-             * PESO
-             */
-
             weight:
                 isPersonalized
                     ? selectedWeight
                     : "",
 
-
-            /*
-             * BIZCOCHUELO PRINCIPAL
-             */
-
             flavor:
                 selectedFlavor,
 
-
-            /*
-             * TODOS LOS BIZCOCHUELOS
-             */
-
             flavorsSelected:
                 selectedFlavors,
-
-
-            /*
-             * RELLENO PRINCIPAL
-             */
 
             filling:
                 isFiveKg20cm
@@ -801,33 +782,13 @@ function Product() {
                         ""
                     ),
 
-
-            /*
-             * TODOS LOS RELLENOS
-             */
-
             fillingsSelected:
                 selectedFillings,
-
-
-            /*
-             * COBERTURA
-             */
 
             covering:
                 selectedCovering,
 
-
-            /*
-             * EXTRAS
-             */
-
             extras,
-
-
-            /*
-             * RELLENOS MODIFICADOS
-             */
 
             changedFillings:
                 isFiveKg20cm
@@ -839,30 +800,13 @@ function Product() {
 
             fillingChangePrice,
 
-
-            /*
-             * ==========================================
-             * DETALLE DE PRECIO
-             * ==========================================
-             */
-
             basePrice,
 
             extraDetails,
 
             priceKey,
 
-
-            /*
-             * OBSERVACIONES
-             */
-
             note,
-
-
-            /*
-             * PRECIO FINAL
-             */
 
             price:
                 totalPrice
@@ -878,9 +822,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * CARGANDO
-     * ==========================================
      */
 
     if (loading) {
@@ -892,9 +834,7 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-2xl font-bold">
-
                         Cargando producto...
-
                     </h2>
 
                 </div>
@@ -907,9 +847,7 @@ function Product() {
 
 
     /*
-     * ==========================================
      * PRODUCTO NO ENCONTRADO
-     * ==========================================
      */
 
     if (!product) {
@@ -921,9 +859,7 @@ function Product() {
                 <div className="text-center py-20">
 
                     <h2 className="text-3xl font-bold">
-
                         Producto no encontrado
-
                     </h2>
 
                 </div>
@@ -943,45 +879,454 @@ function Product() {
 
 
                 {/* ================================= */}
-                {/* IMAGEN */}
+                {/* GALERÍA DE IMÁGENES */}
                 {/* ================================= */}
 
-                <div className="
-                    rounded-3xl
-                    overflow-hidden
-                    bg-[#F8F3F0]
-                ">
+                <div className="relative">
 
-                    {product.image ? (
+                    <div
+                        className="
+                            w-full
+                            overflow-hidden
+                            bg-[#F8F3F0]
+                            cursor-pointer
+                        "
+                        onClick={() => {
 
-                        <img
-                            src={product.image}
-                            alt={product.name}
+                            if (
+                                productImages.length > 0
+                            ) {
+                                setIsImageOpen(true);
+                            }
+
+                        }}
+                    >
+
+                        {productImages.length > 0 ? (
+
+                            <img
+                                src={
+                                    productImages[
+                                        selectedImage
+                                    ]
+                                }
+                                alt={
+                                    `${product.name} ${
+                                        selectedImage + 1
+                                    }`
+                                }
+                                className="
+                                    w-full
+                                    h-auto
+                                    object-contain
+                                    block
+                                "
+                            />
+
+                        ) : (
+
+                            <div className="
+                                h-56
+                                flex
+                                items-center
+                                justify-center
+                            ">
+
+                                <span className="text-8xl">
+                                    🎂
+                                </span>
+
+                            </div>
+
+                        )}
+
+                    </div>
+
+
+                    {/* ================================= */}
+                    {/* FLECHA ANTERIOR */}
+                    {/* ================================= */}
+
+                    {productImages.length > 1 && (
+
+                        <button
+                            type="button"
+                            aria-label="Imagen anterior"
+                            onClick={(e) => {
+
+                                e.stopPropagation();
+
+                                previousImage();
+
+                            }}
                             className="
-                                w-full
-                                h-auto
-                                object-contain
+                                absolute
+                                left-3
+                                top-1/2
+                                -translate-y-1/2
+                                w-10
+                                h-10
+                                rounded-full
+                                bg-white/85
+                                backdrop-blur-sm
+                                shadow
+                                flex
+                                items-center
+                                justify-center
+                                text-xl
+                                text-[#5A3B31]
+                                hover:bg-white
+                                transition
                             "
-                        />
+                        >
 
-                    ) : (
+                            ‹
 
-                        <div className="
-                            h-56
-                            flex
-                            items-center
-                            justify-center
-                        ">
+                        </button>
 
-                            <span className="text-8xl">
-                                🎂
-                            </span>
+                    )}
 
-                        </div>
+
+                    {/* ================================= */}
+                    {/* FLECHA SIGUIENTE */}
+                    {/* ================================= */}
+
+                    {productImages.length > 1 && (
+
+                        <button
+                            type="button"
+                            aria-label="Siguiente imagen"
+                            onClick={(e) => {
+
+                                e.stopPropagation();
+
+                                nextImage();
+
+                            }}
+                            className="
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+                                w-10
+                                h-10
+                                rounded-full
+                                bg-white/85
+                                backdrop-blur-sm
+                                shadow
+                                flex
+                                items-center
+                                justify-center
+                                text-xl
+                                text-[#5A3B31]
+                                hover:bg-white
+                                transition
+                            "
+                        >
+
+                            ›
+
+                        </button>
 
                     )}
 
                 </div>
+
+
+                {/* ================================= */}
+                {/* PUNTOS DE LA GALERÍA */}
+                {/* ================================= */}
+
+                {productImages.length > 1 && (
+
+                    <div className="
+                        flex
+                        justify-center
+                        items-center
+                        gap-2
+                        mt-4
+                    ">
+
+                        {productImages.map(
+                            (image, index) => (
+
+                                <button
+                                    key={`${image}-${index}`}
+                                    type="button"
+                                    aria-label={
+                                        `Ver imagen ${
+                                            index + 1
+                                        }`
+                                    }
+                                    onClick={() =>
+                                        handleImageChange(
+                                            index
+                                        )
+                                    }
+                                    className={`
+                                        w-2
+                                        h-2
+                                        rounded-full
+                                        transition-all
+                                        ${
+                                            selectedImage === index
+                                                ? "bg-[#D08A9B] scale-125"
+                                                : "bg-[#D8C7C0]"
+                                        }
+                                    `}
+                                />
+
+                            )
+                        )}
+
+                    </div>
+
+                )}
+
+
+                {/* ================================= */}
+                {/* MINIATURAS */}
+                {/* ================================= */}
+
+                {productImages.length > 1 && (
+
+                    <div className="
+                        flex
+                        gap-3
+                        mt-4
+                        overflow-x-auto
+                        pb-2
+                    ">
+
+                        {productImages.map(
+                            (image, index) => (
+
+                                <button
+                                    key={`thumbnail-${image}-${index}`}
+                                    type="button"
+                                    onClick={() =>
+                                        handleImageChange(
+                                            index
+                                        )
+                                    }
+                                    className={`
+                                        flex-shrink-0
+                                        w-20
+                                        h-20
+                                        overflow-hidden
+                                        border-2
+                                        transition
+                                        ${
+                                            selectedImage === index
+                                                ? "border-[#D08A9B]"
+                                                : "border-transparent"
+                                        }
+                                    `}
+                                >
+
+                                    <img
+                                        src={image}
+                                        alt=""
+                                        className="
+                                            w-full
+                                            h-full
+                                            object-cover
+                                        "
+                                    />
+
+                                </button>
+
+                            )
+                        )}
+
+                    </div>
+
+                )}
+
+
+                {/* ================================= */}
+                {/* IMAGEN EN GRANDE */}
+                {/* ================================= */}
+
+                {isImageOpen &&
+                    productImages.length > 0 && (
+
+                    <div
+                        className="
+                            fixed
+                            inset-0
+                            z-[100]
+                            bg-black/90
+                            flex
+                            items-center
+                            justify-center
+                            p-4
+                        "
+                        onClick={() =>
+                            setIsImageOpen(false)
+                        }
+                    >
+
+                        {/* CERRAR */}
+
+                        <button
+                            type="button"
+                            aria-label="Cerrar"
+                            onClick={() =>
+                                setIsImageOpen(false)
+                            }
+                            className="
+                                absolute
+                                top-5
+                                right-5
+                                z-[110]
+                                w-10
+                                h-10
+                                rounded-full
+                                bg-white/90
+                                text-[#5A3B31]
+                                text-2xl
+                                flex
+                                items-center
+                                justify-center
+                                shadow-lg
+                            "
+                        >
+
+                            ×
+
+                        </button>
+
+
+                        {/* IMAGEN */}
+
+                        <img
+                            src={
+                                productImages[
+                                    selectedImage
+                                ]
+                            }
+                            alt={product.name}
+                            className="
+                                max-w-full
+                                max-h-[90vh]
+                                object-contain
+                                select-none
+                            "
+                            onClick={(e) =>
+                                e.stopPropagation()
+                            }
+                        />
+
+
+                        {/* ANTERIOR */}
+
+                        {productImages.length > 1 && (
+
+                            <button
+                                type="button"
+                                aria-label="Imagen anterior"
+                                onClick={(e) => {
+
+                                    e.stopPropagation();
+
+                                    previousImage();
+
+                                }}
+                                className="
+                                    absolute
+                                    left-3
+                                    sm:left-6
+                                    top-1/2
+                                    -translate-y-1/2
+                                    w-11
+                                    h-11
+                                    rounded-full
+                                    bg-white/90
+                                    text-[#5A3B31]
+                                    text-3xl
+                                    flex
+                                    items-center
+                                    justify-center
+                                    shadow-lg
+                                "
+                            >
+
+                                ‹
+
+                            </button>
+
+                        )}
+
+
+                        {/* SIGUIENTE */}
+
+                        {productImages.length > 1 && (
+
+                            <button
+                                type="button"
+                                aria-label="Siguiente imagen"
+                                onClick={(e) => {
+
+                                    e.stopPropagation();
+
+                                    nextImage();
+
+                                }}
+                                className="
+                                    absolute
+                                    right-3
+                                    sm:right-6
+                                    top-1/2
+                                    -translate-y-1/2
+                                    w-11
+                                    h-11
+                                    rounded-full
+                                    bg-white/90
+                                    text-[#5A3B31]
+                                    text-3xl
+                                    flex
+                                    items-center
+                                    justify-center
+                                    shadow-lg
+                                "
+                            >
+
+                                ›
+
+                            </button>
+
+                        )}
+
+
+                        {/* CONTADOR */}
+
+                        {productImages.length > 1 && (
+
+                            <div className="
+                                absolute
+                                bottom-6
+                                left-1/2
+                                -translate-x-1/2
+                                bg-black/60
+                                text-white
+                                text-sm
+                                px-4
+                                py-2
+                                rounded-full
+                            ">
+
+                                {selectedImage + 1}
+                                {" / "}
+                                {productImages.length}
+
+                            </div>
+
+                        )}
+
+                    </div>
+
+                )}
 
 
                 {/* ================================= */}
@@ -1289,7 +1634,7 @@ function Product() {
 
 
                         {/* ================================= */}
-                        {/* PESO PERSONALIZADA */}
+                        {/* PESO */}
                         {/* ================================= */}
 
                         {isPersonalized && (
@@ -1403,7 +1748,6 @@ function Product() {
 
                         {/* ================================= */}
                         {/* 20 CM / 5 KG */}
-                        {/* DOS BIZCOCHUELOS */}
                         {/* ================================= */}
 
                         {isFiveKg20cm && (
