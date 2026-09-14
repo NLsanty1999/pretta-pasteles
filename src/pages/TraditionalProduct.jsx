@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { useParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
+
 import useProducts from "../hooks/useProducts";
+
 import { useCart } from "../context/CartContext";
 
 function TraditionalProduct() {
-
     const { slug } = useParams();
 
     const { addToCart } = useCart();
@@ -17,19 +19,25 @@ function TraditionalProduct() {
         p => p.slug === slug
     );
 
-
-    /* =========================
-       ESTADOS
-    ========================= */
+    /*
+     * =========================
+     * ESTADOS
+     * =========================
+     */
 
     const [size, setSize] = useState("");
+
     const [quantity, setQuantity] = useState(1);
+
     const [note, setNote] = useState("");
+
     const [extras, setExtras] = useState([]);
 
     // Bento
     const [bentoForm, setBentoForm] = useState("");
+
     const [bentoFlavor, setBentoFlavor] = useState("");
+
     const [bentoCovering, setBentoCovering] = useState("");
 
     // Galería
@@ -38,10 +46,11 @@ function TraditionalProduct() {
     // Visor grande
     const [lightboxOpen, setLightboxOpen] = useState(false);
 
-
-    /* =========================
-       TIPOS DE PRODUCTO
-    ========================= */
+    /*
+     * =========================
+     * TIPOS DE PRODUCTO
+     * =========================
+     */
 
     const isAlfajor =
         product?.type === "alfajor";
@@ -56,174 +65,218 @@ function TraditionalProduct() {
         product?.type === "bento" ||
         Number(product?.category) === 5;
 
+    /*
+     * =========================
+     * PRODUCTOS POR PESO
+     * =========================
+     */
 
-    /* =========================
-       CONFIGURAR TAMAÑO
-    ========================= */
+    function normalizeProductName(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim()
+            .toLowerCase();
+    }
+
+    const normalizedProductName =
+        normalizeProductName(product?.name);
+
+    const isWeightProduct =
+    normalizedProductName.includes("bombon") ||
+    normalizedProductName.includes("nueces");
+
+    const weightOptions = [
+        {
+            key: "250g",
+            label: "250 g"
+        },
+        {
+            key: "500g",
+            label: "500 g"
+        },
+        {
+            key: "750g",
+            label: "750 g"
+        },
+        {
+            key: "1kg",
+            label: "1 kg"
+        }
+    ];
+
+    /*
+     * =========================
+     * CONFIGURAR TAMAÑO
+     * =========================
+     */
 
     useEffect(() => {
+        if (!product) {
+            return;
+        }
 
-        if (!product) return;
+        /*
+         * Bombón / Nueces
+         */
+        if (isWeightProduct) {
+            const availableWeights =
+                product.weightPrices || {};
 
-
-        if (product.type === "mesaDulce") {
+            const firstAvailable =
+                weightOptions.find(
+                    option =>
+                        availableWeights[
+                            option.key
+                        ] !== undefined
+                );
 
             setSize(
-                String(product.quantity ?? "")
+                firstAvailable?.key ||
+                "250g"
             );
 
             return;
-
         }
 
+        /*
+         * Mesa dulce
+         */
+        if (product.type === "mesaDulce") {
+            setSize(
+                String(
+                    product.quantity ?? ""
+                )
+            );
 
+            return;
+        }
+
+        /*
+         * Productos normales
+         */
         if (product.sizes?.length) {
-
             setSize(
                 String(product.sizes[0])
             );
-
         }
+    }, [
+        product,
+        isWeightProduct
+    ]);
 
-    }, [product]);
-
-
-    /* =========================
-       CONFIGURAR BENTO
-    ========================= */
+    /*
+     * =========================
+     * CONFIGURAR BENTO
+     * =========================
+     */
 
     useEffect(() => {
-
         if (!product || !isBento) {
             return;
         }
 
-
         /*
          * FORMAS
-         *
-         * Firebase:
-         * bentoFormas
          */
-
         const forms =
             product.bentoFormas ||
             [];
 
-
         /*
          * BIZCOCHUELOS
-         *
-         * Firebase:
-         * bentoBizcochuelos
          */
-
         const bizcochuelos =
             product.bentoBizcochuelos ||
             [];
 
-
         /*
          * COBERTURAS
-         *
-         * Si en Firebase hay coberturas,
-         * usamos esas.
-         *
-         * Si está vacío, usamos Buttercream.
          */
-
         const coverings =
             product.coverings?.length
                 ? product.coverings
                 : ["Buttercream"];
 
-
         /*
          * PRIMERA FORMA
          */
-
         setBentoForm(
             forms[0] || ""
         );
 
-
         /*
          * PRIMER BIZCOCHUELO
          */
-
         setBentoFlavor(
             bizcochuelos[0] || ""
         );
 
-
         /*
          * PRIMERA COBERTURA
          */
-
         setBentoCovering(
             coverings[0] || ""
         );
 
-
         /*
          * TAMAÑO
          */
-
         if (product.sizes?.length) {
-
             setSize(
                 String(product.sizes[0])
             );
-
         }
         else {
-
             setSize("10");
-
         }
 
-    }, [product, isBento]);
+    }, [
+        product,
+        isBento
+    ]);
 
-
-    /* =========================
-       GALERÍA
-    ========================= */
+    /*
+     * =========================
+     * GALERÍA
+     * =========================
+     */
 
     const galleryImages =
         product?.images?.filter(Boolean) || [];
 
-
-    /* =========================
-       IMAGEN ACTUAL
-    ========================= */
+    /*
+     * =========================
+     * IMAGEN ACTUAL
+     * =========================
+     */
 
     const currentImage =
         galleryImages[selectedImage] ||
         galleryImages[0] ||
         null;
 
-
-    /* =========================
-       CAMBIAR IMAGEN
-    ========================= */
+    /*
+     * =========================
+     * CAMBIAR IMAGEN
+     * =========================
+     */
 
     function changeImage(index) {
-
         if (!galleryImages.length) {
             return;
         }
 
         setSelectedImage(index);
-
     }
 
-
-    /* =========================
-       SIGUIENTE IMAGEN
-    ========================= */
+    /*
+     * =========================
+     * SIGUIENTE IMAGEN
+     * =========================
+     */
 
     function nextImage() {
-
         if (galleryImages.length <= 1) {
             return;
         }
@@ -233,16 +286,15 @@ function TraditionalProduct() {
                 (currentIndex + 1) %
                 galleryImages.length
         );
-
     }
 
-
-    /* =========================
-       IMAGEN ANTERIOR
-    ========================= */
+    /*
+     * =========================
+     * IMAGEN ANTERIOR
+     * =========================
+     */
 
     function previousImage() {
-
         if (galleryImages.length <= 1) {
             return;
         }
@@ -256,98 +308,109 @@ function TraditionalProduct() {
                 ) %
                 galleryImages.length
         );
-
     }
 
-
-    /* =========================
-       PRECIO BASE
-    ========================= */
+    /*
+     * =========================
+     * PRECIO BASE
+     * =========================
+     */
 
     const basePrice = useMemo(() => {
-
         if (!product) {
             return 0;
         }
 
+        /*
+         * =========================
+         * BOMBÓN / NUECES
+         * =========================
+         *
+         * El precio depende del peso.
+         */
+        if (isWeightProduct) {
+            return Number(
+                product.weightPrices?.[String(size)] ?? 0
+            );
+        }
 
-if (product.type === "mesaDulce") {
-    return Number(
-        product.prices?.[String(product.quantity)] ?? 0
-    );
-}
+        /*
+         * =========================
+         * MESA DULCE
+         * =========================
+         */
 
+        if (product.type === "mesaDulce") {
+            return Number(
+                product.prices?.[
+                    String(product.quantity)
+                ] ?? 0
+            );
+        }
+
+        /*
+         * =========================
+         * PRODUCTOS NORMALES
+         * =========================
+         */
 
         if (size) {
-
             const prices =
                 product.prices || {};
-
 
             /*
              * Primero busca el tamaño exacto.
              */
-
             if (
                 prices[String(size)] !== undefined
             ) {
-
                 return Number(
                     prices[String(size)] || 0
                 );
-
             }
 
-
             /*
-             * Compatibilidad con el Bento
+             * Compatibilidad con Bento
              * si Firebase tiene la clave "100".
              */
-
             if (
                 isBento &&
                 prices["100"] !== undefined
             ) {
-
                 return Number(
                     prices["100"] || 0
                 );
-
             }
-
         }
-
 
         return 0;
 
     }, [
         product,
         size,
-        isBento
+        isBento,
+        isWeightProduct
     ]);
 
-
-    /* =========================
-       PRECIO EXTRAS
-    ========================= */
+    /*
+     * =========================
+     * PRECIO EXTRAS
+     * =========================
+     */
 
     const extrasPrice = useMemo(() => {
-
         if (!product) {
             return 0;
         }
 
-
         const singleExtrasPrice =
             extras.reduce(
                 (total, extraName) => {
-
                     const extra =
                         product.extras?.find(
                             e =>
                                 e.name === extraName
                         );
-
 
                     return (
                         total +
@@ -359,11 +422,9 @@ if (product.type === "mesaDulce") {
                                 : 0
                         )
                     );
-
                 },
                 0
             );
-
 
         return (
             singleExtrasPrice *
@@ -376,212 +437,200 @@ if (product.type === "mesaDulce") {
         quantity
     ]);
 
-
-    /* =========================
-       PRECIO TOTAL
-    ========================= */
+    /*
+     * =========================
+     * PRECIO TOTAL
+     * =========================
+     */
 
     const price = useMemo(() => {
-
         return (
             basePrice * quantity +
             extrasPrice
         );
-
     }, [
         basePrice,
         quantity,
         extrasPrice
     ]);
 
-
-    /* =========================
-       SELECCIONAR EXTRA
-    ========================= */
+    /*
+     * =========================
+     * SELECCIONAR EXTRA
+     * =========================
+     */
 
     function toggleExtra(extraName) {
-
         setExtras(currentExtras => {
-
             if (
                 currentExtras.includes(
                     extraName
                 )
             ) {
-
                 return currentExtras.filter(
                     name =>
                         name !== extraName
                 );
-
             }
-
 
             return [
                 ...currentExtras,
                 extraName
             ];
-
         });
-
     }
 
-
-    /* =========================
-       CARGANDO
-    ========================= */
+    /*
+     * =========================
+     * CARGANDO
+     * =========================
+     */
 
     if (loading) {
-
         return (
-
             <Layout>
 
-                <h2 className="
-                    text-center
-                    text-2xl
-                    mt-10
-                ">
-
+                <h2
+                    className="
+                        text-center
+                        text-2xl
+                        mt-10
+                    "
+                >
                     Cargando producto...
-
                 </h2>
 
             </Layout>
-
         );
-
     }
 
-
-    /* =========================
-       PRODUCTO NO ENCONTRADO
-    ========================= */
+    /*
+     * =========================
+     * PRODUCTO NO ENCONTRADO
+     * =========================
+     */
 
     if (!product) {
-
         return (
-
             <Layout>
 
-                <div className="
-                    text-center
-                    mt-10
-                ">
-
+                <div
+                    className="
+                        text-center
+                        mt-10
+                    "
+                >
                     Producto no encontrado
-
                 </div>
 
             </Layout>
-
         );
-
     }
-
 
     const available =
         product.available !== false;
 
-
-    /* =========================
-       DATOS BENTO
-    ========================= */
+    /*
+     * =========================
+     * DATOS BENTO
+     * =========================
+     */
 
     const bentoForms =
         product.bentoFormas || [];
 
-
     const bentoBizcochuelos =
         product.bentoBizcochuelos || [];
-
 
     const bentoCoverings =
         product.coverings?.length
             ? product.coverings
             : ["Buttercream"];
 
-
-    /* =========================
-       AGREGAR AL PEDIDO
-    ========================= */
+    /*
+     * =========================
+     * AGREGAR AL PEDIDO
+     * =========================
+     */
 
     function handleAdd() {
-
         if (!available) {
             return;
         }
 
+        addToCart({
+            id: product.id,
 
-addToCart({
-    id: product.id,
+            name: product.name,
 
-    name: product.name,
+            size,
 
-    size,
+            quantity,
 
-    quantity,
+            note,
 
-    note,
+            extras,
 
-    extras,
+            /*
+             * Precio base de la presentación.
+             */
+            basePrice,
 
-    // Precio base del tamaño elegido
-    basePrice,
+            /*
+             * Guardamos cada extra
+             * con su precio.
+             */
+            extraDetails: extras.map(
+                extraName => {
+                    const extra =
+                        product.extras?.find(
+                            e =>
+                                e.name === extraName
+                        );
 
-    // Guardamos cada extra con su precio
-    extraDetails: extras.map(extraName => {
+                    return {
+                        name: extraName,
 
-        const extra = product.extras?.find(
-            e => e.name === extraName
-        );
+                        price: Number(
+                            extra?.price ?? 0
+                        )
+                    };
+                }
+            ),
 
-        return {
-            name: extraName,
-            price: Number(extra?.price ?? 0)
-        };
+            bentoForm:
+                isBento
+                    ? bentoForm
+                    : "",
 
-    }),
+            flavor:
+                isBento
+                    ? bentoFlavor
+                    : "",
 
-    bentoForm:
-        isBento
-            ? bentoForm
-            : "",
+            covering:
+                isBento
+                    ? bentoCovering
+                    : "",
 
-    flavor:
-        isBento
-            ? bentoFlavor
-            : "",
-
-    covering:
-        isBento
-            ? bentoCovering
-            : "",
-
-    price
-
-});
+            price
+        });
 
         alert(
             "Producto agregado al pedido."
         );
-
     }
 
-
     return (
-
         <Layout>
 
             <div className="max-w-xl mx-auto">
 
-
-                {/* =========================
-                    GALERÍA
-                ========================= */}
+                {/* ========================= */}
+                {/* GALERÍA */}
+                {/* ========================= */}
 
                 <div className="px-2">
-
 
                     {/* IMAGEN PRINCIPAL */}
 
@@ -601,15 +650,11 @@ addToCart({
                             }
                         `}
                         onClick={() => {
-
                             if (
                                 galleryImages.length > 0
                             ) {
-
                                 setLightboxOpen(true);
-
                             }
-
                         }}
                     >
 
@@ -628,31 +673,32 @@ addToCart({
 
                         ) : (
 
-                            <span className="
-                                text-7xl
-                                py-12
-                            ">
-
+                            <span
+                                className="
+                                    text-7xl
+                                    py-12
+                                "
+                            >
                                 🎂
-
                             </span>
 
                         )}
 
                     </div>
 
-
                     {/* MINIATURAS */}
 
                     {galleryImages.length > 1 && (
 
-                        <div className="
-                            flex
-                            justify-center
-                            gap-2
-                            mt-3
-                            px-2
-                        ">
+                        <div
+                            className="
+                                flex
+                                justify-center
+                                gap-2
+                                mt-3
+                                px-2
+                            "
+                        >
 
                             {galleryImages.map(
                                 (image, index) => (
@@ -699,10 +745,9 @@ addToCart({
 
                 </div>
 
-
-                {/* =========================
-                    VISOR GRANDE
-                ========================= */}
+                {/* ========================= */}
+                {/* VISOR GRANDE */}
+                {/* ========================= */}
 
                 {lightboxOpen && currentImage && (
 
@@ -743,22 +788,16 @@ addToCart({
                                 z-10
                             "
                         >
-
                             ×
-
                         </button>
-
 
                         {galleryImages.length > 1 && (
 
                             <button
                                 type="button"
                                 onClick={(e) => {
-
                                     e.stopPropagation();
-
                                     previousImage();
-
                                 }}
                                 className="
                                     absolute
@@ -777,13 +816,10 @@ addToCart({
                                     z-10
                                 "
                             >
-
                                 ‹
-
                             </button>
 
                         )}
-
 
                         <img
                             src={currentImage}
@@ -800,17 +836,13 @@ addToCart({
                             "
                         />
 
-
                         {galleryImages.length > 1 && (
 
                             <button
                                 type="button"
                                 onClick={(e) => {
-
                                     e.stopPropagation();
-
                                     nextImage();
-
                                 }}
                                 className="
                                     absolute
@@ -829,33 +861,30 @@ addToCart({
                                     z-10
                                 "
                             >
-
                                 ›
-
                             </button>
 
                         )}
 
-
                         {galleryImages.length > 1 && (
 
-                            <div className="
-                                absolute
-                                bottom-6
-                                left-1/2
-                                -translate-x-1/2
-                                text-white
-                                text-sm
-                                bg-black/40
-                                px-3
-                                py-1
-                                rounded-full
-                            ">
-
+                            <div
+                                className="
+                                    absolute
+                                    bottom-6
+                                    left-1/2
+                                    -translate-x-1/2
+                                    text-white
+                                    text-sm
+                                    bg-black/40
+                                    px-3
+                                    py-1
+                                    rounded-full
+                                "
+                            >
                                 {selectedImage + 1}
                                 {" / "}
                                 {galleryImages.length}
-
                             </div>
 
                         )}
@@ -864,134 +893,131 @@ addToCart({
 
                 )}
 
-
-                {/* =========================
-                    NOMBRE
-                ========================= */}
+                {/* ========================= */}
+                {/* NOMBRE */}
+                {/* ========================= */}
 
                 <div className="px-6">
 
-                    <div className="
-                        flex
-                        items-center
-                        justify-between
-                        gap-4
-                        mt-8
-                    ">
+                    <div
+                        className="
+                            flex
+                            items-center
+                            justify-between
+                            gap-4
+                            mt-8
+                        "
+                    >
 
-                        <h1 className="
-                            text-4xl
-                            font-bold
-                        ">
-
+                        <h1
+                            className="
+                                text-4xl
+                                font-bold
+                            "
+                        >
                             {product.name}
-
                         </h1>
-
 
                         {!available && (
 
-                            <span className="
-                                bg-red-100
-                                text-red-700
-                                px-4
-                                py-2
-                                rounded-full
-                                font-bold
-                                text-sm
-                                whitespace-nowrap
-                            ">
-
+                            <span
+                                className="
+                                    bg-red-100
+                                    text-red-700
+                                    px-4
+                                    py-2
+                                    rounded-full
+                                    font-bold
+                                    text-sm
+                                    whitespace-nowrap
+                                "
+                            >
                                 FUERA DE STOCK
-
                             </span>
 
                         )}
 
                     </div>
 
-
-                    <p className="
-                        text-gray-500
-                        mt-3
-                    ">
-
+                    <p
+                        className="
+                            text-gray-500
+                            mt-3
+                        "
+                    >
                         {product.description}
-
                     </p>
 
                 </div>
 
-
                 {!available ? (
 
-                    <div className="
-                        mx-6
-                        mt-8
-                        bg-red-50
-                        border
-                        border-red-200
-                        rounded-3xl
-                        p-6
-                        text-center
-                    ">
+                    <div
+                        className="
+                            mx-6
+                            mt-8
+                            bg-red-50
+                            border
+                            border-red-200
+                            rounded-3xl
+                            p-6
+                            text-center
+                        "
+                    >
 
-                        <p className="
-                            text-red-700
-                            font-semibold
-                            text-lg
-                        ">
-
+                        <p
+                            className="
+                                text-red-700
+                                font-semibold
+                                text-lg
+                            "
+                        >
                             Este producto no está
                             disponible actualmente.
-
                         </p>
 
-                        <p className="
-                            text-red-500
-                            mt-2
-                        ">
-
+                        <p
+                            className="
+                                text-red-500
+                                mt-2
+                            "
+                        >
                             Podés volver a consultar
                             más adelante.
-
                         </p>
 
                     </div>
 
                 ) : (
 
-                    <div className="
-                        px-7
-                    ">
+                    <div className="px-7">
 
-
-                        {/* =========================
-                            BENTO CAKES
-                        ========================= */}
+                        {/* ========================= */}
+                        {/* BENTO CAKES */}
+                        {/* ========================= */}
 
                         {isBento && (
 
-                            <div className="
-                                mt-8
-                                space-y-6
-                            ">
-
+                            <div
+                                className="
+                                    mt-8
+                                    space-y-6
+                                "
+                            >
 
                                 {/* FORMA */}
 
                                 <div>
 
-                                    <h2 className="
-                                        font-bold
-                                        text-xl
-                                        mb-3
-                                    ">
-
+                                    <h2
+                                        className="
+                                            font-bold
+                                            text-xl
+                                            mb-3
+                                        "
+                                    >
                                         Forma
-
                                     </h2>
-
 
                                     {bentoForms.length > 0 ? (
 
@@ -1011,15 +1037,16 @@ addToCart({
                                         >
 
                                             {bentoForms.map(
-                                                (option, index) => (
+                                                (
+                                                    option,
+                                                    index
+                                                ) => (
 
                                                     <option
                                                         key={`${option}-${index}`}
                                                         value={option}
                                                     >
-
                                                         {option}
-
                                                     </option>
 
                                                 )
@@ -1029,39 +1056,37 @@ addToCart({
 
                                     ) : (
 
-                                        <div className="
-                                            w-full
-                                            rounded-xl
-                                            border
-                                            p-4
-                                            bg-gray-50
-                                            text-gray-500
-                                        ">
-
+                                        <div
+                                            className="
+                                                w-full
+                                                rounded-xl
+                                                border
+                                                p-4
+                                                bg-gray-50
+                                                text-gray-500
+                                            "
+                                        >
                                             No hay formas
                                             configuradas.
-
                                         </div>
 
                                     )}
 
                                 </div>
 
-
                                 {/* BIZCOCHUELO */}
 
                                 <div>
 
-                                    <h2 className="
-                                        font-bold
-                                        text-xl
-                                        mb-3
-                                    ">
-
+                                    <h2
+                                        className="
+                                            font-bold
+                                            text-xl
+                                            mb-3
+                                        "
+                                    >
                                         Bizcochuelo
-
                                     </h2>
-
 
                                     {bentoBizcochuelos.length > 0 ? (
 
@@ -1081,15 +1106,16 @@ addToCart({
                                         >
 
                                             {bentoBizcochuelos.map(
-                                                (option, index) => (
+                                                (
+                                                    option,
+                                                    index
+                                                ) => (
 
                                                     <option
                                                         key={`${option}-${index}`}
                                                         value={option}
                                                     >
-
                                                         {option}
-
                                                     </option>
 
                                                 )
@@ -1099,70 +1125,66 @@ addToCart({
 
                                     ) : (
 
-                                        <div className="
-                                            w-full
-                                            rounded-xl
-                                            border
-                                            p-4
-                                            bg-gray-50
-                                            text-gray-500
-                                        ">
-
+                                        <div
+                                            className="
+                                                w-full
+                                                rounded-xl
+                                                border
+                                                p-4
+                                                bg-gray-50
+                                                text-gray-500
+                                            "
+                                        >
                                             No hay bizcochuelos
                                             configurados.
-
                                         </div>
 
                                     )}
 
                                 </div>
 
-
                                 {/* TAMAÑO */}
 
                                 <div>
 
-                                    <h2 className="
-                                        font-bold
-                                        text-xl
-                                        mb-3
-                                    ">
-
+                                    <h2
+                                        className="
+                                            font-bold
+                                            text-xl
+                                            mb-3
+                                        "
+                                    >
                                         Tamaño
-
                                     </h2>
 
-
-                                    <div className="
-                                        w-full
-                                        rounded-xl
-                                        border
-                                        p-4
-                                        bg-gray-50
-                                        text-gray-700
-                                    ">
-
+                                    <div
+                                        className="
+                                            w-full
+                                            rounded-xl
+                                            border
+                                            p-4
+                                            bg-gray-50
+                                            text-gray-700
+                                        "
+                                    >
                                         {size || "10"} cm
-
                                     </div>
 
                                 </div>
-
 
                                 {/* COBERTURA */}
 
                                 <div>
 
-                                    <h2 className="
-                                        font-bold
-                                        text-xl
-                                        mb-3
-                                    ">
-
+                                    <h2
+                                        className="
+                                            font-bold
+                                            text-xl
+                                            mb-3
+                                        "
+                                    >
                                         Cobertura
-
                                     </h2>
-
 
                                     <select
                                         value={bentoCovering}
@@ -1180,15 +1202,16 @@ addToCart({
                                     >
 
                                         {bentoCoverings.map(
-                                            (option, index) => (
+                                            (
+                                                option,
+                                                index
+                                            ) => (
 
                                                 <option
                                                     key={`${option}-${index}`}
                                                     value={option}
                                                 >
-
                                                     {option}
-
                                                 </option>
 
                                             )
@@ -1202,35 +1225,68 @@ addToCart({
 
                         )}
 
-
-                        {/* =========================
-                            PRESENTACIÓN
-                            SOLO NO BENTO
-                        ========================= */}
+                        {/* ========================= */}
+                        {/* PRESENTACIÓN */}
+                        {/* ========================= */}
 
                         {!isBento && (
 
                             <>
 
-                                <h2 className="
-                                    font-bold
-                                    text-xl
-                                    mt-8
-                                    mb-3
-                                ">
-
+                                <h2
+                                    className="
+                                        font-bold
+                                        text-xl
+                                        mt-8
+                                        mb-3
+                                    "
+                                >
                                     Presentación
-
                                 </h2>
 
+                                <div
+                                    className="
+                                        flex
+                                        gap-3
+                                        flex-wrap
+                                    "
+                                >
 
-                                <div className="
-                                    flex
-                                    gap-3
-                                    flex-wrap
-                                ">
+                                    {/* BOMBÓN / NUECES */}
 
-                                    {isMesaDulce ? (
+                                    {isWeightProduct ? (
+
+                                        weightOptions.map(
+                                            option => (
+
+                                                <button
+                                                    key={option.key}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setSize(
+                                                            option.key
+                                                        )
+                                                    }
+                                                    className={`
+                                                        px-5
+                                                        py-3
+                                                        rounded-full
+                                                        border
+                                                        transition
+                                                        ${
+                                                            size === option.key
+                                                                ? "bg-[#D08A9B] text-white border-[#D08A9B]"
+                                                                : "bg-white"
+                                                        }
+                                                    `}
+                                                >
+                                                    {option.label}
+                                                </button>
+
+                                            )
+                                        )
+
+                                    ) : isMesaDulce ? (
 
                                         <button
                                             type="button"
@@ -1244,12 +1300,13 @@ addToCart({
                                                 border-[#D08A9B]
                                             "
                                         >
-
-                                            {Number(product.quantity) === 1
-                                                ? "1 kg"
-                                                : `${product.quantity} unidades`
+                                            {
+                                                Number(
+                                                    product.quantity
+                                                ) === 1
+                                                    ? "1 kg"
+                                                    : `${product.quantity} unidades`
                                             }
-
                                         </button>
 
                                     ) : (
@@ -1278,13 +1335,11 @@ addToCart({
                                                         }
                                                     `}
                                                 >
-
                                                     {isAlfajor ||
-                                                     isCookies
+                                                    isCookies
                                                         ? `${s} unidades`
                                                         : `${s} cm`
                                                     }
-
                                                 </button>
 
                                             )
@@ -1294,33 +1349,17 @@ addToCart({
 
                                 </div>
 
+                                {isWeightProduct && (
 
-                                {isAlfajor && (
-
-                                    <p className="
-                                        text-sm
-                                        text-gray-500
-                                        mt-3
-                                    ">
-
-                                        Precio por presentación.
-
-                                    </p>
-
-                                )}
-
-
-                                {isMesaDulce && (
-
-                                    <p className="
-                                        text-sm
-                                        text-gray-500
-                                        mt-3
-                                    ">
-
-                                        Elegí la presentación
-                                        que querés comprar.
-
+                                    <p
+                                        className="
+                                            text-sm
+                                            text-gray-500
+                                            mt-3
+                                        "
+                                    >
+                                        El precio corresponde
+                                        al peso seleccionado.
                                     </p>
 
                                 )}
@@ -1329,45 +1368,47 @@ addToCart({
 
                         )}
 
-
-                        {/* =========================
-                            EXTRAS
-                        ========================= */}
+                        {/* ========================= */}
+                        {/* EXTRAS */}
+                        {/* ========================= */}
 
                         {product.extras?.length > 0 && (
 
                             <div className="mt-8">
 
-                                <h2 className="
-                                    font-bold
-                                    text-xl
-                                    mb-3
-                                ">
-
+                                <h2
+                                    className="
+                                        font-bold
+                                        text-xl
+                                        mb-3
+                                    "
+                                >
                                     Extras
-
                                 </h2>
 
-
-                                <p className="
-                                    text-sm
-                                    text-gray-500
-                                    mb-4
-                                ">
-
+                                <p
+                                    className="
+                                        text-sm
+                                        text-gray-500
+                                        mb-4
+                                    "
+                                >
                                     ¿Querés personalizar tu torta?
-
                                 </p>
 
-
-                                <div className="
-                                    grid
-                                    grid-cols-2
-                                    gap-3
-                                ">
+                                <div
+                                    className="
+                                        grid
+                                        grid-cols-2
+                                        gap-3
+                                    "
+                                >
 
                                     {product.extras.map(
-                                        (extra, index) => (
+                                        (
+                                            extra,
+                                            index
+                                        ) => (
 
                                             <button
                                                 key={`${extra.name}-${index}`}
@@ -1393,28 +1434,26 @@ addToCart({
                                                 `}
                                             >
 
-                                                <div className="
-                                                    font-semibold
-                                                ">
-
+                                                <div
+                                                    className="
+                                                        font-semibold
+                                                    "
+                                                >
                                                     {extra.name}
-
                                                 </div>
 
-
-                                                <div className="
-                                                    text-sm
-                                                    mt-1
-                                                ">
-
+                                                <div
+                                                    className="
+                                                        text-sm
+                                                        mt-1
+                                                    "
+                                                >
                                                     +$
-
                                                     {Number(
                                                         extra.price ?? 0
                                                     ).toLocaleString(
                                                         "es-AR"
                                                     )}
-
                                                 </div>
 
                                             </button>
@@ -1428,28 +1467,28 @@ addToCart({
 
                         )}
 
+                        {/* ========================= */}
+                        {/* CANTIDAD */}
+                        {/* ========================= */}
 
-                        {/* =========================
-                            CANTIDAD
-                        ========================= */}
-
-                        <h2 className="
-                            font-bold
-                            text-xl
-                            mt-8
-                            mb-3
-                        ">
-
+                        <h2
+                            className="
+                                font-bold
+                                text-xl
+                                mt-8
+                                mb-3
+                            "
+                        >
                             Cantidad
-
                         </h2>
 
-
-                        <div className="
-                            flex
-                            items-center
-                            gap-5
-                        ">
+                        <div
+                            className="
+                                flex
+                                items-center
+                                gap-5
+                            "
+                        >
 
                             <button
                                 type="button"
@@ -1466,21 +1505,17 @@ addToCart({
                                     bg-pink-100
                                 "
                             >
-
                                 -
-
                             </button>
 
-
-                            <span className="
-                                text-2xl
-                                font-bold
-                            ">
-
+                            <span
+                                className="
+                                    text-2xl
+                                    font-bold
+                                "
+                            >
                                 {quantity}
-
                             </span>
-
 
                             <button
                                 type="button"
@@ -1496,29 +1531,25 @@ addToCart({
                                     bg-pink-100
                                 "
                             >
-
                                 +
-
                             </button>
 
                         </div>
 
+                        {/* ========================= */}
+                        {/* OBSERVACIONES */}
+                        {/* ========================= */}
 
-                        {/* =========================
-                            OBSERVACIONES
-                        ========================= */}
-
-                        <h2 className="
-                            font-bold
-                            text-xl
-                            mt-8
-                            mb-3
-                        ">
-
+                        <h2
+                            className="
+                                font-bold
+                                text-xl
+                                mt-8
+                                mb-3
+                            "
+                        >
                             Observaciones
-
                         </h2>
-
 
                         <textarea
                             value={note}
@@ -1536,131 +1567,127 @@ addToCart({
                                 text-left
                                 align-top
                             "
-                            placeholder="Ej: frase en la torta, colores, etc."
+                            placeholder="Ej: Agregar tarjeta de Regalo."
                         />
 
+                        {/* ========================= */}
+                        {/* RESUMEN */}
+                        {/* ========================= */}
 
-                        {/* =========================
-                            RESUMEN
-                        ========================= */}
+                        <div
+                            className="
+                                mt-8
+                                bg-white
+                                rounded-3xl
+                                shadow
+                                p-6
+                            "
+                        >
 
-                        <div className="
-                            mt-8
-                            bg-white
-                            rounded-3xl
-                            shadow
-                            p-6
-                        ">
+                            <div
+                                className="
+                                    flex
+                                    justify-between
+                                    items-center
+                                "
+                            >
 
-                            <div className="
-                                flex
-                                justify-between
-                                items-center
-                            ">
-
-                                <span className="
-                                    font-semibold
-                                ">
-
+                                <span
+                                    className="
+                                        font-semibold
+                                    "
+                                >
                                     Precio base
                                     {quantity > 1 &&
                                         ` × ${quantity}`
                                     }
-
                                 </span>
 
-
                                 <span>
-
                                     $
-                                    {(basePrice * quantity)
-                                        .toLocaleString(
-                                            "es-AR"
-                                        )
-                                    }
-
+                                    {(
+                                        basePrice *
+                                        quantity
+                                    ).toLocaleString(
+                                        "es-AR"
+                                    )}
                                 </span>
 
                             </div>
 
-
                             {extrasPrice > 0 && (
 
-                                <div className="
-                                    flex
-                                    justify-between
-                                    items-center
-                                    mt-2
-                                ">
+                                <div
+                                    className="
+                                        flex
+                                        justify-between
+                                        items-center
+                                        mt-2
+                                    "
+                                >
 
-                                    <span className="
-                                        font-semibold
-                                    ">
-
+                                    <span
+                                        className="
+                                            font-semibold
+                                        "
+                                    >
                                         Extras
                                         {quantity > 1 &&
                                             ` × ${quantity}`
                                         }
-
                                     </span>
 
-
                                     <span>
-
                                         +$
-                                        {extrasPrice
-                                            .toLocaleString(
-                                                "es-AR"
-                                            )
-                                        }
-
+                                        {extrasPrice.toLocaleString(
+                                            "es-AR"
+                                        )}
                                     </span>
 
                                 </div>
 
                             )}
 
+                            <div
+                                className="
+                                    border-t
+                                    mt-4
+                                    pt-4
+                                    flex
+                                    justify-between
+                                    items-center
+                                "
+                            >
 
-                            <div className="
-                                border-t
-                                mt-4
-                                pt-4
-                                flex
-                                justify-between
-                                items-center
-                            ">
-
-                                <span className="
-                                    text-xl
-                                    font-bold
-                                ">
-
+                                <span
+                                    className="
+                                        text-xl
+                                        font-bold
+                                    "
+                                >
                                     Total
-
                                 </span>
 
-
-                                <span className="
-                                    text-3xl
-                                    font-bold
-                                    text-[#D08A9B]
-                                ">
-
+                                <span
+                                    className="
+                                        text-3xl
+                                        font-bold
+                                        text-[#D08A9B]
+                                    "
+                                >
                                     $
                                     {price.toLocaleString(
                                         "es-AR"
                                     )}
-
                                 </span>
 
                             </div>
 
                         </div>
 
-
-                        {/* =========================
-                            BOTÓN
-                        ========================= */}
+                        {/* ========================= */}
+                        {/* BOTÓN */}
+                        {/* ========================= */}
 
                         <button
                             type="button"
@@ -1675,9 +1702,7 @@ addToCart({
                                 font-bold
                             "
                         >
-
                             Agregar al pedido
-
                         </button>
 
                     </div>
@@ -1687,10 +1712,7 @@ addToCart({
             </div>
 
         </Layout>
-
     );
-
 }
-
 
 export default TraditionalProduct;

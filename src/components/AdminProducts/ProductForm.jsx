@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 import { saveProduct, createSlug } from "../../firebase/products";
@@ -14,7 +13,6 @@ function ProductForm({
     onClose,
     editingProduct = null
 }) {
-
     const [name, setName] = useState(
         editingProduct?.name || ""
     );
@@ -41,10 +39,32 @@ function ProductForm({
         editingProduct?.prices || {}
     );
 
-    // =============================
-    // PRECIOS CAMBIO DE RELLENO
-    // =============================
+    /*
+     * =============================
+     * PRECIOS POR PESO
+     * =============================
+     *
+     * Se utilizan exclusivamente
+     * para Bombón y Nueces.
+     *
+     * 250g
+     * 500g
+     * 750g
+     * 1kg
+     */
+const [weightPrices, setWeightPrices] = useState({
+    "250g": "",
+    "500g": "",
+    "750g": "",
+    "1kg": "",
+    ...(editingProduct?.weightPrices || {})
+});
 
+    /*
+     * =============================
+     * PRECIOS CAMBIO DE RELLENO
+     * =============================
+     */
     const [fillingPrices, setFillingPrices] = useState(
         editingProduct?.fillingPrices || {
             "16": 9000,
@@ -91,7 +111,6 @@ function ProductForm({
      * BENTO
      * =============================
      */
-
     const [bentoFormas, setBentoFormas] = useState(
         editingProduct?.bentoFormas?.length
             ? editingProduct.bentoFormas
@@ -119,7 +138,6 @@ function ProductForm({
      * 6 = Cookies
      * 7 = Tortas personalizadas
      */
-
     const isMesaDulce =
         category === 3;
 
@@ -138,20 +156,65 @@ function ProductForm({
 
     /*
      * =============================
+     * PRODUCTOS POR PESO
+     * =============================
+     *
+     * Bombón y Nueces utilizan:
+     *
+     * 250 g
+     * 500 g
+     * 750 g
+     * 1 kg
+     */
+    function normalizeProductName(value) {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim()
+            .toLowerCase();
+    }
+
+    const normalizedName =
+        normalizeProductName(name);
+
+    const isWeightProduct =
+        normalizedName.includes("bombon") ||
+        normalizedName.includes("nueces");
+
+    console.log("NOMBRE PRODUCTO:", name);
+    console.log("NOMBRE NORMALIZADO:", normalizedName);
+    console.log("ES PRODUCTO POR PESO:", isWeightProduct);
+
+    const weightOptions = [
+        {
+            key: "250g",
+            label: "250 g"
+        },
+        {
+            key: "500g",
+            label: "500 g"
+        },
+        {
+            key: "750g",
+            label: "750 g"
+        },
+        {
+            key: "1kg",
+            label: "1 kg"
+        }
+    ];
+
+    /*
+     * =============================
      * CAMBIO DE CATEGORÍA
      * =============================
      */
-
     function toggleCategory(categoryId) {
-
         setCategories(current => {
-
             const exists =
                 current.includes(categoryId);
 
             if (exists) {
-
-                // No permitir que quede sin categoría
                 if (current.length === 1) {
                     return current;
                 }
@@ -170,12 +233,10 @@ function ProductForm({
 
     /*
      * =============================
-     * TEXTO DE PRESENTACIÓN
+     * TEXTO MESA DULCE
      * =============================
      */
-
     function getMesaDulceLabel(value) {
-
         const numericValue = Number(value);
 
         if (numericValue === 1) {
@@ -198,20 +259,15 @@ function ProductForm({
      * GUARDAR PRODUCTO
      * =============================
      */
-
     async function handleSave() {
-
         if (!name.trim()) {
-
             alert(
                 "Ingresá un nombre para el producto"
             );
-
             return;
         }
 
         try {
-
             setSaving(true);
 
             /*
@@ -219,36 +275,26 @@ function ProductForm({
              * DETERMINAR TIPO
              * =============================
              */
-
             let productType =
                 "tradicional";
 
             if (isPersonalizada) {
-
                 productType =
                     "personalizada";
-
             }
             else if (isAlfajor) {
-
                 productType =
                     "alfajor";
-
             }
             else if (isMesaDulce) {
-
                 productType =
                     "mesaDulce";
-
             }
             else if (isBento) {
-
                 productType =
                     "bento";
-
             }
             else if (isCookies) {
-
                 productType =
                     "cookies";
             }
@@ -258,7 +304,6 @@ function ProductForm({
              * OPCIONES BENTO
              * =============================
              */
-
             const cleanBentoFormas =
                 bentoFormas
                     .map(forma => forma.trim())
@@ -276,7 +321,6 @@ function ProductForm({
              * PRECIOS
              * =============================
              */
-
             const cleanPrices = {
                 ...prices
             };
@@ -286,19 +330,42 @@ function ProductForm({
              * eliminamos el precio antiguo
              * "mesaDulce" si existiera.
              */
-
             if (isMesaDulce) {
                 delete cleanPrices.mesaDulce;
             }
 
             /*
              * =============================
+             * PRECIOS POR PESO
+             * =============================
+             *
+             * Solo guardamos estos valores
+             * para Bombón y Nueces.
+             */
+            const cleanWeightPrices =
+                isWeightProduct
+                    ? {
+                        "250g": Number(
+                            weightPrices["250g"] || 0
+                        ),
+                        "500g": Number(
+                            weightPrices["500g"] || 0
+                        ),
+                        "750g": Number(
+                            weightPrices["750g"] || 0
+                        ),
+                        "1kg": Number(
+                            weightPrices["1kg"] || 0
+                        )
+                    }
+                    : editingProduct?.weightPrices || {};
+
+            /*
+             * =============================
              * PRODUCTO
              * =============================
              */
-
             const product = {
-
                 ...editingProduct,
 
                 id:
@@ -310,16 +377,19 @@ function ProductForm({
                     createSlug(name),
 
                 name,
-
                 description,
 
                 category,
-
                 categories,
 
                 type:
                     productType,
 
+                /*
+                 * =============================
+                 * BENTO
+                 * =============================
+                 */
                 bentoFormas:
                     isBento
                         ? cleanBentoFormas
@@ -336,13 +406,10 @@ function ProductForm({
                         : [],
 
                 /*
-                 * Mesa dulce:
-                 *
-                 * 12 = 12 unidades
-                 * 35 = 35 unidades
-                 * 1 = 1 kg
+                 * =============================
+                 * MESA DULCE
+                 * =============================
                  */
-
                 quantity:
                     isMesaDulce
                         ? quantity
@@ -352,16 +419,27 @@ function ProductForm({
                     editingProduct?.image ||
                     "",
 
+                /*
+                 * =============================
+                 * PRECIOS NORMALES
+                 * =============================
+                 */
                 prices:
                     cleanPrices,
 
                 /*
-                 * PRECIOS DE CAMBIO DE RELLENO
-                 *
-                 * Solo se utilizan para
-                 * tortas personalizadas.
+                 * =============================
+                 * PRECIOS POR PESO
+                 * =============================
                  */
+                weightPrices:
+                    cleanWeightPrices,
 
+                /*
+                 * =============================
+                 * PRECIOS CAMBIO DE RELLENO
+                 * =============================
+                 */
                 fillingPrices:
                     isPersonalizada
                         ? {
@@ -383,20 +461,24 @@ function ProductForm({
                         : editingProduct?.fillingPrices || {},
 
                 /*
+                 * =============================
                  * TAMAÑOS
+                 * =============================
                  */
-
                 sizes:
                     isMesaDulce
                         ? [String(quantity)]
                         : isBento
                             ? ["10"]
-                            : sizes,
+                            : isWeightProduct
+                                ? []
+                                : sizes,
 
                 /*
+                 * =============================
                  * SABORES
+                 * =============================
                  */
-
                 flavors:
                     isPersonalizada
                         ? flavors
@@ -404,16 +486,15 @@ function ProductForm({
                                 flavor.trim()
                             )
                             .filter(Boolean)
-
                         : isBento
                             ? cleanBentoBizcochuelos
-
                             : [],
 
                 /*
+                 * =============================
                  * RELLENOS
+                 * =============================
                  */
-
                 fillings:
                     isPersonalizada
                         ? fillings
@@ -421,13 +502,13 @@ function ProductForm({
                                 filling.trim()
                             )
                             .filter(Boolean)
-
                         : [],
 
                 /*
+                 * =============================
                  * COBERTURAS
+                 * =============================
                  */
-
                 coverings:
                     isPersonalizada
                         ? coverings
@@ -435,13 +516,13 @@ function ProductForm({
                                 covering.trim()
                             )
                             .filter(Boolean)
-
                         : [],
 
                 /*
+                 * =============================
                  * EXTRAS
+                 * =============================
                  */
-
                 extras:
                     extras
                         .filter(
@@ -474,10 +555,8 @@ function ProductForm({
             );
 
             onClose();
-
         }
         catch (error) {
-
             console.error(
                 "ERROR GUARDANDO PRODUCTO:",
                 error
@@ -488,17 +567,13 @@ function ProductForm({
                     ? "Error al actualizar el producto"
                     : "Error al crear el producto"
             );
-
         }
         finally {
-
             setSaving(false);
-
         }
     }
 
     return (
-
         <div
             className="
                 bg-white
@@ -508,7 +583,6 @@ function ProductForm({
                 mb-8
             "
         >
-
             <h2
                 className="
                     text-3xl
@@ -516,25 +590,20 @@ function ProductForm({
                     mb-6
                 "
             >
-
                 {
                     editingProduct
                         ? "Editar producto"
                         : "Nuevo producto"
                 }
-
             </h2>
 
-
             <div className="space-y-5">
-
 
                 {/* ============================= */}
                 {/* NOMBRE */}
                 {/* ============================= */}
 
                 <div>
-
                     <label className="font-semibold">
                         Nombre
                     </label>
@@ -552,16 +621,13 @@ function ProductForm({
                             mt-2
                         "
                     />
-
                 </div>
-
 
                 {/* ============================= */}
                 {/* DESCRIPCIÓN */}
                 {/* ============================= */}
 
                 <div>
-
                     <label className="font-semibold">
                         Descripción
                     </label>
@@ -580,16 +646,13 @@ function ProductForm({
                             mt-2
                         "
                     />
-
                 </div>
-
 
                 {/* ============================= */}
                 {/* CATEGORÍA */}
                 {/* ============================= */}
 
                 <div>
-
                     <label className="font-semibold">
                         Catálogos
                     </label>
@@ -630,7 +693,6 @@ function ProductForm({
                                 name: "Tortas personalizadas"
                             }
                         ].map(categoryOption => (
-
                             <label
                                 key={categoryOption.id}
                                 className="
@@ -644,7 +706,6 @@ function ProductForm({
                                     hover:bg-pink-50
                                 "
                             >
-
                                 <input
                                     type="checkbox"
                                     checked={categories.includes(
@@ -664,26 +725,20 @@ function ProductForm({
                                 <span className="font-medium">
                                     {categoryOption.name}
                                 </span>
-
                             </label>
-
                         ))}
 
                     </div>
-
                 </div>
-
 
                 {/* ============================= */}
                 {/* MESA DULCE */}
                 {/* ============================= */}
 
                 {isMesaDulce && (
-
                     <div className="space-y-4">
 
                         <div>
-
                             <label className="font-semibold">
                                 Presentación
                             </label>
@@ -705,7 +760,6 @@ function ProductForm({
                                     mt-2
                                 "
                             >
-
                                 <option value={12}>
                                     12 unidades
                                 </option>
@@ -717,14 +771,10 @@ function ProductForm({
                                 <option value={1}>
                                     1 kg
                                 </option>
-
                             </select>
-
                         </div>
 
-
                         <div>
-
                             <label className="font-semibold">
                                 Precio
                             </label>
@@ -754,20 +804,107 @@ function ProductForm({
                                     mt-2
                                 "
                             />
-
                         </div>
 
                     </div>
-
                 )}
 
+                {/* ============================= */}
+                {/* BOMBÓN / NUECES */}
+                {/* ============================= */}
+
+                {isWeightProduct && (
+                    <div
+                        className="
+                            border
+                            rounded-3xl
+                            p-5
+                            bg-pink-50/40
+                        "
+                    >
+                        <div className="mb-5">
+                            <label className="font-semibold text-lg">
+                                Precios por peso
+                            </label>
+
+                            <p className="text-sm text-gray-500 mt-1">
+                                Configurá el precio de cada presentación.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+
+                            {weightOptions.map(option => (
+                                <div
+                                    key={option.key}
+                                    className="
+                                        flex
+                                        items-center
+                                        gap-4
+                                    "
+                                >
+                                    <div
+                                        className="
+                                            w-24
+                                            font-semibold
+                                            text-gray-700
+                                        "
+                                    >
+                                        {option.label}
+                                    </div>
+
+                                    <div className="flex-1 relative">
+                                        <span
+                                            className="
+                                                absolute
+                                                left-4
+                                                top-1/2
+                                                -translate-y-1/2
+                                                text-gray-500
+                                            "
+                                        >
+                                            $
+                                        </span>
+
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={
+                                                weightPrices[option.key] ?? ""
+                                            }
+                                            onChange={(e) =>
+                                                setWeightPrices({
+                                                    ...weightPrices,
+
+                                                    [option.key]:
+                                                        Number(
+                                                            e.target.value
+                                                        )
+                                                })
+                                            }
+                                            placeholder="Precio"
+                                            className="
+                                                w-full
+                                                border
+                                                rounded-2xl
+                                                p-3
+                                                pl-9
+                                                bg-white
+                                            "
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                        </div>
+                    </div>
+                )}
 
                 {/* ============================= */}
                 {/* ALFAJORES / COOKIES */}
                 {/* ============================= */}
 
                 {(isAlfajor || isCookies) && (
-
                     <SizesSection
                         sizes={sizes}
                         setSizes={setSizes}
@@ -779,25 +916,18 @@ function ProductForm({
                                 : "alfajor"
                         }
                     />
-
                 )}
-
 
                 {/* ============================= */}
                 {/* BENTO CAKES */}
                 {/* ============================= */}
 
                 {isBento && (
-
                     <div className="space-y-6">
 
-
-                        {/* ============================= */}
                         {/* FORMAS */}
-                        {/* ============================= */}
 
                         <div>
-
                             <label className="font-semibold">
                                 Formas
                             </label>
@@ -806,7 +936,6 @@ function ProductForm({
 
                                 {bentoFormas.map(
                                     (forma, index) => (
-
                                         <div
                                             key={index}
                                             className="
@@ -815,16 +944,13 @@ function ProductForm({
                                                 gap-3
                                             "
                                         >
-
                                             <input
                                                 type="text"
                                                 value={forma}
                                                 onChange={(e) => {
-
-                                                    const newFormas =
-                                                        [
-                                                            ...bentoFormas
-                                                        ];
+                                                    const newFormas = [
+                                                        ...bentoFormas
+                                                    ];
 
                                                     newFormas[index] =
                                                         e.target.value;
@@ -832,7 +958,6 @@ function ProductForm({
                                                     setBentoFormas(
                                                         newFormas
                                                     );
-
                                                 }}
                                                 placeholder="Ej.: Redonda"
                                                 className="
@@ -844,18 +969,15 @@ function ProductForm({
                                             />
 
                                             {bentoFormas.length > 1 && (
-
                                                 <button
                                                     type="button"
                                                     onClick={() => {
-
                                                         setBentoFormas(
                                                             bentoFormas.filter(
                                                                 (_, i) =>
                                                                     i !== index
                                                             )
                                                         );
-
                                                     }}
                                                     className="
                                                         px-4
@@ -867,16 +989,12 @@ function ProductForm({
                                                 >
                                                     🗑
                                                 </button>
-
                                             )}
-
                                         </div>
-
                                     )
                                 )}
 
                             </div>
-
 
                             <button
                                 type="button"
@@ -894,16 +1012,11 @@ function ProductForm({
                             >
                                 ➕ Agregar otra forma
                             </button>
-
                         </div>
 
-
-                        {/* ============================= */}
                         {/* BIZCOCHUELOS */}
-                        {/* ============================= */}
 
                         <div>
-
                             <label className="font-semibold">
                                 Bizcochuelos
                             </label>
@@ -915,7 +1028,6 @@ function ProductForm({
                                         bizcochuelo,
                                         index
                                     ) => (
-
                                         <div
                                             key={index}
                                             className="
@@ -924,18 +1036,15 @@ function ProductForm({
                                                 gap-3
                                             "
                                         >
-
                                             <input
                                                 type="text"
                                                 value={
                                                     bizcochuelo
                                                 }
                                                 onChange={(e) => {
-
-                                                    const newBizcochuelos =
-                                                        [
-                                                            ...bentoBizcochuelos
-                                                        ];
+                                                    const newBizcochuelos = [
+                                                        ...bentoBizcochuelos
+                                                    ];
 
                                                     newBizcochuelos[
                                                         index
@@ -945,7 +1054,6 @@ function ProductForm({
                                                     setBentoBizcochuelos(
                                                         newBizcochuelos
                                                     );
-
                                                 }}
                                                 placeholder="Ej.: Vainilla"
                                                 className="
@@ -957,18 +1065,15 @@ function ProductForm({
                                             />
 
                                             {bentoBizcochuelos.length > 1 && (
-
                                                 <button
                                                     type="button"
                                                     onClick={() => {
-
                                                         setBentoBizcochuelos(
                                                             bentoBizcochuelos.filter(
                                                                 (_, i) =>
                                                                     i !== index
                                                             )
                                                         );
-
                                                     }}
                                                     className="
                                                         px-4
@@ -980,16 +1085,12 @@ function ProductForm({
                                                 >
                                                     🗑
                                                 </button>
-
                                             )}
-
                                         </div>
-
                                     )
                                 )}
 
                             </div>
-
 
                             <button
                                 type="button"
@@ -1007,16 +1108,11 @@ function ProductForm({
                             >
                                 ➕ Agregar otro bizcochuelo
                             </button>
-
                         </div>
 
-
-                        {/* ============================= */}
                         {/* TAMAÑO */}
-                        {/* ============================= */}
 
                         <div>
-
                             <label className="font-semibold">
                                 Tamaño
                             </label>
@@ -1034,16 +1130,11 @@ function ProductForm({
                             >
                                 10 cm
                             </div>
-
                         </div>
 
-
-                        {/* ============================= */}
                         {/* COBERTURA */}
-                        {/* ============================= */}
 
                         <div>
-
                             <label className="font-semibold">
                                 Cobertura
                             </label>
@@ -1061,16 +1152,11 @@ function ProductForm({
                             >
                                 Buttercream
                             </div>
-
                         </div>
 
-
-                        {/* ============================= */}
                         {/* PRECIO */}
-                        {/* ============================= */}
 
                         <div>
-
                             <label className="font-semibold">
                                 Precio base
                             </label>
@@ -1084,6 +1170,7 @@ function ProductForm({
                                 onChange={(e) =>
                                     setPrices({
                                         ...prices,
+
                                         "10":
                                             Number(
                                                 e.target.value
@@ -1099,30 +1186,23 @@ function ProductForm({
                                     mt-2
                                 "
                             />
-
                         </div>
 
                     </div>
-
                 )}
-
 
                 {/* ============================= */}
                 {/* PERSONALIZADA */}
                 {/* ============================= */}
 
                 {isPersonalizada && (
-
                     <>
 
-                        {/* ============================= */}
                         {/* PRECIOS CAMBIO DE RELLENO */}
-                        {/* ============================= */}
 
                         <div className="space-y-4">
 
                             <div>
-
                                 <label className="font-semibold">
                                     Precio por cambio de relleno
                                 </label>
@@ -1133,14 +1213,11 @@ function ProductForm({
                                     automáticamente a todos los
                                     pesos disponibles para ese tamaño.
                                 </p>
-
                             </div>
-
 
                             {/* 16 CM */}
 
                             <div>
-
                                 <label className="font-medium">
                                     16 cm
                                 </label>
@@ -1160,6 +1237,7 @@ function ProductForm({
                                         onChange={(e) =>
                                             setFillingPrices({
                                                 ...fillingPrices,
+
                                                 "16":
                                                     Number(
                                                         e.target.value
@@ -1176,14 +1254,11 @@ function ProductForm({
                                     />
 
                                 </div>
-
                             </div>
-
 
                             {/* 20 CM */}
 
                             <div>
-
                                 <label className="font-medium">
                                     20 cm
                                 </label>
@@ -1203,6 +1278,7 @@ function ProductForm({
                                         onChange={(e) =>
                                             setFillingPrices({
                                                 ...fillingPrices,
+
                                                 "20":
                                                     Number(
                                                         e.target.value
@@ -1219,14 +1295,11 @@ function ProductForm({
                                     />
 
                                 </div>
-
                             </div>
-
 
                             {/* 24 CM */}
 
                             <div>
-
                                 <label className="font-medium">
                                     24 cm
                                 </label>
@@ -1246,6 +1319,7 @@ function ProductForm({
                                         onChange={(e) =>
                                             setFillingPrices({
                                                 ...fillingPrices,
+
                                                 "24":
                                                     Number(
                                                         e.target.value
@@ -1262,15 +1336,11 @@ function ProductForm({
                                     />
 
                                 </div>
-
                             </div>
 
                         </div>
 
-
-                        {/* ============================= */}
                         {/* TAMAÑOS PERSONALIZADOS */}
-                        {/* ============================= */}
 
                         <PersonalizedSizesSection
                             sizes={sizes}
@@ -1279,30 +1349,21 @@ function ProductForm({
                             setPrices={setPrices}
                         />
 
-
-                        {/* ============================= */}
                         {/* SABORES */}
-                        {/* ============================= */}
 
                         <FlavorsSection
                             flavors={flavors}
                             setFlavors={setFlavors}
                         />
 
-
-                        {/* ============================= */}
                         {/* RELLENOS */}
-                        {/* ============================= */}
 
                         <FillingsSection
                             fillings={fillings}
                             setFillings={setFillings}
                         />
 
-
-                        {/* ============================= */}
                         {/* COBERTURAS */}
-                        {/* ============================= */}
 
                         <CoveringsSection
                             coverings={coverings}
@@ -1310,9 +1371,7 @@ function ProductForm({
                         />
 
                     </>
-
                 )}
-
 
                 {/* ============================= */}
                 {/* EXTRAS */}
@@ -1323,7 +1382,6 @@ function ProductForm({
                     setExtras={setExtras}
                 />
 
-
                 {/* ============================= */}
                 {/* TAMAÑOS TRADICIONALES */}
                 {/* ============================= */}
@@ -1332,8 +1390,8 @@ function ProductForm({
                     !isAlfajor &&
                     !isCookies &&
                     !isPersonalizada &&
-                    !isBento && (
-
+                    !isBento &&
+                    !isWeightProduct && (
                         <SizesSection
                             sizes={sizes}
                             setSizes={setSizes}
@@ -1341,9 +1399,7 @@ function ProductForm({
                             setPrices={setPrices}
                             type="tradicional"
                         />
-
                     )}
-
 
                 {/* ============================= */}
                 {/* BOTONES */}
@@ -1371,7 +1427,6 @@ function ProductForm({
                         Cancelar
                     </button>
 
-
                     <button
                         type="button"
                         onClick={handleSave}
@@ -1384,25 +1439,19 @@ function ProductForm({
                             py-3
                         "
                     >
-
                         {saving
                             ? "Guardando..."
-
                             : editingProduct
                                 ? "Actualizar producto"
-
                                 : "Guardar producto"
                         }
-
                     </button>
 
                 </div>
 
             </div>
-
         </div>
     );
 }
 
 export default ProductForm;
-

@@ -9,31 +9,88 @@ function ProductCard({ product }) {
 
     const navigate = useNavigate();
 
-// *=============================*
-// *OBTENER PRECIO*
-// *=============================*
+    // =============================
+    // OBTENER PRECIO
+    // =============================
 
-let firstPrice = 0;
+    let firstPrice = 0;
 
-// *MESA DULCE*
+    // =============================
+    // BOMBÓN Y NUECES
+    // =============================
 
-if (product.type === "mesaDulce") {
+    const normalizeProductName = (value) => {
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .trim()
+            .toLowerCase();
+    };
 
-    const quantity = product.quantity
-        ? String(product.quantity)
-        : null;
+    const normalizedProductName =
+        normalizeProductName(product.name);
 
-    if (
-        quantity &&
-        product.prices?.[quantity] != null
-    ) {
-        firstPrice =
-            Number(product.prices[quantity]);
+    const isWeightProduct =
+        normalizedProductName === "bombon" ||
+        normalizedProductName === "nueces";
+
+    if (isWeightProduct) {
+
+        const prices =
+            product.weightPrices || {};
+
+        const availablePrices =
+            Object.values(prices)
+                .map(Number)
+                .filter(
+                    price => price > 0
+                );
+
+        if (availablePrices.length > 0) {
+            firstPrice =
+                Math.min(...availablePrices);
+        }
     }
 
+    // =============================
+    // MESA DULCE
+    // =============================
+
+    else if (product.type === "mesaDulce") {
+
+        const quantity = product.quantity
+            ? String(product.quantity)
+            : null;
+
+        if (
+            quantity &&
+            product.prices?.[quantity] != null
+        ) {
+            firstPrice =
+                Number(product.prices[quantity]);
+        }
+
+        else if (
+            product.sizes?.length &&
+            product.prices
+        ) {
+            const presentation =
+                String(product.sizes[0]);
+
+            firstPrice =
+                Number(
+                    product.prices[presentation] || 0
+                );
+        }
+    }
+
+    // =============================
+    // ALFAJORES
+    // =============================
+
     else if (
-        product.sizes?.length &&
-        product.prices
+        product.type === "alfajor" &&
+        product.sizes?.length
     ) {
 
         const presentation =
@@ -41,141 +98,115 @@ if (product.type === "mesaDulce") {
 
         firstPrice =
             Number(
-                product.prices[presentation] || 0
+                product.prices?.[presentation] || 0
             );
     }
-}
 
+    // =============================
+    // PRODUCTOS PERSONALIZADOS
+    // =============================
 
-// *ALFAJORES*
+    else if (
+        product.type === "personalizada"
+    ) {
 
-else if (
-    product.type === "alfajor" &&
-    product.sizes?.length
-) {
+        const activeSizes =
+            product.sizes?.map(
+                size => String(size)
+            ) || [];
 
-    const presentation =
-        String(product.sizes[0]);
+        const prices =
+            product.prices || {};
 
-    firstPrice =
-        Number(
-            product.prices?.[presentation] || 0
-        );
-}
+        const availablePrices = [];
 
+        activeSizes.forEach(size => {
 
-// *PRODUCTOS PERSONALIZADOS*
+            Object.entries(prices).forEach(
+                ([key, price]) => {
 
-else if (
-    product.type === "personalizada"
-) {
+                    const keySize =
+                        String(key).split("-")[0];
 
-    const activeSizes =
-        product.sizes?.map(
-            size => String(size)
-        ) || [];
-
-    const prices =
-        product.prices || {};
-
-    const availablePrices = [];
-
-    activeSizes.forEach(size => {
-
-        Object.entries(prices).forEach(
-            ([key, price]) => {
-
-                const keySize =
-                    String(key).split("-")[0];
-
-                if (
-                    keySize === size &&
-                    Number(price) > 0
-                ) {
-                    availablePrices.push(
-                        Number(price)
-                    );
+                    if (
+                        keySize === size &&
+                        Number(price) > 0
+                    ) {
+                        availablePrices.push(
+                            Number(price)
+                        );
+                    }
                 }
-
-            }
-        );
-
-    });
-
-    if (availablePrices.length > 0) {
-
-        firstPrice =
-            Math.min(...availablePrices);
-
-    }
-}
-
-
-// *PRODUCTOS TRADICIONALES*
-
-else if (
-    product.type === "tradicional"
-) {
-
-    const activeSizes =
-        product.sizes?.map(
-            size => String(size)
-        ) || [];
-
-    const prices =
-        product.prices || {};
-
-    const availablePrices = [];
-
-    activeSizes.forEach(size => {
-
-        if (
-            prices[size] != null &&
-            Number(prices[size]) > 0
-        ) {
-
-            availablePrices.push(
-                Number(prices[size])
             );
+        });
 
+        if (availablePrices.length > 0) {
+            firstPrice =
+                Math.min(...availablePrices);
         }
-
-    });
-
-    if (availablePrices.length > 0) {
-
-        firstPrice =
-            Math.min(...availablePrices);
-
     }
-}
 
+    // =============================
+    // PRODUCTOS TRADICIONALES
+    // =============================
 
-// *RESTO DE PRODUCTOS*
+    else if (
+        product.type === "tradicional"
+    ) {
 
-else {
+        const activeSizes =
+            product.sizes?.map(
+                size => String(size)
+            ) || [];
 
-    const prices =
-        product.prices || {};
+        const prices =
+            product.prices || {};
 
-    const availablePrices =
-        Object.values(prices)
-            .map(Number)
-            .filter(
-                price => price > 0
-            );
+        const availablePrices = [];
 
-    if (availablePrices.length > 0) {
+        activeSizes.forEach(size => {
 
-        firstPrice =
-            Math.min(...availablePrices);
+            if (
+                prices[size] != null &&
+                Number(prices[size]) > 0
+            ) {
+                availablePrices.push(
+                    Number(prices[size])
+                );
+            }
+        });
 
+        if (availablePrices.length > 0) {
+            firstPrice =
+                Math.min(...availablePrices);
+        }
     }
-}
 
-    // *=============================*
-    // *ABRIR PRODUCTO*
-    // *=============================*
+    // =============================
+    // RESTO DE PRODUCTOS
+    // =============================
+
+    else {
+
+        const prices =
+            product.prices || {};
+
+        const availablePrices =
+            Object.values(prices)
+                .map(Number)
+                .filter(
+                    price => price > 0
+                );
+
+        if (availablePrices.length > 0) {
+            firstPrice =
+                Math.min(...availablePrices);
+        }
+    }
+
+    // =============================
+    // ABRIR PRODUCTO
+    // =============================
 
     function handleOpen() {
 
@@ -190,14 +221,12 @@ else {
             navigate(
                 `/producto/tradicional/${product.slug}`
             );
-
         }
     }
 
-
-    // *=============================*
-    // *RENDER*
-    // *=============================*
+    // =============================
+    // RENDER
+    // =============================
 
     return (
 
@@ -246,11 +275,9 @@ else {
                     <span className="text-6xl opacity-50">
                         🎂
                     </span>
-
                 )}
 
             </div>
-
 
             {/* INFORMACIÓN */}
 
@@ -267,7 +294,6 @@ else {
                 >
                     {product.name}
                 </h2>
-
 
                 <p
                     className="
