@@ -30,6 +30,10 @@ function Catalog() {
 
     }
 
+console.log(
+    "MESA DULCE DESDE FIREBASE:",
+    products.filter(product => product.type === "mesaDulce")
+);
 
 const filteredProducts = products
 

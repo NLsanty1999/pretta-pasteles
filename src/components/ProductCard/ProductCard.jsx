@@ -1,36 +1,181 @@
-
 import { useNavigate } from "react-router-dom";
 
 function ProductCard({ product }) {
 
+    console.log(
+        "PRODUCTO QUE LLEGA A PRODUCT CARD:",
+        product
+    );
+
     const navigate = useNavigate();
 
+// *=============================*
+// *OBTENER PRECIO*
+// *=============================*
 
-    // Obtener el precio correcto
-    let firstPrice = 0;
+let firstPrice = 0;
 
+// *MESA DULCE*
+
+if (product.type === "mesaDulce") {
+
+    const quantity = product.quantity
+        ? String(product.quantity)
+        : null;
 
     if (
-        product.type === "alfajor" &&
-        product.sizes?.length
+        quantity &&
+        product.prices?.[quantity] != null
+    ) {
+        firstPrice =
+            Number(product.prices[quantity]);
+    }
+
+    else if (
+        product.sizes?.length &&
+        product.prices
     ) {
 
         const presentation =
             String(product.sizes[0]);
 
         firstPrice =
-            product.prices?.[presentation] || 0;
+            Number(
+                product.prices[presentation] || 0
+            );
+    }
+}
+
+
+// *ALFAJORES*
+
+else if (
+    product.type === "alfajor" &&
+    product.sizes?.length
+) {
+
+    const presentation =
+        String(product.sizes[0]);
+
+    firstPrice =
+        Number(
+            product.prices?.[presentation] || 0
+        );
+}
+
+
+// *PRODUCTOS PERSONALIZADOS*
+
+else if (
+    product.type === "personalizada"
+) {
+
+    const activeSizes =
+        product.sizes?.map(
+            size => String(size)
+        ) || [];
+
+    const prices =
+        product.prices || {};
+
+    const availablePrices = [];
+
+    activeSizes.forEach(size => {
+
+        Object.entries(prices).forEach(
+            ([key, price]) => {
+
+                const keySize =
+                    String(key).split("-")[0];
+
+                if (
+                    keySize === size &&
+                    Number(price) > 0
+                ) {
+                    availablePrices.push(
+                        Number(price)
+                    );
+                }
+
+            }
+        );
+
+    });
+
+    if (availablePrices.length > 0) {
+
+        firstPrice =
+            Math.min(...availablePrices);
 
     }
+}
 
-    else {
 
-        firstPrice = product.prices
-            ? Object.values(product.prices)[0]
-            : 0;
+// *PRODUCTOS TRADICIONALES*
+
+else if (
+    product.type === "tradicional"
+) {
+
+    const activeSizes =
+        product.sizes?.map(
+            size => String(size)
+        ) || [];
+
+    const prices =
+        product.prices || {};
+
+    const availablePrices = [];
+
+    activeSizes.forEach(size => {
+
+        if (
+            prices[size] != null &&
+            Number(prices[size]) > 0
+        ) {
+
+            availablePrices.push(
+                Number(prices[size])
+            );
+
+        }
+
+    });
+
+    if (availablePrices.length > 0) {
+
+        firstPrice =
+            Math.min(...availablePrices);
 
     }
+}
 
+
+// *RESTO DE PRODUCTOS*
+
+else {
+
+    const prices =
+        product.prices || {};
+
+    const availablePrices =
+        Object.values(prices)
+            .map(Number)
+            .filter(
+                price => price > 0
+            );
+
+    if (availablePrices.length > 0) {
+
+        firstPrice =
+            Math.min(...availablePrices);
+
+    }
+}
+
+    // *=============================*
+    // *ABRIR PRODUCTO*
+    // *=============================*
 
     function handleOpen() {
 
@@ -40,18 +185,19 @@ function ProductCard({ product }) {
                 `/producto/${product.slug}`
             );
 
-        }
-
-        else {
+        } else {
 
             navigate(
                 `/producto/tradicional/${product.slug}`
             );
 
         }
-
     }
 
+
+    // *=============================*
+    // *RENDER*
+    // *=============================*
 
     return (
 
@@ -98,9 +244,7 @@ function ProductCard({ product }) {
                 ) : (
 
                     <span className="text-6xl opacity-50">
-
                         🎂
-
                     </span>
 
                 )}
@@ -121,9 +265,7 @@ function ProductCard({ product }) {
                         min-h-[3.5rem]
                     "
                 >
-
                     {product.name}
-
                 </h2>
 
 
@@ -134,25 +276,18 @@ function ProductCard({ product }) {
                         mt-2
                     "
                 >
-
                     Desde $
-
                     {Number(
                         firstPrice || 0
                     ).toLocaleString(
                         "es-AR"
                     )}
-
                 </p>
 
             </div>
 
         </button>
-
     );
-
 }
 
-
 export default ProductCard;
-

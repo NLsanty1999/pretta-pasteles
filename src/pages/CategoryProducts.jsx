@@ -1,55 +1,119 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Layout from "../Layout/Layout";
-
 import ProductCard from "../components/ProductCard/ProductCard";
 
-import tortas from "../data/products/tortas";
-import tartas from "../data/products/tartas";
-import alfajores from "../data/products/alfajores";
-import mesaDulce from "../data/products/mesaDulce";
+import { getProducts } from "../firebase/products";
 
 function CategoryProducts() {
 
     const { category } = useParams();
 
-    let products = [];
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    switch (category) {
+    useEffect(() => {
 
-        case "tortas":
+        async function loadProducts() {
 
-            products = tortas.filter(
+            try {
 
-                product => product.type === "tradicional"
+                const data = await getProducts();
 
-            );
+                let filteredProducts = [];
 
-            break;
+                switch (category) {
 
-        case "tartas":
+                    case "tortas":
 
-            products = tartas;
+                        filteredProducts = data.filter(
+                            product =>
+                                product.type === "tradicional"
+                        );
 
-            break;
+                        break;
 
-        case "alfajores":
+                    case "tartas":
 
-            products = alfajores;
+                        filteredProducts = data.filter(
+                            product =>
+                                product.category === 2 ||
+                                product.categories?.includes(2)
+                        );
 
-            break;
+                        break;
 
-        case "mesa-dulce":
+                    case "alfajores":
 
-            products = mesaDulce;
+                        filteredProducts = data.filter(
+                            product =>
+                                product.type === "alfajor" ||
+                                product.category === 4 ||
+                                product.categories?.includes(4)
+                        );
 
-            break;
+                        break;
 
-        default:
+                    case "mesa-dulce":
 
-            products = [];
+                        filteredProducts = data.filter(
+                            product =>
+                                product.type === "mesaDulce" ||
+                                product.category === 3 ||
+                                product.categories?.includes(3)
+                        );
+
+                        break;
+
+                    default:
+
+                        filteredProducts = [];
+
+                }
+
+                setProducts(filteredProducts);
+
+            } catch (error) {
+
+                console.error(
+                    "Error cargando productos:",
+                    error
+                );
+
+                setProducts([]);
+
+            } finally {
+
+                setLoading(false);
+
+            }
+
+        }
+
+        loadProducts();
+
+    }, [category]);
+
+
+    if (loading) {
+
+        return (
+
+            <Layout>
+
+                <div className="flex justify-center py-10">
+
+                    <p>Cargando productos...</p>
+
+                </div>
+
+            </Layout>
+
+        );
 
     }
+
 
     return (
 
@@ -57,21 +121,14 @@ function CategoryProducts() {
 
             <div className="space-y-6">
 
-                {
+                {products.map(product => (
 
-                    products.map(product => (
+                    <ProductCard
+                        key={product.slug || product.id}
+                        product={product}
+                    />
 
-                        <ProductCard
-
-                            key={product.id}
-
-                            product={product}
-
-                        />
-
-                    ))
-
-                }
+                ))}
 
             </div>
 

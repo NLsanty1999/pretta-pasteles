@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+
 import { saveProduct, createSlug } from "../../firebase/products";
 
 import SizesSection from "./SizesSection";
@@ -7,7 +9,6 @@ import ExtrasSection from "./ExtrasSection";
 import FlavorsSection from "./FlavorsSection";
 import FillingsSection from "./FillingsSection";
 import CoveringsSection from "./CoveringsSection";
-
 
 function ProductForm({
     onClose,
@@ -23,14 +24,14 @@ function ProductForm({
     );
 
     const [categories, setCategories] = useState(
-    editingProduct?.categories?.length
-        ? editingProduct.categories.map(Number)
-        : [
-            Number(editingProduct?.category || 1)
-        ]
-);
+        editingProduct?.categories?.length
+            ? editingProduct.categories.map(Number)
+            : [
+                Number(editingProduct?.category || 1)
+            ]
+    );
 
-const category = categories[0];
+    const category = categories[0];
 
     const [sizes, setSizes] = useState(
         editingProduct?.sizes || []
@@ -38,6 +39,18 @@ const category = categories[0];
 
     const [prices, setPrices] = useState(
         editingProduct?.prices || {}
+    );
+
+    // =============================
+    // PRECIOS CAMBIO DE RELLENO
+    // =============================
+
+    const [fillingPrices, setFillingPrices] = useState(
+        editingProduct?.fillingPrices || {
+            "16": 9000,
+            "20": 13000,
+            "24": 0
+        }
     );
 
     const [flavors, setFlavors] = useState(
@@ -73,7 +86,6 @@ const category = categories[0];
         editingProduct?.quantity || 35
     );
 
-
     /*
      * =============================
      * BENTO
@@ -92,9 +104,7 @@ const category = categories[0];
             : [""]
     );
 
-
     const [saving, setSaving] = useState(false);
-
 
     /*
      * =============================
@@ -126,42 +136,62 @@ const category = categories[0];
         category === 7 ||
         editingProduct?.type === "personalizada";
 
-
     /*
      * =============================
      * CAMBIO DE CATEGORÍA
      * =============================
      */
 
-function toggleCategory(categoryId) {
+    function toggleCategory(categoryId) {
 
-    setCategories(current => {
+        setCategories(current => {
 
-        const exists =
-            current.includes(categoryId);
+            const exists =
+                current.includes(categoryId);
 
-        if (exists) {
+            if (exists) {
 
-            // No permitir que quede sin categoría
-            if (current.length === 1) {
-                return current;
+                // No permitir que quede sin categoría
+                if (current.length === 1) {
+                    return current;
+                }
+
+                return current.filter(
+                    id => id !== categoryId
+                );
             }
 
-            return current.filter(
-                id => id !== categoryId
-            );
+            return [
+                ...current,
+                categoryId
+            ];
+        });
+    }
 
+    /*
+     * =============================
+     * TEXTO DE PRESENTACIÓN
+     * =============================
+     */
+
+    function getMesaDulceLabel(value) {
+
+        const numericValue = Number(value);
+
+        if (numericValue === 1) {
+            return "1 kg";
         }
 
-        return [
-            ...current,
-            categoryId
-        ];
+        if (numericValue === 12) {
+            return "12 unidades";
+        }
 
-    });
+        if (numericValue === 35) {
+            return "35 unidades";
+        }
 
-}
-
+        return `${numericValue} unidades`;
+    }
 
     /*
      * =============================
@@ -178,14 +208,11 @@ function toggleCategory(categoryId) {
             );
 
             return;
-
         }
-
 
         try {
 
             setSaving(true);
-
 
             /*
              * =============================
@@ -196,42 +223,35 @@ function toggleCategory(categoryId) {
             let productType =
                 "tradicional";
 
-
             if (isPersonalizada) {
 
                 productType =
                     "personalizada";
 
             }
-
             else if (isAlfajor) {
 
                 productType =
                     "alfajor";
 
             }
-
             else if (isMesaDulce) {
 
                 productType =
                     "mesaDulce";
 
             }
-
             else if (isBento) {
 
                 productType =
                     "bento";
 
             }
-
             else if (isCookies) {
 
                 productType =
                     "cookies";
-
             }
-
 
             /*
              * =============================
@@ -244,7 +264,6 @@ function toggleCategory(categoryId) {
                     .map(forma => forma.trim())
                     .filter(Boolean);
 
-
             const cleanBentoBizcochuelos =
                 bentoBizcochuelos
                     .map(bizcochuelo =>
@@ -252,6 +271,25 @@ function toggleCategory(categoryId) {
                     )
                     .filter(Boolean);
 
+            /*
+             * =============================
+             * PRECIOS
+             * =============================
+             */
+
+            const cleanPrices = {
+                ...prices
+            };
+
+            /*
+             * Mesa dulce:
+             * eliminamos el precio antiguo
+             * "mesaDulce" si existiera.
+             */
+
+            if (isMesaDulce) {
+                delete cleanPrices.mesaDulce;
+            }
 
             /*
              * =============================
@@ -263,66 +301,46 @@ function toggleCategory(categoryId) {
 
                 ...editingProduct,
 
-
                 id:
                     editingProduct?.id ||
                     Date.now(),
-
 
                 slug:
                     editingProduct?.slug ||
                     createSlug(name),
 
-
                 name,
-
 
                 description,
 
-
                 category,
 
-categories,
-
+                categories,
 
                 type:
                     productType,
-
-
-                /*
-                 * =============================
-                 * BENTO
-                 * =============================
-                 *
-                 * Guardamos exactamente
-                 * las opciones que cargaste.
-                 */
 
                 bentoFormas:
                     isBento
                         ? cleanBentoFormas
                         : [],
 
-
                 bentoBizcochuelos:
                     isBento
                         ? cleanBentoBizcochuelos
                         : [],
-
-
-                /*
-                 * Alias para compatibilidad
-                 * con el frontend.
-                 */
 
                 bentoForms:
                     isBento
                         ? cleanBentoFormas
                         : [],
 
-
                 /*
-                 * CANTIDAD
+                 * Mesa dulce:
+                 *
+                 * 12 = 12 unidades
+                 * 35 = 35 unidades
+                 * 1 = 1 kg
                  */
 
                 quantity:
@@ -330,27 +348,42 @@ categories,
                         ? quantity
                         : null,
 
-
-                /*
-                 * IMAGEN
-                 */
-
                 image:
                     editingProduct?.image ||
                     "",
 
+                prices:
+                    cleanPrices,
 
                 /*
-                 * PRECIOS
+                 * PRECIOS DE CAMBIO DE RELLENO
+                 *
+                 * Solo se utilizan para
+                 * tortas personalizadas.
                  */
 
-                prices,
+                fillingPrices:
+                    isPersonalizada
+                        ? {
+                            "16":
+                                Number(
+                                    fillingPrices["16"] || 0
+                                ),
 
+                            "20":
+                                Number(
+                                    fillingPrices["20"] || 0
+                                ),
+
+                            "24":
+                                Number(
+                                    fillingPrices["24"] || 0
+                                )
+                        }
+                        : editingProduct?.fillingPrices || {},
 
                 /*
                  * TAMAÑOS
-                 *
-                 * Bento usa 10 cm.
                  */
 
                 sizes:
@@ -360,11 +393,8 @@ categories,
                             ? ["10"]
                             : sizes,
 
-
                 /*
                  * SABORES
-                 *
-                 * Personalizada usa flavors.
                  */
 
                 flavors:
@@ -374,10 +404,11 @@ categories,
                                 flavor.trim()
                             )
                             .filter(Boolean)
+
                         : isBento
                             ? cleanBentoBizcochuelos
-                            : [],
 
+                            : [],
 
                 /*
                  * RELLENOS
@@ -390,8 +421,8 @@ categories,
                                 filling.trim()
                             )
                             .filter(Boolean)
-                        : [],
 
+                        : [],
 
                 /*
                  * COBERTURAS
@@ -404,8 +435,8 @@ categories,
                                 covering.trim()
                             )
                             .filter(Boolean)
-                        : [],
 
+                        : [],
 
                 /*
                  * EXTRAS
@@ -427,18 +458,14 @@ categories,
                                     extra.price || 0
                                 )
                         }))
-
             };
-
 
             console.log(
                 "PRODUCTO QUE SE VA A GUARDAR:",
                 product
             );
 
-
             await saveProduct(product);
-
 
             alert(
                 editingProduct
@@ -446,11 +473,9 @@ categories,
                     : "Producto creado correctamente ✅"
             );
 
-
             onClose();
 
         }
-
         catch (error) {
 
             console.error(
@@ -465,32 +490,32 @@ categories,
             );
 
         }
-
         finally {
 
             setSaving(false);
 
         }
-
     }
-
 
     return (
 
-        <div className="
-            bg-white
-            rounded-3xl
-            shadow
-            p-6
-            mb-8
-        ">
+        <div
+            className="
+                bg-white
+                rounded-3xl
+                shadow
+                p-6
+                mb-8
+            "
+        >
 
-
-            <h2 className="
-                text-3xl
-                font-bold
-                mb-6
-            ">
+            <h2
+                className="
+                    text-3xl
+                    font-bold
+                    mb-6
+                "
+            >
 
                 {
                     editingProduct
@@ -563,90 +588,90 @@ categories,
                 {/* CATEGORÍA */}
                 {/* ============================= */}
 
-<div>
+                <div>
 
-    <label className="font-semibold">
-        Catálogos
-    </label>
+                    <label className="font-semibold">
+                        Catálogos
+                    </label>
 
-    <p className="text-sm text-gray-500 mt-1 mb-3">
-        Podés seleccionar uno o varios catálogos.
-    </p>
+                    <p className="text-sm text-gray-500 mt-1 mb-3">
+                        Podés seleccionar uno o varios catálogos.
+                    </p>
 
-    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-3">
 
-        {[
-            {
-                id: 1,
-                name: "Tortas clásicas"
-            },
-            {
-                id: 2,
-                name: "Tartas"
-            },
-            {
-                id: 3,
-                name: "Mesa dulce"
-            },
-            {
-                id: 4,
-                name: "Alfajores"
-            },
-            {
-                id: 5,
-                name: "Bento Cakes"
-            },
-            {
-                id: 6,
-                name: "Cookies"
-            },
-            {
-                id: 7,
-                name: "Tortas personalizadas"
-            }
-        ].map(categoryOption => (
+                        {[
+                            {
+                                id: 1,
+                                name: "Tortas clásicas"
+                            },
+                            {
+                                id: 2,
+                                name: "Tartas"
+                            },
+                            {
+                                id: 3,
+                                name: "Mesa dulce"
+                            },
+                            {
+                                id: 4,
+                                name: "Alfajores"
+                            },
+                            {
+                                id: 5,
+                                name: "Bento Cakes"
+                            },
+                            {
+                                id: 6,
+                                name: "Cookies"
+                            },
+                            {
+                                id: 7,
+                                name: "Tortas personalizadas"
+                            }
+                        ].map(categoryOption => (
 
-            <label
-                key={categoryOption.id}
-                className="
-                    flex
-                    items-center
-                    gap-3
-                    border
-                    rounded-2xl
-                    p-4
-                    cursor-pointer
-                    hover:bg-pink-50
-                "
-            >
+                            <label
+                                key={categoryOption.id}
+                                className="
+                                    flex
+                                    items-center
+                                    gap-3
+                                    border
+                                    rounded-2xl
+                                    p-4
+                                    cursor-pointer
+                                    hover:bg-pink-50
+                                "
+                            >
 
-                <input
-                    type="checkbox"
-                    checked={categories.includes(
-                        categoryOption.id
-                    )}
-                    onChange={() =>
-                        toggleCategory(
-                            categoryOption.id
-                        )
-                    }
-                    className="
-                        w-5
-                        h-5
-                    "
-                />
+                                <input
+                                    type="checkbox"
+                                    checked={categories.includes(
+                                        categoryOption.id
+                                    )}
+                                    onChange={() =>
+                                        toggleCategory(
+                                            categoryOption.id
+                                        )
+                                    }
+                                    className="
+                                        w-5
+                                        h-5
+                                    "
+                                />
 
-                <span className="font-medium">
-                    {categoryOption.name}
-                </span>
+                                <span className="font-medium">
+                                    {categoryOption.name}
+                                </span>
 
-            </label>
+                            </label>
 
-        ))}
+                        ))}
 
-    </div>
+                    </div>
 
-</div>
+                </div>
 
 
                 {/* ============================= */}
@@ -660,7 +685,7 @@ categories,
                         <div>
 
                             <label className="font-semibold">
-                                Cantidad
+                                Presentación
                             </label>
 
                             <select
@@ -689,6 +714,10 @@ categories,
                                     35 unidades
                                 </option>
 
+                                <option value={1}>
+                                    1 kg
+                                </option>
+
                             </select>
 
                         </div>
@@ -702,20 +731,18 @@ categories,
 
                             <input
                                 type="number"
+                                min="0"
                                 value={
-                                    prices[String(quantity)]
-                                    || ""
+                                    prices[String(quantity)] ?? ""
                                 }
                                 onChange={(e) =>
                                     setPrices({
-
                                         ...prices,
 
                                         [String(quantity)]:
                                             Number(
                                                 e.target.value
                                             )
-
                                     })
                                 }
                                 placeholder="Precio"
@@ -816,7 +843,6 @@ categories,
                                                 "
                                             />
 
-
                                             {bentoFormas.length > 1 && (
 
                                                 <button
@@ -839,9 +865,7 @@ categories,
                                                         text-red-600
                                                     "
                                                 >
-
                                                     🗑
-
                                                 </button>
 
                                             )}
@@ -868,9 +892,7 @@ categories,
                                     font-semibold
                                 "
                             >
-
                                 ➕ Agregar otra forma
-
                             </button>
 
                         </div>
@@ -934,7 +956,6 @@ categories,
                                                 "
                                             />
 
-
                                             {bentoBizcochuelos.length > 1 && (
 
                                                 <button
@@ -957,9 +978,7 @@ categories,
                                                         text-red-600
                                                     "
                                                 >
-
                                                     🗑
-
                                                 </button>
 
                                             )}
@@ -986,9 +1005,7 @@ categories,
                                     font-semibold
                                 "
                             >
-
                                 ➕ Agregar otro bizcochuelo
-
                             </button>
 
                         </div>
@@ -1004,18 +1021,18 @@ categories,
                                 Tamaño
                             </label>
 
-                            <div className="
-                                w-full
-                                border
-                                rounded-2xl
-                                p-3
-                                mt-2
-                                bg-gray-50
-                                text-gray-600
-                            ">
-
+                            <div
+                                className="
+                                    w-full
+                                    border
+                                    rounded-2xl
+                                    p-3
+                                    mt-2
+                                    bg-gray-50
+                                    text-gray-600
+                                "
+                            >
                                 10 cm
-
                             </div>
 
                         </div>
@@ -1031,18 +1048,18 @@ categories,
                                 Cobertura
                             </label>
 
-                            <div className="
-                                w-full
-                                border
-                                rounded-2xl
-                                p-3
-                                mt-2
-                                bg-gray-50
-                                text-gray-600
-                            ">
-
+                            <div
+                                className="
+                                    w-full
+                                    border
+                                    rounded-2xl
+                                    p-3
+                                    mt-2
+                                    bg-gray-50
+                                    text-gray-600
+                                "
+                            >
                                 Buttercream
-
                             </div>
 
                         </div>
@@ -1066,14 +1083,11 @@ categories,
                                 }
                                 onChange={(e) =>
                                     setPrices({
-
                                         ...prices,
-
                                         "10":
                                             Number(
                                                 e.target.value
                                             )
-
                                     })
                                 }
                                 placeholder="Precio"
@@ -1098,32 +1112,206 @@ categories,
                 {/* ============================= */}
 
                 {isPersonalizada && (
-    <>
 
-        <PersonalizedSizesSection
-            sizes={sizes}
-            setSizes={setSizes}
-            prices={prices}
-            setPrices={setPrices}
-        />
+                    <>
 
-        <FlavorsSection
-            flavors={flavors}
-            setFlavors={setFlavors}
-        />
+                        {/* ============================= */}
+                        {/* PRECIOS CAMBIO DE RELLENO */}
+                        {/* ============================= */}
 
-        <FillingsSection
-            fillings={fillings}
-            setFillings={setFillings}
-        />
+                        <div className="space-y-4">
 
-        <CoveringsSection
-            coverings={coverings}
-            setCoverings={setCoverings}
-        />
+                            <div>
 
-    </>
-)}
+                                <label className="font-semibold">
+                                    Precio por cambio de relleno
+                                </label>
+
+                                <p className="text-sm text-gray-500 mt-1">
+                                    El precio depende del diámetro
+                                    de la torta y se aplica
+                                    automáticamente a todos los
+                                    pesos disponibles para ese tamaño.
+                                </p>
+
+                            </div>
+
+
+                            {/* 16 CM */}
+
+                            <div>
+
+                                <label className="font-medium">
+                                    16 cm
+                                </label>
+
+                                <div className="flex items-center gap-3 mt-2">
+
+                                    <span className="text-gray-500">
+                                        $
+                                    </span>
+
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={
+                                            fillingPrices["16"] ?? ""
+                                        }
+                                        onChange={(e) =>
+                                            setFillingPrices({
+                                                ...fillingPrices,
+                                                "16":
+                                                    Number(
+                                                        e.target.value
+                                                    )
+                                            })
+                                        }
+                                        placeholder="9000"
+                                        className="
+                                            flex-1
+                                            border
+                                            rounded-2xl
+                                            p-3
+                                        "
+                                    />
+
+                                </div>
+
+                            </div>
+
+
+                            {/* 20 CM */}
+
+                            <div>
+
+                                <label className="font-medium">
+                                    20 cm
+                                </label>
+
+                                <div className="flex items-center gap-3 mt-2">
+
+                                    <span className="text-gray-500">
+                                        $
+                                    </span>
+
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={
+                                            fillingPrices["20"] ?? ""
+                                        }
+                                        onChange={(e) =>
+                                            setFillingPrices({
+                                                ...fillingPrices,
+                                                "20":
+                                                    Number(
+                                                        e.target.value
+                                                    )
+                                            })
+                                        }
+                                        placeholder="13000"
+                                        className="
+                                            flex-1
+                                            border
+                                            rounded-2xl
+                                            p-3
+                                        "
+                                    />
+
+                                </div>
+
+                            </div>
+
+
+                            {/* 24 CM */}
+
+                            <div>
+
+                                <label className="font-medium">
+                                    24 cm
+                                </label>
+
+                                <div className="flex items-center gap-3 mt-2">
+
+                                    <span className="text-gray-500">
+                                        $
+                                    </span>
+
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={
+                                            fillingPrices["24"] ?? ""
+                                        }
+                                        onChange={(e) =>
+                                            setFillingPrices({
+                                                ...fillingPrices,
+                                                "24":
+                                                    Number(
+                                                        e.target.value
+                                                    )
+                                            })
+                                        }
+                                        placeholder="Precio"
+                                        className="
+                                            flex-1
+                                            border
+                                            rounded-2xl
+                                            p-3
+                                        "
+                                    />
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        {/* ============================= */}
+                        {/* TAMAÑOS PERSONALIZADOS */}
+                        {/* ============================= */}
+
+                        <PersonalizedSizesSection
+                            sizes={sizes}
+                            setSizes={setSizes}
+                            prices={prices}
+                            setPrices={setPrices}
+                        />
+
+
+                        {/* ============================= */}
+                        {/* SABORES */}
+                        {/* ============================= */}
+
+                        <FlavorsSection
+                            flavors={flavors}
+                            setFlavors={setFlavors}
+                        />
+
+
+                        {/* ============================= */}
+                        {/* RELLENOS */}
+                        {/* ============================= */}
+
+                        <FillingsSection
+                            fillings={fillings}
+                            setFillings={setFillings}
+                        />
+
+
+                        {/* ============================= */}
+                        {/* COBERTURAS */}
+                        {/* ============================= */}
+
+                        <CoveringsSection
+                            coverings={coverings}
+                            setCoverings={setCoverings}
+                        />
+
+                    </>
+
+                )}
 
 
                 {/* ============================= */}
@@ -1141,31 +1329,33 @@ categories,
                 {/* ============================= */}
 
                 {!isMesaDulce &&
-                 !isAlfajor &&
-                 !isCookies &&
-                 !isPersonalizada &&
-                 !isBento && (
+                    !isAlfajor &&
+                    !isCookies &&
+                    !isPersonalizada &&
+                    !isBento && (
 
-                    <SizesSection
-                        sizes={sizes}
-                        setSizes={setSizes}
-                        prices={prices}
-                        setPrices={setPrices}
-                        type="tradicional"
-                    />
+                        <SizesSection
+                            sizes={sizes}
+                            setSizes={setSizes}
+                            prices={prices}
+                            setPrices={setPrices}
+                            type="tradicional"
+                        />
 
-                )}
+                    )}
 
 
                 {/* ============================= */}
                 {/* BOTONES */}
                 {/* ============================= */}
 
-                <div className="
-                    flex
-                    gap-4
-                    pt-4
-                ">
+                <div
+                    className="
+                        flex
+                        gap-4
+                        pt-4
+                    "
+                >
 
                     <button
                         type="button"
@@ -1178,9 +1368,7 @@ categories,
                             py-3
                         "
                     >
-
                         Cancelar
-
                     </button>
 
 
@@ -1199,8 +1387,10 @@ categories,
 
                         {saving
                             ? "Guardando..."
+
                             : editingProduct
                                 ? "Actualizar producto"
+
                                 : "Guardar producto"
                         }
 
@@ -1208,14 +1398,11 @@ categories,
 
                 </div>
 
-
             </div>
 
         </div>
-
     );
-
 }
 
-
 export default ProductForm;
+

@@ -271,13 +271,11 @@ function TraditionalProduct() {
         }
 
 
-        if (product.type === "mesaDulce") {
-
-            return Number(
-                product.prices?.mesaDulce ?? 0
-            );
-
-        }
+if (product.type === "mesaDulce") {
+    return Number(
+        product.prices?.[String(product.quantity)] ?? 0
+    );
+}
 
 
         if (size) {
@@ -1247,9 +1245,10 @@ addToCart({
                                             "
                                         >
 
-                                            {product.quantity}
-                                            {" "}
-                                            unidades
+                                            {Number(product.quantity) === 1
+                                                ? "1 kg"
+                                                : `${product.quantity} unidades`
+                                            }
 
                                         </button>
 

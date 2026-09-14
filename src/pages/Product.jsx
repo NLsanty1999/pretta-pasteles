@@ -322,10 +322,10 @@ function Product() {
      * ==========================================
      */
 
-    const fillingChangePrice =
-        Number(
-            product?.fillingChangePrice || 0
-        );
+const fillingChangePrice =
+    Number(
+        product?.fillingPrices?.[String(selectedSize)] || 0
+    );
 
 
     /*
@@ -522,19 +522,23 @@ function Product() {
      * ==========================================
      */
 
-    const changedFillingsCount =
-        isFiveKg20cm
-            ? fiveKgFillings.filter(
-                filling =>
-                    filling &&
-                    filling !== defaultFilling
-            ).length
-            : changedFillings.filter(
-                filling =>
-                    filling &&
-                    filling !== defaultFilling
-            ).length;
+const isFreeFilling = (filling) =>
+    String(filling || "")
+        .trim()
+        .toLowerCase() === "dulce de leche";
 
+const changedFillingsCount =
+    isFiveKg20cm
+        ? fiveKgFillings.filter(
+            filling =>
+                filling &&
+                !isFreeFilling(filling)
+        ).length
+        : changedFillings.filter(
+            filling =>
+                filling &&
+                !isFreeFilling(filling)
+        ).length;
 
     /*
      * ==========================================

@@ -167,7 +167,7 @@ function BeforeOrder() {
                         <p className="text-[#315E73] text-base leading-relaxed">
 
                             <strong>
-                                Se necesita seña del 50% para tomar pedido.
+                                se requiere seña del 50% para tortas personalizadas.
                             </strong>
 
                         </p>
@@ -193,12 +193,9 @@ function BeforeOrder() {
                         <p className="text-[#315E73] text-base leading-relaxed">
 
                             <strong>
-                                No realizamos entregas a domicilio.
+                                no realizamos entregas a domicilio.
                             </strong>
 
-                            {" "}
-                            Los pedidos se retiran en el lugar
-                            acordado.
 
                         </p>
 
