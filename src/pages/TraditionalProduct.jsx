@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 
 import { useParams } from "react-router-dom";
@@ -9,6 +10,7 @@ import useProducts from "../hooks/useProducts";
 import { useCart } from "../context/CartContext";
 
 function TraditionalProduct() {
+
     const { slug } = useParams();
 
     const { addToCart } = useCart();
@@ -83,21 +85,21 @@ function TraditionalProduct() {
         normalizeProductName(product?.name);
 
     const isWeightProduct =
-    normalizedProductName.includes("bombon") ||
-    normalizedProductName.includes("nueces");
+        normalizedProductName.includes("bombon") ||
+        normalizedProductName.includes("nueces");
 
     const weightOptions = [
         {
             key: "250g",
-            label: "250 g"
+            label: "250 gr"
         },
         {
             key: "500g",
-            label: "500 g"
+            label: "500 gr"
         },
         {
             key: "750g",
-            label: "750 g"
+            label: "750 gr"
         },
         {
             key: "1kg",
@@ -112,6 +114,7 @@ function TraditionalProduct() {
      */
 
     useEffect(() => {
+
         if (!product) {
             return;
         }
@@ -119,7 +122,9 @@ function TraditionalProduct() {
         /*
          * Bombón / Nueces
          */
+
         if (isWeightProduct) {
+
             const availableWeights =
                 product.weightPrices || {};
 
@@ -142,7 +147,9 @@ function TraditionalProduct() {
         /*
          * Mesa dulce
          */
+
         if (product.type === "mesaDulce") {
+
             setSize(
                 String(
                     product.quantity ?? ""
@@ -155,11 +162,14 @@ function TraditionalProduct() {
         /*
          * Productos normales
          */
+
         if (product.sizes?.length) {
+
             setSize(
                 String(product.sizes[0])
             );
         }
+
     }, [
         product,
         isWeightProduct
@@ -172,6 +182,7 @@ function TraditionalProduct() {
      */
 
     useEffect(() => {
+
         if (!product || !isBento) {
             return;
         }
@@ -179,6 +190,7 @@ function TraditionalProduct() {
         /*
          * FORMAS
          */
+
         const forms =
             product.bentoFormas ||
             [];
@@ -186,6 +198,7 @@ function TraditionalProduct() {
         /*
          * BIZCOCHUELOS
          */
+
         const bizcochuelos =
             product.bentoBizcochuelos ||
             [];
@@ -193,6 +206,7 @@ function TraditionalProduct() {
         /*
          * COBERTURAS
          */
+
         const coverings =
             product.coverings?.length
                 ? product.coverings
@@ -201,6 +215,7 @@ function TraditionalProduct() {
         /*
          * PRIMERA FORMA
          */
+
         setBentoForm(
             forms[0] || ""
         );
@@ -208,6 +223,7 @@ function TraditionalProduct() {
         /*
          * PRIMER BIZCOCHUELO
          */
+
         setBentoFlavor(
             bizcochuelos[0] || ""
         );
@@ -215,6 +231,7 @@ function TraditionalProduct() {
         /*
          * PRIMERA COBERTURA
          */
+
         setBentoCovering(
             coverings[0] || ""
         );
@@ -222,13 +239,17 @@ function TraditionalProduct() {
         /*
          * TAMAÑO
          */
+
         if (product.sizes?.length) {
+
             setSize(
                 String(product.sizes[0])
             );
-        }
-        else {
+
+        } else {
+
             setSize("10");
+
         }
 
     }, [
@@ -263,6 +284,7 @@ function TraditionalProduct() {
      */
 
     function changeImage(index) {
+
         if (!galleryImages.length) {
             return;
         }
@@ -277,6 +299,7 @@ function TraditionalProduct() {
      */
 
     function nextImage() {
+
         if (galleryImages.length <= 1) {
             return;
         }
@@ -295,6 +318,7 @@ function TraditionalProduct() {
      */
 
     function previousImage() {
+
         if (galleryImages.length <= 1) {
             return;
         }
@@ -317,6 +341,7 @@ function TraditionalProduct() {
      */
 
     const basePrice = useMemo(() => {
+
         if (!product) {
             return 0;
         }
@@ -328,9 +353,13 @@ function TraditionalProduct() {
          *
          * El precio depende del peso.
          */
+
         if (isWeightProduct) {
+
             return Number(
-                product.weightPrices?.[String(size)] ?? 0
+                product.weightPrices?.[
+                    String(size)
+                ] ?? 0
             );
         }
 
@@ -341,6 +370,7 @@ function TraditionalProduct() {
          */
 
         if (product.type === "mesaDulce") {
+
             return Number(
                 product.prices?.[
                     String(product.quantity)
@@ -355,15 +385,18 @@ function TraditionalProduct() {
          */
 
         if (size) {
+
             const prices =
                 product.prices || {};
 
             /*
              * Primero busca el tamaño exacto.
              */
+
             if (
                 prices[String(size)] !== undefined
             ) {
+
                 return Number(
                     prices[String(size)] || 0
                 );
@@ -373,10 +406,12 @@ function TraditionalProduct() {
              * Compatibilidad con Bento
              * si Firebase tiene la clave "100".
              */
+
             if (
                 isBento &&
                 prices["100"] !== undefined
             ) {
+
                 return Number(
                     prices["100"] || 0
                 );
@@ -399,6 +434,7 @@ function TraditionalProduct() {
      */
 
     const extrasPrice = useMemo(() => {
+
         if (!product) {
             return 0;
         }
@@ -406,6 +442,7 @@ function TraditionalProduct() {
         const singleExtrasPrice =
             extras.reduce(
                 (total, extraName) => {
+
                     const extra =
                         product.extras?.find(
                             e =>
@@ -422,6 +459,7 @@ function TraditionalProduct() {
                                 : 0
                         )
                     );
+
                 },
                 0
             );
@@ -444,10 +482,12 @@ function TraditionalProduct() {
      */
 
     const price = useMemo(() => {
+
         return (
             basePrice * quantity +
             extrasPrice
         );
+
     }, [
         basePrice,
         quantity,
@@ -461,12 +501,15 @@ function TraditionalProduct() {
      */
 
     function toggleExtra(extraName) {
+
         setExtras(currentExtras => {
+
             if (
                 currentExtras.includes(
                     extraName
                 )
             ) {
+
                 return currentExtras.filter(
                     name =>
                         name !== extraName
@@ -487,6 +530,7 @@ function TraditionalProduct() {
      */
 
     if (loading) {
+
         return (
             <Layout>
 
@@ -511,6 +555,7 @@ function TraditionalProduct() {
      */
 
     if (!product) {
+
         return (
             <Layout>
 
@@ -554,11 +599,13 @@ function TraditionalProduct() {
      */
 
     function handleAdd() {
+
         if (!available) {
             return;
         }
 
         addToCart({
+
             id: product.id,
 
             name: product.name,
@@ -574,14 +621,17 @@ function TraditionalProduct() {
             /*
              * Precio base de la presentación.
              */
+
             basePrice,
 
             /*
              * Guardamos cada extra
              * con su precio.
              */
+
             extraDetails: extras.map(
                 extraName => {
+
                     const extra =
                         product.extras?.find(
                             e =>
@@ -589,6 +639,7 @@ function TraditionalProduct() {
                         );
 
                     return {
+
                         name: extraName,
 
                         price: Number(
@@ -622,13 +673,14 @@ function TraditionalProduct() {
     }
 
     return (
+
         <Layout>
 
             <div className="max-w-xl mx-auto">
 
-                {/* ========================= */}
-                {/* GALERÍA */}
-                {/* ========================= */}
+                {/* =========================
+                    GALERÍA
+                ========================= */}
 
                 <div className="px-2">
 
@@ -650,11 +702,15 @@ function TraditionalProduct() {
                             }
                         `}
                         onClick={() => {
+
                             if (
                                 galleryImages.length > 0
                             ) {
+
                                 setLightboxOpen(true);
+
                             }
+
                         }}
                     >
 
@@ -745,9 +801,9 @@ function TraditionalProduct() {
 
                 </div>
 
-                {/* ========================= */}
-                {/* VISOR GRANDE */}
-                {/* ========================= */}
+                {/* =========================
+                    VISOR GRANDE
+                ========================= */}
 
                 {lightboxOpen && currentImage && (
 
@@ -796,8 +852,11 @@ function TraditionalProduct() {
                             <button
                                 type="button"
                                 onClick={(e) => {
+
                                     e.stopPropagation();
+
                                     previousImage();
+
                                 }}
                                 className="
                                     absolute
@@ -841,8 +900,11 @@ function TraditionalProduct() {
                             <button
                                 type="button"
                                 onClick={(e) => {
+
                                     e.stopPropagation();
+
                                     nextImage();
+
                                 }}
                                 className="
                                     absolute
@@ -893,9 +955,9 @@ function TraditionalProduct() {
 
                 )}
 
-                {/* ========================= */}
-                {/* NOMBRE */}
-                {/* ========================= */}
+                {/* =========================
+                    NOMBRE
+                ========================= */}
 
                 <div className="px-6">
 
@@ -992,9 +1054,9 @@ function TraditionalProduct() {
 
                     <div className="px-7">
 
-                        {/* ========================= */}
-                        {/* BENTO CAKES */}
-                        {/* ========================= */}
+                        {/* =========================
+                            BENTO CAKES
+                        ========================= */}
 
                         {isBento && (
 
@@ -1225,9 +1287,9 @@ function TraditionalProduct() {
 
                         )}
 
-                        {/* ========================= */}
-                        {/* PRESENTACIÓN */}
-                        {/* ========================= */}
+                        {/* =========================
+                            PRESENTACIÓN
+                        ========================= */}
 
                         {!isBento && (
 
@@ -1335,11 +1397,13 @@ function TraditionalProduct() {
                                                         }
                                                     `}
                                                 >
+
                                                     {isAlfajor ||
                                                     isCookies
                                                         ? `${s} unidades`
                                                         : `${s} cm`
                                                     }
+
                                                 </button>
 
                                             )
@@ -1368,9 +1432,9 @@ function TraditionalProduct() {
 
                         )}
 
-                        {/* ========================= */}
-                        {/* EXTRAS */}
-                        {/* ========================= */}
+                        {/* =========================
+                            EXTRAS
+                        ========================= */}
 
                         {product.extras?.length > 0 && (
 
@@ -1467,9 +1531,9 @@ function TraditionalProduct() {
 
                         )}
 
-                        {/* ========================= */}
-                        {/* CANTIDAD */}
-                        {/* ========================= */}
+                        {/* =========================
+                            CANTIDAD
+                        ========================= */}
 
                         <h2
                             className="
@@ -1536,9 +1600,9 @@ function TraditionalProduct() {
 
                         </div>
 
-                        {/* ========================= */}
-                        {/* OBSERVACIONES */}
-                        {/* ========================= */}
+                        {/* =========================
+                            OBSERVACIONES
+                        ========================= */}
 
                         <h2
                             className="
@@ -1570,9 +1634,9 @@ function TraditionalProduct() {
                             placeholder="Ej: Agregar tarjeta de Regalo."
                         />
 
-                        {/* ========================= */}
-                        {/* RESUMEN */}
-                        {/* ========================= */}
+                        {/* =========================
+                            RESUMEN
+                        ========================= */}
 
                         <div
                             className="
@@ -1685,9 +1749,9 @@ function TraditionalProduct() {
 
                         </div>
 
-                        {/* ========================= */}
-                        {/* BOTÓN */}
-                        {/* ========================= */}
+                        {/* =========================
+                            BOTÓN
+                        ========================= */}
 
                         <button
                             type="button"

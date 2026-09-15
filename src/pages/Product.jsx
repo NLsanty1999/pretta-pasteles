@@ -322,10 +322,10 @@ function Product() {
      * ==========================================
      */
 
-const fillingChangePrice =
-    Number(
-        product?.fillingPrices?.[String(selectedSize)] || 0
-    );
+    const fillingChangePrice =
+        Number(
+            product?.fillingPrices?.[String(selectedSize)] || 0
+        );
 
 
     /*
@@ -522,23 +522,24 @@ const fillingChangePrice =
      * ==========================================
      */
 
-const isFreeFilling = (filling) =>
-    String(filling || "")
-        .trim()
-        .toLowerCase() === "dulce de leche";
+    const isFreeFilling = (filling) =>
+        String(filling || "")
+            .trim()
+            .toLowerCase() === "dulce de leche";
 
-const changedFillingsCount =
-    isFiveKg20cm
-        ? fiveKgFillings.filter(
-            filling =>
-                filling &&
-                !isFreeFilling(filling)
-        ).length
-        : changedFillings.filter(
-            filling =>
-                filling &&
-                !isFreeFilling(filling)
-        ).length;
+    const changedFillingsCount =
+        isFiveKg20cm
+            ? fiveKgFillings.filter(
+                filling =>
+                    filling &&
+                    !isFreeFilling(filling)
+            ).length
+            : changedFillings.filter(
+                filling =>
+                    filling &&
+                    !isFreeFilling(filling)
+            ).length;
+
 
     /*
      * ==========================================
@@ -751,6 +752,10 @@ const changedFillingsCount =
          * ==========================================
          * RELLENOS
          * ==========================================
+         *
+         * IMPORTANTE:
+         * Cada posición vacía se considera
+         * automáticamente como el relleno base.
          */
 
         const selectedFillings =
@@ -769,9 +774,19 @@ const changedFillingsCount =
                     defaultFilling
                 ]
                 : (
-                    changedFillings.length > 0
-                        ? changedFillings
-                        : []
+                    fillingChangeActive
+                        ? Array.from({
+                            length: fillingLimit
+                        }).map(
+                            (_, index) =>
+                                changedFillings[index] ||
+                                defaultFilling
+                        )
+                        : Array.from({
+                            length: fillingLimit
+                        }).map(
+                            () => defaultFilling
+                        )
                 );
 
 
@@ -807,12 +822,8 @@ const changedFillingsCount =
                 selectedFlavors,
 
             filling:
-                isFiveKg20cm
-                    ? selectedFillings[0]
-                    : (
-                        selectedFillings[0] ||
-                        ""
-                    ),
+                selectedFillings[0] ||
+                defaultFilling,
 
             fillingsSelected:
                 selectedFillings,
@@ -825,7 +836,7 @@ const changedFillingsCount =
             changedFillings:
                 isFiveKg20cm
                     ? selectedFillings
-                    : changedFillings,
+                    : selectedFillings,
 
             fillingChanges:
                 changedFillingsCount,
@@ -2828,3 +2839,4 @@ const changedFillingsCount =
 }
 
 export default Product;
+

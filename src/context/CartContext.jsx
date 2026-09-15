@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useMemo, useState } from "react";
 
 const CartContext = createContext();
@@ -11,11 +12,9 @@ export function CartProvider({ children }) {
         setCart(prev => {
 
             const existingIndex = prev.findIndex(item =>
-
                 item.id === product.id &&
                 item.size === product.size &&
                 item.note === product.note
-
             );
 
             if (existingIndex !== -1) {
@@ -23,34 +22,33 @@ export function CartProvider({ children }) {
                 const updated = [...prev];
 
                 updated[existingIndex] = {
-
                     ...updated[existingIndex],
-
                     quantity:
-                        updated[existingIndex].quantity + product.quantity
-
+                        updated[existingIndex].quantity + (product.quantity || 1)
                 };
 
                 return updated;
-
             }
 
+            // TraditionalProduct envía "price" como el total
+            // de la cantidad seleccionada.
+            // En el carrito necesitamos guardar el precio UNITARIO.
+            const quantity = product.quantity || 1;
+
+            const unitPrice =
+                quantity > 0
+                    ? Number(product.price || 0) / quantity
+                    : Number(product.price || 0);
+
             return [
-
                 ...prev,
-
                 {
-
                     ...product,
-
-                    quantity: product.quantity || 1
-
+                    quantity,
+                    price: unitPrice
                 }
-
             ];
-
         });
-
     }
 
     function removeFromCart(index) {
@@ -63,34 +61,42 @@ export function CartProvider({ children }) {
 
         setCart(prev => {
 
-            const copy = [...prev];
-
-            copy[index].quantity += 1;
-
-            return copy;
+            return prev.map((item, i) =>
+                i === index
+                    ? {
+                        ...item,
+                        quantity: item.quantity + 1
+                    }
+                    : item
+            );
 
         });
-
     }
 
     function decreaseQuantity(index) {
 
         setCart(prev => {
 
-            const copy = [...prev];
+            const item = prev[index];
 
-            if (copy[index].quantity > 1) {
+            if (!item) return prev;
 
-                copy[index].quantity -= 1;
+            if (item.quantity > 1) {
 
-                return copy;
+                return prev.map((currentItem, i) =>
+                    i === index
+                        ? {
+                            ...currentItem,
+                            quantity: currentItem.quantity - 1
+                        }
+                        : currentItem
+                );
 
             }
 
-            return copy.filter((_, i) => i !== index);
+            return prev.filter((_, i) => i !== index);
 
         });
-
     }
 
     function clearCart() {
@@ -100,21 +106,15 @@ export function CartProvider({ children }) {
     }
 
     const totalItems = cart.reduce(
-
         (sum, item) => sum + item.quantity,
-
         0
-
     );
 
     const totalPrice = useMemo(() => {
 
         return cart.reduce(
-
-            (sum, item) => sum + item.price * item.quantity,
-
+            (sum, item) => sum + Number(item.price || 0) * item.quantity,
             0
-
         );
 
     }, [cart]);
@@ -122,31 +122,18 @@ export function CartProvider({ children }) {
     return (
 
         <CartContext.Provider
-
             value={{
-
                 cart,
-
                 addToCart,
-
                 removeFromCart,
-
                 increaseQuantity,
-
                 decreaseQuantity,
-
                 clearCart,
-
                 totalItems,
-
                 totalPrice
-
             }}
-
         >
-
             {children}
-
         </CartContext.Provider>
 
     );
@@ -158,3 +145,4 @@ export function useCart() {
     return useContext(CartContext);
 
 }
+

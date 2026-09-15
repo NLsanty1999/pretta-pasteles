@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 import { saveProduct, createSlug } from "../../firebase/products";
@@ -13,6 +14,7 @@ function ProductForm({
     onClose,
     editingProduct = null
 }) {
+
     const [name, setName] = useState(
         editingProduct?.name || ""
     );
@@ -47,24 +49,49 @@ function ProductForm({
      * Se utilizan exclusivamente
      * para Bombón y Nueces.
      *
+     * Las claves internas utilizan "g":
      * 250g
      * 500g
      * 750g
      * 1kg
+     *
+     * Pero al usuario se le muestra:
+     * 250 gr
+     * 500 gr
+     * 750 gr
+     * 1 kg
      */
-const [weightPrices, setWeightPrices] = useState({
-    "250g": "",
-    "500g": "",
-    "750g": "",
-    "1kg": "",
-    ...(editingProduct?.weightPrices || {})
-});
+
+    const existingWeightPrices =
+        editingProduct?.weightPrices || {};
+
+    const [weightPrices, setWeightPrices] = useState({
+        "250g":
+            existingWeightPrices["250g"] ??
+            existingWeightPrices["250gr"] ??
+            "",
+
+        "500g":
+            existingWeightPrices["500g"] ??
+            existingWeightPrices["500gr"] ??
+            "",
+
+        "750g":
+            existingWeightPrices["750g"] ??
+            existingWeightPrices["750gr"] ??
+            "",
+
+        "1kg":
+            existingWeightPrices["1kg"] ??
+            ""
+    });
 
     /*
      * =============================
      * PRECIOS CAMBIO DE RELLENO
      * =============================
      */
+
     const [fillingPrices, setFillingPrices] = useState(
         editingProduct?.fillingPrices || {
             "16": 9000,
@@ -111,6 +138,7 @@ const [weightPrices, setWeightPrices] = useState({
      * BENTO
      * =============================
      */
+
     const [bentoFormas, setBentoFormas] = useState(
         editingProduct?.bentoFormas?.length
             ? editingProduct.bentoFormas
@@ -138,6 +166,7 @@ const [weightPrices, setWeightPrices] = useState({
      * 6 = Cookies
      * 7 = Tortas personalizadas
      */
+
     const isMesaDulce =
         category === 3;
 
@@ -159,13 +188,13 @@ const [weightPrices, setWeightPrices] = useState({
      * PRODUCTOS POR PESO
      * =============================
      *
-     * Bombón y Nueces utilizan:
+     * Solamente:
+     * - Bombón
+     * - Nueces
      *
-     * 250 g
-     * 500 g
-     * 750 g
-     * 1 kg
+     * "Nuez" NO entra.
      */
+
     function normalizeProductName(value) {
         return String(value || "")
             .normalize("NFD")
@@ -177,26 +206,42 @@ const [weightPrices, setWeightPrices] = useState({
     const normalizedName =
         normalizeProductName(name);
 
-    const isWeightProduct =
-        normalizedName.includes("bombon") ||
-        normalizedName.includes("nueces");
+const isWeightProduct =
+    normalizedName.includes("bombon") ||
+    normalizedName.includes("nueces");
+    
+    console.log(
+        "NOMBRE PRODUCTO:",
+        name
+    );
 
-    console.log("NOMBRE PRODUCTO:", name);
-    console.log("NOMBRE NORMALIZADO:", normalizedName);
-    console.log("ES PRODUCTO POR PESO:", isWeightProduct);
+    console.log(
+        "NOMBRE NORMALIZADO:",
+        normalizedName
+    );
+
+    console.log(
+        "ES PRODUCTO POR PESO:",
+        isWeightProduct
+    );
+
+    /*
+     * Las claves internas usan "g",
+     * pero las etiquetas visibles usan "gr".
+     */
 
     const weightOptions = [
         {
             key: "250g",
-            label: "250 g"
+            label: "250 gr"
         },
         {
             key: "500g",
-            label: "500 g"
+            label: "500 gr"
         },
         {
             key: "750g",
-            label: "750 g"
+            label: "750 gr"
         },
         {
             key: "1kg",
@@ -209,12 +254,16 @@ const [weightPrices, setWeightPrices] = useState({
      * CAMBIO DE CATEGORÍA
      * =============================
      */
+
     function toggleCategory(categoryId) {
+
         setCategories(current => {
+
             const exists =
                 current.includes(categoryId);
 
             if (exists) {
+
                 if (current.length === 1) {
                     return current;
                 }
@@ -236,7 +285,9 @@ const [weightPrices, setWeightPrices] = useState({
      * TEXTO MESA DULCE
      * =============================
      */
+
     function getMesaDulceLabel(value) {
+
         const numericValue = Number(value);
 
         if (numericValue === 1) {
@@ -259,15 +310,20 @@ const [weightPrices, setWeightPrices] = useState({
      * GUARDAR PRODUCTO
      * =============================
      */
+
     async function handleSave() {
+
         if (!name.trim()) {
+
             alert(
                 "Ingresá un nombre para el producto"
             );
+
             return;
         }
 
         try {
+
             setSaving(true);
 
             /*
@@ -275,26 +331,32 @@ const [weightPrices, setWeightPrices] = useState({
              * DETERMINAR TIPO
              * =============================
              */
+
             let productType =
                 "tradicional";
 
             if (isPersonalizada) {
+
                 productType =
                     "personalizada";
-            }
-            else if (isAlfajor) {
+
+            } else if (isAlfajor) {
+
                 productType =
                     "alfajor";
-            }
-            else if (isMesaDulce) {
+
+            } else if (isMesaDulce) {
+
                 productType =
                     "mesaDulce";
-            }
-            else if (isBento) {
+
+            } else if (isBento) {
+
                 productType =
                     "bento";
-            }
-            else if (isCookies) {
+
+            } else if (isCookies) {
+
                 productType =
                     "cookies";
             }
@@ -304,6 +366,7 @@ const [weightPrices, setWeightPrices] = useState({
              * OPCIONES BENTO
              * =============================
              */
+
             const cleanBentoFormas =
                 bentoFormas
                     .map(forma => forma.trim())
@@ -321,6 +384,7 @@ const [weightPrices, setWeightPrices] = useState({
              * PRECIOS
              * =============================
              */
+
             const cleanPrices = {
                 ...prices
             };
@@ -330,6 +394,7 @@ const [weightPrices, setWeightPrices] = useState({
              * eliminamos el precio antiguo
              * "mesaDulce" si existiera.
              */
+
             if (isMesaDulce) {
                 delete cleanPrices.mesaDulce;
             }
@@ -339,21 +404,36 @@ const [weightPrices, setWeightPrices] = useState({
              * PRECIOS POR PESO
              * =============================
              *
-             * Solo guardamos estos valores
-             * para Bombón y Nueces.
+             * Guardamos SIEMPRE las claves:
+             *
+             * 250g
+             * 500g
+             * 750g
+             * 1kg
+             *
+             * Aunque visualmente se muestre:
+             *
+             * 250 gr
+             * 500 gr
+             * 750 gr
+             * 1 kg
              */
+
             const cleanWeightPrices =
                 isWeightProduct
                     ? {
                         "250g": Number(
                             weightPrices["250g"] || 0
                         ),
+
                         "500g": Number(
                             weightPrices["500g"] || 0
                         ),
+
                         "750g": Number(
                             weightPrices["750g"] || 0
                         ),
+
                         "1kg": Number(
                             weightPrices["1kg"] || 0
                         )
@@ -365,7 +445,9 @@ const [weightPrices, setWeightPrices] = useState({
              * PRODUCTO
              * =============================
              */
+
             const product = {
+
                 ...editingProduct,
 
                 id:
@@ -377,9 +459,11 @@ const [weightPrices, setWeightPrices] = useState({
                     createSlug(name),
 
                 name,
+
                 description,
 
                 category,
+
                 categories,
 
                 type:
@@ -390,6 +474,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * BENTO
                  * =============================
                  */
+
                 bentoFormas:
                     isBento
                         ? cleanBentoFormas
@@ -410,6 +495,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * MESA DULCE
                  * =============================
                  */
+
                 quantity:
                     isMesaDulce
                         ? quantity
@@ -424,6 +510,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * PRECIOS NORMALES
                  * =============================
                  */
+
                 prices:
                     cleanPrices,
 
@@ -432,6 +519,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * PRECIOS POR PESO
                  * =============================
                  */
+
                 weightPrices:
                     cleanWeightPrices,
 
@@ -440,6 +528,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * PRECIOS CAMBIO DE RELLENO
                  * =============================
                  */
+
                 fillingPrices:
                     isPersonalizada
                         ? {
@@ -465,6 +554,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * TAMAÑOS
                  * =============================
                  */
+
                 sizes:
                     isMesaDulce
                         ? [String(quantity)]
@@ -479,6 +569,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * SABORES
                  * =============================
                  */
+
                 flavors:
                     isPersonalizada
                         ? flavors
@@ -495,6 +586,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * RELLENOS
                  * =============================
                  */
+
                 fillings:
                     isPersonalizada
                         ? fillings
@@ -509,6 +601,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * COBERTURAS
                  * =============================
                  */
+
                 coverings:
                     isPersonalizada
                         ? coverings
@@ -523,6 +616,7 @@ const [weightPrices, setWeightPrices] = useState({
                  * EXTRAS
                  * =============================
                  */
+
                 extras:
                     extras
                         .filter(
@@ -555,8 +649,9 @@ const [weightPrices, setWeightPrices] = useState({
             );
 
             onClose();
-        }
-        catch (error) {
+
+        } catch (error) {
+
             console.error(
                 "ERROR GUARDANDO PRODUCTO:",
                 error
@@ -567,13 +662,15 @@ const [weightPrices, setWeightPrices] = useState({
                     ? "Error al actualizar el producto"
                     : "Error al crear el producto"
             );
-        }
-        finally {
+
+        } finally {
+
             setSaving(false);
         }
     }
 
     return (
+
         <div
             className="
                 bg-white
@@ -583,6 +680,7 @@ const [weightPrices, setWeightPrices] = useState({
                 mb-8
             "
         >
+
             <h2
                 className="
                     text-3xl
@@ -604,6 +702,7 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 <div>
+
                     <label className="font-semibold">
                         Nombre
                     </label>
@@ -621,6 +720,7 @@ const [weightPrices, setWeightPrices] = useState({
                             mt-2
                         "
                     />
+
                 </div>
 
                 {/* ============================= */}
@@ -628,6 +728,7 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 <div>
+
                     <label className="font-semibold">
                         Descripción
                     </label>
@@ -646,6 +747,7 @@ const [weightPrices, setWeightPrices] = useState({
                             mt-2
                         "
                     />
+
                 </div>
 
                 {/* ============================= */}
@@ -653,6 +755,7 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 <div>
+
                     <label className="font-semibold">
                         Catálogos
                     </label>
@@ -693,6 +796,7 @@ const [weightPrices, setWeightPrices] = useState({
                                 name: "Tortas personalizadas"
                             }
                         ].map(categoryOption => (
+
                             <label
                                 key={categoryOption.id}
                                 className="
@@ -706,6 +810,7 @@ const [weightPrices, setWeightPrices] = useState({
                                     hover:bg-pink-50
                                 "
                             >
+
                                 <input
                                     type="checkbox"
                                     checked={categories.includes(
@@ -725,10 +830,13 @@ const [weightPrices, setWeightPrices] = useState({
                                 <span className="font-medium">
                                     {categoryOption.name}
                                 </span>
+
                             </label>
+
                         ))}
 
                     </div>
+
                 </div>
 
                 {/* ============================= */}
@@ -736,9 +844,11 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 {isMesaDulce && (
+
                     <div className="space-y-4">
 
                         <div>
+
                             <label className="font-semibold">
                                 Presentación
                             </label>
@@ -760,6 +870,7 @@ const [weightPrices, setWeightPrices] = useState({
                                     mt-2
                                 "
                             >
+
                                 <option value={12}>
                                     12 unidades
                                 </option>
@@ -771,10 +882,13 @@ const [weightPrices, setWeightPrices] = useState({
                                 <option value={1}>
                                     1 kg
                                 </option>
+
                             </select>
+
                         </div>
 
                         <div>
+
                             <label className="font-semibold">
                                 Precio
                             </label>
@@ -788,7 +902,6 @@ const [weightPrices, setWeightPrices] = useState({
                                 onChange={(e) =>
                                     setPrices({
                                         ...prices,
-
                                         [String(quantity)]:
                                             Number(
                                                 e.target.value
@@ -804,9 +917,11 @@ const [weightPrices, setWeightPrices] = useState({
                                     mt-2
                                 "
                             />
+
                         </div>
 
                     </div>
+
                 )}
 
                 {/* ============================= */}
@@ -814,6 +929,7 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 {isWeightProduct && (
+
                     <div
                         className="
                             border
@@ -822,7 +938,9 @@ const [weightPrices, setWeightPrices] = useState({
                             bg-pink-50/40
                         "
                     >
+
                         <div className="mb-5">
+
                             <label className="font-semibold text-lg">
                                 Precios por peso
                             </label>
@@ -830,11 +948,13 @@ const [weightPrices, setWeightPrices] = useState({
                             <p className="text-sm text-gray-500 mt-1">
                                 Configurá el precio de cada presentación.
                             </p>
+
                         </div>
 
                         <div className="grid grid-cols-1 gap-4">
 
                             {weightOptions.map(option => (
+
                                 <div
                                     key={option.key}
                                     className="
@@ -843,6 +963,7 @@ const [weightPrices, setWeightPrices] = useState({
                                         gap-4
                                     "
                                 >
+
                                     <div
                                         className="
                                             w-24
@@ -854,6 +975,7 @@ const [weightPrices, setWeightPrices] = useState({
                                     </div>
 
                                     <div className="flex-1 relative">
+
                                         <span
                                             className="
                                                 absolute
@@ -875,7 +997,6 @@ const [weightPrices, setWeightPrices] = useState({
                                             onChange={(e) =>
                                                 setWeightPrices({
                                                     ...weightPrices,
-
                                                     [option.key]:
                                                         Number(
                                                             e.target.value
@@ -892,12 +1013,17 @@ const [weightPrices, setWeightPrices] = useState({
                                                 bg-white
                                             "
                                         />
+
                                     </div>
+
                                 </div>
+
                             ))}
 
                         </div>
+
                     </div>
+
                 )}
 
                 {/* ============================= */}
@@ -905,6 +1031,7 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 {(isAlfajor || isCookies) && (
+
                     <SizesSection
                         sizes={sizes}
                         setSizes={setSizes}
@@ -916,6 +1043,7 @@ const [weightPrices, setWeightPrices] = useState({
                                 : "alfajor"
                         }
                     />
+
                 )}
 
                 {/* ============================= */}
@@ -923,11 +1051,13 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 {isBento && (
+
                     <div className="space-y-6">
 
                         {/* FORMAS */}
 
                         <div>
+
                             <label className="font-semibold">
                                 Formas
                             </label>
@@ -936,6 +1066,7 @@ const [weightPrices, setWeightPrices] = useState({
 
                                 {bentoFormas.map(
                                     (forma, index) => (
+
                                         <div
                                             key={index}
                                             className="
@@ -944,10 +1075,12 @@ const [weightPrices, setWeightPrices] = useState({
                                                 gap-3
                                             "
                                         >
+
                                             <input
                                                 type="text"
                                                 value={forma}
                                                 onChange={(e) => {
+
                                                     const newFormas = [
                                                         ...bentoFormas
                                                     ];
@@ -969,15 +1102,18 @@ const [weightPrices, setWeightPrices] = useState({
                                             />
 
                                             {bentoFormas.length > 1 && (
+
                                                 <button
                                                     type="button"
                                                     onClick={() => {
+
                                                         setBentoFormas(
                                                             bentoFormas.filter(
                                                                 (_, i) =>
                                                                     i !== index
                                                             )
                                                         );
+
                                                     }}
                                                     className="
                                                         px-4
@@ -989,8 +1125,11 @@ const [weightPrices, setWeightPrices] = useState({
                                                 >
                                                     🗑
                                                 </button>
+
                                             )}
+
                                         </div>
+
                                     )
                                 )}
 
@@ -1012,11 +1151,13 @@ const [weightPrices, setWeightPrices] = useState({
                             >
                                 ➕ Agregar otra forma
                             </button>
+
                         </div>
 
                         {/* BIZCOCHUELOS */}
 
                         <div>
+
                             <label className="font-semibold">
                                 Bizcochuelos
                             </label>
@@ -1028,6 +1169,7 @@ const [weightPrices, setWeightPrices] = useState({
                                         bizcochuelo,
                                         index
                                     ) => (
+
                                         <div
                                             key={index}
                                             className="
@@ -1036,12 +1178,14 @@ const [weightPrices, setWeightPrices] = useState({
                                                 gap-3
                                             "
                                         >
+
                                             <input
                                                 type="text"
                                                 value={
                                                     bizcochuelo
                                                 }
                                                 onChange={(e) => {
+
                                                     const newBizcochuelos = [
                                                         ...bentoBizcochuelos
                                                     ];
@@ -1065,15 +1209,18 @@ const [weightPrices, setWeightPrices] = useState({
                                             />
 
                                             {bentoBizcochuelos.length > 1 && (
+
                                                 <button
                                                     type="button"
                                                     onClick={() => {
+
                                                         setBentoBizcochuelos(
                                                             bentoBizcochuelos.filter(
                                                                 (_, i) =>
                                                                     i !== index
                                                             )
                                                         );
+
                                                     }}
                                                     className="
                                                         px-4
@@ -1085,8 +1232,11 @@ const [weightPrices, setWeightPrices] = useState({
                                                 >
                                                     🗑
                                                 </button>
+
                                             )}
+
                                         </div>
+
                                     )
                                 )}
 
@@ -1108,11 +1258,13 @@ const [weightPrices, setWeightPrices] = useState({
                             >
                                 ➕ Agregar otro bizcochuelo
                             </button>
+
                         </div>
 
                         {/* TAMAÑO */}
 
                         <div>
+
                             <label className="font-semibold">
                                 Tamaño
                             </label>
@@ -1130,11 +1282,13 @@ const [weightPrices, setWeightPrices] = useState({
                             >
                                 10 cm
                             </div>
+
                         </div>
 
                         {/* COBERTURA */}
 
                         <div>
+
                             <label className="font-semibold">
                                 Cobertura
                             </label>
@@ -1152,11 +1306,13 @@ const [weightPrices, setWeightPrices] = useState({
                             >
                                 Buttercream
                             </div>
+
                         </div>
 
                         {/* PRECIO */}
 
                         <div>
+
                             <label className="font-semibold">
                                 Precio base
                             </label>
@@ -1170,7 +1326,6 @@ const [weightPrices, setWeightPrices] = useState({
                                 onChange={(e) =>
                                     setPrices({
                                         ...prices,
-
                                         "10":
                                             Number(
                                                 e.target.value
@@ -1186,9 +1341,11 @@ const [weightPrices, setWeightPrices] = useState({
                                     mt-2
                                 "
                             />
+
                         </div>
 
                     </div>
+
                 )}
 
                 {/* ============================= */}
@@ -1196,6 +1353,7 @@ const [weightPrices, setWeightPrices] = useState({
                 {/* ============================= */}
 
                 {isPersonalizada && (
+
                     <>
 
                         {/* PRECIOS CAMBIO DE RELLENO */}
@@ -1203,6 +1361,7 @@ const [weightPrices, setWeightPrices] = useState({
                         <div className="space-y-4">
 
                             <div>
+
                                 <label className="font-semibold">
                                     Precio por cambio de relleno
                                 </label>
@@ -1213,11 +1372,13 @@ const [weightPrices, setWeightPrices] = useState({
                                     automáticamente a todos los
                                     pesos disponibles para ese tamaño.
                                 </p>
+
                             </div>
 
                             {/* 16 CM */}
 
                             <div>
+
                                 <label className="font-medium">
                                     16 cm
                                 </label>
@@ -1237,7 +1398,6 @@ const [weightPrices, setWeightPrices] = useState({
                                         onChange={(e) =>
                                             setFillingPrices({
                                                 ...fillingPrices,
-
                                                 "16":
                                                     Number(
                                                         e.target.value
@@ -1254,11 +1414,13 @@ const [weightPrices, setWeightPrices] = useState({
                                     />
 
                                 </div>
+
                             </div>
 
                             {/* 20 CM */}
 
                             <div>
+
                                 <label className="font-medium">
                                     20 cm
                                 </label>
@@ -1278,7 +1440,6 @@ const [weightPrices, setWeightPrices] = useState({
                                         onChange={(e) =>
                                             setFillingPrices({
                                                 ...fillingPrices,
-
                                                 "20":
                                                     Number(
                                                         e.target.value
@@ -1295,11 +1456,13 @@ const [weightPrices, setWeightPrices] = useState({
                                     />
 
                                 </div>
+
                             </div>
 
                             {/* 24 CM */}
 
                             <div>
+
                                 <label className="font-medium">
                                     24 cm
                                 </label>
@@ -1319,7 +1482,6 @@ const [weightPrices, setWeightPrices] = useState({
                                         onChange={(e) =>
                                             setFillingPrices({
                                                 ...fillingPrices,
-
                                                 "24":
                                                     Number(
                                                         e.target.value
@@ -1336,6 +1498,7 @@ const [weightPrices, setWeightPrices] = useState({
                                     />
 
                                 </div>
+
                             </div>
 
                         </div>
@@ -1371,6 +1534,7 @@ const [weightPrices, setWeightPrices] = useState({
                         />
 
                     </>
+
                 )}
 
                 {/* ============================= */}
@@ -1392,6 +1556,7 @@ const [weightPrices, setWeightPrices] = useState({
                     !isPersonalizada &&
                     !isBento &&
                     !isWeightProduct && (
+
                         <SizesSection
                             sizes={sizes}
                             setSizes={setSizes}
@@ -1399,6 +1564,7 @@ const [weightPrices, setWeightPrices] = useState({
                             setPrices={setPrices}
                             type="tradicional"
                         />
+
                     )}
 
                 {/* ============================= */}
@@ -1450,8 +1616,10 @@ const [weightPrices, setWeightPrices] = useState({
                 </div>
 
             </div>
+
         </div>
     );
 }
 
 export default ProductForm;
+
