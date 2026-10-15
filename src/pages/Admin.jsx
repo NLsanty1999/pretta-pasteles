@@ -63,45 +63,67 @@ function Admin() {
     }, [orders, search, status]);
 
 
-    const groupedOrders = useMemo(() => {
+const groupedOrders = useMemo(() => {
+    const completedStatuses = [
+        "finalizado",
+        "finalizada",
+        "entregado",
+        "entregada"
+    ];
 
-        const groups = {};
+    const isCompleted = (order) => {
+        const orderStatus = String(order.status || "")
+            .trim()
+            .toLowerCase();
 
-        filteredOrders.forEach(order => {
+        return completedStatuses.includes(orderStatus);
+    };
 
-            const date = order.deliveryDate || "Sin fecha";
+    const sortedOrders = [...filteredOrders].sort((a, b) => {
+        // Primero, pedidos que todavía no están terminados
+        const completedA = isCompleted(a);
+        const completedB = isCompleted(b);
 
-            if (!groups[date]) {
+        if (completedA !== completedB) {
+            return completedA ? 1 : -1;
+        }
 
-                groups[date] = [];
+        // Después, ordenar por fecha de entrega
+        const dateA = a.deliveryDate || "Sin fecha";
+        const dateB = b.deliveryDate || "Sin fecha";
 
-            }
+        if (dateA === "Sin fecha" && dateB !== "Sin fecha") {
+            return 1;
+        }
 
-            groups[date].push(order);
+        if (dateB === "Sin fecha" && dateA !== "Sin fecha") {
+            return -1;
+        }
 
-        });
+        if (dateA === "Sin fecha" && dateB === "Sin fecha") {
+            return 0;
+        }
 
+        return (
+            new Date(`${dateA}T00:00:00`) -
+            new Date(`${dateB}T00:00:00`)
+        );
+    });
 
-        const sortedGroups = Object.entries(groups)
+    const groups = new Map();
 
-            .sort(([dateA], [dateB]) => {
+    sortedOrders.forEach((order) => {
+        const date = order.deliveryDate || "Sin fecha";
 
-                // Los pedidos sin fecha van al final
-                if (dateA === "Sin fecha") return 1;
+        if (!groups.has(date)) {
+            groups.set(date, []);
+        }
 
-                if (dateB === "Sin fecha") return -1;
+        groups.get(date).push(order);
+    });
 
-
-                // Ordenar de la fecha más próxima a la más lejana
-                return new Date(`${dateA}T00:00:00`) -
-                    new Date(`${dateB}T00:00:00`);
-
-            });
-
-
-        return sortedGroups;
-
-    }, [filteredOrders]);
+    return Array.from(groups.entries());
+}, [filteredOrders]);
 
 
     async function handleStatus(newStatus) {
@@ -306,25 +328,38 @@ function Admin() {
                                         {
 
 
-                                            orders.map(order => (
+                                            [...orders]
+    .sort((a, b) => {
+        const completedStatuses = [
+            "finalizado",
+            "finalizada",
+            "entregado",
+            "entregada"
+        ];
 
+        const statusA = String(a.status || "")
+            .trim()
+            .toLowerCase();
 
-                                                <OrderCard
+        const statusB = String(b.status || "")
+            .trim()
+            .toLowerCase();
 
-                                                    key={order.id}
+        const completedA = completedStatuses.includes(statusA);
+        const completedB = completedStatuses.includes(statusB);
 
-                                                    order={order}
+        if (completedA && !completedB) return 1;
+        if (!completedA && completedB) return -1;
 
-                                                    onOpen={() =>
-                                                        setSelectedOrder(
-                                                            order
-                                                        )
-                                                    }
-
-                                                />
-
-
-                                            ))
+        return 0;
+    })
+    .map(order => (
+        <OrderCard
+            key={order.id}
+            order={order}
+            onOpen={() => setSelectedOrder(order)}
+        />
+    ))
 
                                         }
 

@@ -4,123 +4,143 @@ import { createContext, useContext, useMemo, useState } from "react";
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-
     const [cart, setCart] = useState([]);
 
     function addToCart(product) {
+        const quantity = Math.max(1, Number(product.quantity) || 1);
+        const incomingPrice = Number(product.price) || 0;
 
-        setCart(prev => {
+        // Los productos con basePrice ya envían el precio unitario final.
+        // Los productos tradicionales pueden enviar el precio total
+        // de la cantidad seleccionada.
+        const unitPrice =
+            product.basePrice !== undefined &&
+            product.basePrice !== null
+                ? incomingPrice
+                : incomingPrice / quantity;
 
-            const existingIndex = prev.findIndex(item =>
-                item.id === product.id &&
-                item.size === product.size &&
-                item.note === product.note
-            );
+        const normalizedProduct = {
+            ...product,
+            quantity,
+            price: unitPrice,
+            ...(product.basePrice !== undefined &&
+            product.basePrice !== null
+                ? { basePrice: Number(product.basePrice) || 0 }
+                : {}),
+            extraDetails: Array.isArray(product.extraDetails)
+                ? product.extraDetails
+                : []
+        };
+
+        setCart((prev) => {
+            const existingIndex = prev.findIndex((item) => {
+                const sameProduct =
+                    item.id === normalizedProduct.id &&
+                    item.size === normalizedProduct.size &&
+                    item.note === normalizedProduct.note;
+
+                const samePrice =
+                    Number(item.price || 0) ===
+                        Number(normalizedProduct.price || 0) &&
+                    Number(item.basePrice ?? -1) ===
+                        Number(normalizedProduct.basePrice ?? -1);
+
+                const sameExtras =
+                    JSON.stringify(item.extraDetails || []) ===
+                    JSON.stringify(normalizedProduct.extraDetails || []);
+
+                const sameFilling =
+                    item.filling === normalizedProduct.filling;
+
+                const sameFlavor =
+                    item.flavor === normalizedProduct.flavor;
+
+                const samePriceKey =
+                    item.priceKey === normalizedProduct.priceKey;
+
+                return (
+                    sameProduct &&
+                    samePrice &&
+                    sameExtras &&
+                    sameFilling &&
+                    sameFlavor &&
+                    samePriceKey
+                );
+            });
 
             if (existingIndex !== -1) {
-
-                const updated = [...prev];
-
-                updated[existingIndex] = {
-                    ...updated[existingIndex],
-                    quantity:
-                        updated[existingIndex].quantity + (product.quantity || 1)
-                };
-
-                return updated;
+                return prev.map((item, index) =>
+                    index === existingIndex
+                        ? {
+                              ...item,
+                              quantity: item.quantity + quantity
+                          }
+                        : item
+                );
             }
 
-            // TraditionalProduct envía "price" como el total
-            // de la cantidad seleccionada.
-            // En el carrito necesitamos guardar el precio UNITARIO.
-            const quantity = product.quantity || 1;
-
-            const unitPrice =
-                quantity > 0
-                    ? Number(product.price || 0) / quantity
-                    : Number(product.price || 0);
-
-            return [
-                ...prev,
-                {
-                    ...product,
-                    quantity,
-                    price: unitPrice
-                }
-            ];
+            return [...prev, normalizedProduct];
         });
     }
 
     function removeFromCart(index) {
-
-        setCart(prev => prev.filter((_, i) => i !== index));
-
+        setCart((prev) => prev.filter((_, i) => i !== index));
     }
 
     function increaseQuantity(index) {
-
-        setCart(prev => {
-
-            return prev.map((item, i) =>
+        setCart((prev) =>
+            prev.map((item, i) =>
                 i === index
                     ? {
-                        ...item,
-                        quantity: item.quantity + 1
-                    }
+                          ...item,
+                          quantity: (Number(item.quantity) || 1) + 1
+                      }
                     : item
-            );
-
-        });
+            )
+        );
     }
 
     function decreaseQuantity(index) {
-
-        setCart(prev => {
-
+        setCart((prev) => {
             const item = prev[index];
 
             if (!item) return prev;
 
             if (item.quantity > 1) {
-
                 return prev.map((currentItem, i) =>
                     i === index
                         ? {
-                            ...currentItem,
-                            quantity: currentItem.quantity - 1
-                        }
+                              ...currentItem,
+                              quantity: currentItem.quantity - 1
+                          }
                         : currentItem
                 );
-
             }
 
             return prev.filter((_, i) => i !== index);
-
         });
     }
 
     function clearCart() {
-
         setCart([]);
-
     }
 
     const totalItems = cart.reduce(
-        (sum, item) => sum + item.quantity,
+        (sum, item) => sum + (Number(item.quantity) || 1),
         0
     );
 
     const totalPrice = useMemo(() => {
-
         return cart.reduce(
-            (sum, item) => sum + Number(item.price || 0) * item.quantity,
+            (sum, item) =>
+                sum +
+                (Number(item.price) || 0) *
+                    (Number(item.quantity) || 1),
             0
         );
-
     }, [cart]);
 
     return (
-
         <CartContext.Provider
             value={{
                 cart,
@@ -135,14 +155,9 @@ export function CartProvider({ children }) {
         >
             {children}
         </CartContext.Provider>
-
     );
-
 }
 
 export function useCart() {
-
     return useContext(CartContext);
-
 }
-
