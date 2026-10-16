@@ -1,0 +1,156 @@
+
+
+.halloween-decor {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    overflow: hidden;
+    pointer-events: none;
+    color: #51434b;
+}
+
+
+.halloween-web {
+    position: absolute;
+    top: 0;
+    width: clamp(85px, 14vw, 180px);
+    height: auto;
+    color: #8d7b83;
+    opacity: 0.48;
+}
+
+.web-left {
+    left: 0;
+}
+
+.web-right {
+    right: 0;
+    transform: scaleX(-1);
+}
+
+.halloween-spider {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #51434b;
+    animation: halloween-sway 4.5s ease-in-out infinite;
+    transform-origin: top center;
+}
+
+.spider-left {
+    left: clamp(24px, 9vw, 115px);
+    animation-delay: -1.4s;
+}
+
+.spider-right {
+    right: clamp(24px, 9vw, 115px);
+    animation-delay: -3s;
+}
+
+.spider-thread {
+    display: block;
+    width: 1px;
+    height: clamp(42px, 8vh, 82px);
+    background: rgba(81, 67, 75, 0.45);
+}
+
+.halloween-spider svg {
+    width: 30px;
+    height: 35px;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
+}
+
+.halloween-star {
+    position: absolute;
+    color: #b38b67;
+    opacity: 0.6;
+    font-size: 17px;
+    animation: halloween-twinkle 3.5s ease-in-out infinite;
+}
+
+.star-one {
+    top: 22%;
+    left: 4%;
+}
+
+.star-two {
+    top: 34%;
+    right: 5%;
+    animation-delay: -1.5s;
+}
+
+.star-three {
+    top: 62%;
+    right: 2%;
+    font-size: 12px;
+    animation-delay: -2.5s;
+}
+
+@keyframes halloween-sway {
+    0%,
+    100% {
+        transform: rotate(-4deg);
+    }
+
+    50% {
+        transform: rotate(4deg);
+    }
+}
+
+@keyframes halloween-twinkle {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.9);
+    }
+
+    50% {
+        opacity: 0.75;
+        transform: scale(1.08);
+    }
+}
+
+@media (max-width: 600px) {
+    .halloween-web {
+        width: 88px;
+        opacity: 0.35;
+    }
+
+    .spider-left {
+        left: 24px;
+    }
+
+    .spider-right {
+        right: 24px;
+    }
+
+    .halloween-spider svg {
+        width: 25px;
+        height: 30px;
+    }
+
+    .halloween-star {
+        font-size: 13px;
+    }
+
+    .star-one {
+        top: 18%;
+    }
+
+    .star-two {
+        top: 28%;
+    }
+
+    .star-three {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .halloween-spider,
+    .halloween-star {
+        animation: none;
+    }
+}

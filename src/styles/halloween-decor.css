@@ -1,0 +1,173 @@
+
+/* Contenedor general */
+.halloween-decor {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+/* Luna creciente */
+.halloween-moon {
+    position: absolute;
+    top: 85px;
+    right: 7%;
+    font-size: clamp(36px, 4.5vw, 60px);
+    filter: drop-shadow(0 0 12px rgba(255, 201, 117, 0.55));
+    animation: moon-glow 3s ease-in-out infinite;
+}
+
+/* Calabazas */
+.halloween-pumpkin {
+    position: absolute;
+    display: block;
+    font-size: clamp(25px, 3vw, 42px);
+    filter: drop-shadow(0 4px 5px rgba(76, 42, 20, 0.15));
+    animation: pumpkin-float 4s ease-in-out infinite;
+}
+
+/* Posiciones */
+.pumpkin-one {
+    left: 2%;
+    top: 34%;
+    animation-delay: 0s;
+}
+
+.pumpkin-two {
+    right: 3%;
+    top: 47%;
+    animation-delay: 1s;
+}
+
+.pumpkin-three {
+    left: 5%;
+    bottom: 9%;
+    animation-delay: 1.5s;
+}
+
+.pumpkin-four {
+    right: 8%;
+    bottom: 7%;
+    animation-delay: 0.5s;
+}
+
+/* Pequeños destellos */
+.halloween-star {
+    position: absolute;
+    color: #e9b85f;
+    text-shadow: 0 0 10px rgba(233, 184, 95, 0.5);
+    animation: star-twinkle 2.5s ease-in-out infinite;
+}
+
+.star-one {
+    top: 19%;
+    right: 17%;
+    font-size: 19px;
+}
+
+.star-two {
+    top: 28%;
+    right: 8%;
+    font-size: 25px;
+    animation-delay: 0.8s;
+}
+
+.star-three {
+    top: 12%;
+    right: 25%;
+    font-size: 14px;
+    animation-delay: 1.3s;
+}
+
+/* Animaciones */
+@keyframes moon-glow {
+    0%, 100% {
+        transform: translateY(0);
+        filter: drop-shadow(0 0 8px rgba(255, 201, 117, 0.35));
+    }
+
+    50% {
+        transform: translateY(-5px);
+        filter: drop-shadow(0 0 16px rgba(255, 201, 117, 0.7));
+    }
+}
+
+@keyframes pumpkin-float {
+    0%, 100% {
+        transform: translateY(0) rotate(-4deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(4deg);
+    }
+}
+
+@keyframes star-twinkle {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    .halloween-moon {
+        top: 85px;
+        right: 5%;
+        font-size: 34px;
+    }
+
+    .halloween-pumpkin {
+        font-size: 25px;
+        opacity: 0.8;
+    }
+
+    .pumpkin-one {
+        left: 1%;
+        top: 40%;
+    }
+
+    .pumpkin-two {
+        right: 1%;
+        top: 55%;
+    }
+
+    .pumpkin-three {
+        left: 3%;
+        bottom: 5%;
+    }
+
+    .pumpkin-four {
+        right: 4%;
+        bottom: 5%;
+    }
+
+    .star-one {
+        right: 20%;
+    }
+
+    .star-two {
+        right: 6%;
+    }
+
+    .star-three {
+        right: 28%;
+    }
+}
+
+/* Respetar la preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+    .halloween-moon,
+    .halloween-pumpkin,
+    .halloween-star {
+        animation: none;
+    }
+}

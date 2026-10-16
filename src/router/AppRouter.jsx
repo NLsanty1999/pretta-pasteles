@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "../pages/Home";
@@ -13,13 +14,18 @@ import CategoryProducts from "../pages/CategoryProducts";
 import AdminProducts from "../pages/AdminProducts";
 import TraditionalProduct from "../pages/TraditionalProduct";
 import AdminAvailability from "../pages/AdminAvailability";
+import HalloweenDecor from "../components/HalloweenDecor";
+import HalloweenBats from "../components/HalloweenBats";
+import HalloweenExtras from "../components/HalloweenExtras";
 
 function AppRouter() {
     return (
-        <BrowserRouter>
+<BrowserRouter>
+    <HalloweenDecor />
+    <HalloweenBats />
+    <HalloweenExtras />
 
-            <Routes>
-
+    <Routes>
                 <Route path="/" element={<Home />} />
 
                 <Route path="/catalogo" element={<Catalog />} />
@@ -42,6 +48,7 @@ function AppRouter() {
                         </ProtectedRoute>
                     }
                 />
+
                 <Route
                     path="/admin/disponibilidad"
                     element={
@@ -52,11 +59,8 @@ function AppRouter() {
                 />
 
                 <Route
-
                     path="/catalogo/:category"
-
                     element={<Catalog />}
-
                 />
 
                 <Route
@@ -80,9 +84,7 @@ function AppRouter() {
                         </ProtectedRoute>
                     }
                 />
-
             </Routes>
-
         </BrowserRouter>
     );
 }

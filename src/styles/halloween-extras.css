@@ -1,0 +1,150 @@
+
+.halloween-extras {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.halloween-extra {
+    position: absolute;
+    display: block;
+    color: #7b8871;
+    opacity: 0.8;
+    line-height: 1;
+}
+
+/* Lunitas */
+.moon {
+    font-family: Georgia, serif;
+    font-size: 48px;
+    text-shadow: 0 0 12px rgba(123, 136, 113, 0.2);
+    animation: halloween-moon-float 5s ease-in-out infinite;
+}
+
+.moon-one {
+    top: 105px;
+    right: 13%;
+}
+
+.moon-two {
+    top: 42%;
+    left: 3%;
+    font-size: 32px;
+    animation-delay: 1.5s;
+}
+
+.moon-three {
+    bottom: 15%;
+    right: 5%;
+    font-size: 27px;
+    animation-delay: 2.5s;
+}
+
+/* Calabazas: posiciones */
+
+.pumpkin {
+    width: 42px;
+    height: 42px;
+    opacity: 0.8;
+    animation: halloween-pumpkin-float 4.5s ease-in-out infinite;
+}
+
+.pumpkin-one {
+    top: 29%;
+    left: 2%;
+}
+
+.pumpkin-two {
+    top: 58%;
+    right: 2%;
+    animation-delay: 1s;
+}
+
+.pumpkin-three {
+    bottom: 8%;
+    left: 12%;
+    animation-delay: 2s;
+    width: 34px;
+    height: 34px;
+}
+
+.pumpkin-four {
+    bottom: 19%;
+    right: 13%;
+    animation-delay: 0.5s;
+    width: 36px;
+    height: 36px;
+}
+
+@media (max-width: 600px) {
+    .pumpkin {
+        width: 30px;
+        height: 30px;
+    }
+
+    .pumpkin-three,
+    .pumpkin-four {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+/* Animaciones */
+@keyframes halloween-moon-float {
+    0%, 100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-7px) rotate(5deg);
+    }
+}
+
+@keyframes halloween-pumpkin-float {
+    0%, 100% {
+        transform: translateY(0) rotate(-4deg);
+    }
+
+    50% {
+        transform: translateY(-6px) rotate(4deg);
+    }
+}
+
+/* Ajustes para celulares */
+@media (max-width: 600px) {
+    .moon {
+        font-size: 35px;
+    }
+
+    .moon-one {
+        top: 95px;
+        right: 8%;
+    }
+
+    .moon-two {
+        left: 1%;
+        font-size: 25px;
+    }
+
+    .moon-three {
+        right: 3%;
+        font-size: 23px;
+    }
+
+    .pumpkin {
+        font-size: 28px;
+    }
+
+    .pumpkin-three,
+    .pumpkin-four {
+        font-size: 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .halloween-extra {
+        animation: none;
+    }
+}
