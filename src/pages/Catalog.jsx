@@ -5,6 +5,7 @@ import ProductCard from "../components/ProductCard/ProductCard";
 
 import useProducts from "../hooks/useProducts";
 
+
 function Catalog() {
 
     const { category } = useParams();
@@ -90,12 +91,13 @@ const filteredProducts = products
         <Layout>
 
             <div className="
-                grid
-                grid-cols-2
-                gap-4
-                pt-16
-                px-3
-            ">
+    halloween-catalog
+    grid
+    grid-cols-2
+    gap-4
+    pt-16
+    px-3
+">
 
                 {
 

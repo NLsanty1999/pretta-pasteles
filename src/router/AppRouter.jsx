@@ -14,15 +14,13 @@ import CategoryProducts from "../pages/CategoryProducts";
 import AdminProducts from "../pages/AdminProducts";
 import TraditionalProduct from "../pages/TraditionalProduct";
 import AdminAvailability from "../pages/AdminAvailability";
-import HalloweenDecor from "../components/HalloweenDecor";
-import HalloweenBats from "../components/HalloweenBats";
+import HalloweenSeason from "../components/HalloweenSeason";
 import HalloweenExtras from "../components/HalloweenExtras";
 
 function AppRouter() {
     return (
 <BrowserRouter>
-    <HalloweenDecor />
-    <HalloweenBats />
+<HalloweenSeason />
     <HalloweenExtras />
 
     <Routes>

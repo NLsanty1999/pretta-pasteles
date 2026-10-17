@@ -154,3 +154,29 @@
         animation: none;
     }
 }
+
+
+
+/* Telaraña central simétrica */
+.halloween-center-web {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    width: 105px;
+    height: 105px;
+    color: #80616e;
+    opacity: 0.24;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 999;
+}
+
+@media (max-width: 640px) {
+    .halloween-center-web {
+        top: 82px;
+        width: 76px;
+        height: 76px;
+        opacity: 0.2;
+    }
+}
+

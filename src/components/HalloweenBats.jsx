@@ -2,20 +2,13 @@
 import { useLocation } from "react-router-dom";
 import "../styles/halloween-bats.css";
 
+
 const bats = [
-    { position: "bat-1", delay: "0s", size: 30 },
-    { position: "bat-2", delay: "-2s", size: 23 },
-    { position: "bat-3", delay: "-4s", size: 27 },
-    { position: "bat-4", delay: "-1s", size: 20 },
-    { position: "bat-5", delay: "-3s", size: 32 },
-    { position: "bat-6", delay: "-5s", size: 22 },
-    { position: "bat-7", delay: "-2.5s", size: 25 },
-    { position: "bat-8", delay: "-4.5s", size: 19 },
-    { position: "bat-9", delay: "-1.5s", size: 28 },
-    { position: "bat-10", delay: "-3.5s", size: 21 },
-    { position: "bat-11", delay: "-5.5s", size: 26 },
-    { position: "bat-12", delay: "-2.2s", size: 18 },
+    { position: "bat-2", delay: "-2s", size: 20 },
+    { position: "bat-6", delay: "-5s", size: 18 },
+    { position: "bat-12", delay: "-2.2s", size: 16 },
 ];
+
 
 function Bat({ size }) {
     return (

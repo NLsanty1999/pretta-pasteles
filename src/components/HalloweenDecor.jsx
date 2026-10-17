@@ -59,8 +59,10 @@ export default function HalloweenDecor() {
 
     return (
         <div className="halloween-decor" aria-hidden="true">
-            <SpiderWeb className="web-left" />
-            <SpiderWeb className="web-right" />
+    <SpiderWeb className="web-left" />
+    <SpiderWeb className="web-right" />
+    
+
 
             <HangingSpider className="spider-left" />
             <HangingSpider className="spider-right" />
