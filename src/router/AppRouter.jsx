@@ -14,14 +14,12 @@ import CategoryProducts from "../pages/CategoryProducts";
 import AdminProducts from "../pages/AdminProducts";
 import TraditionalProduct from "../pages/TraditionalProduct";
 import AdminAvailability from "../pages/AdminAvailability";
-import HalloweenSeason from "../components/HalloweenSeason";
-import HalloweenExtras from "../components/HalloweenExtras";
+
 
 function AppRouter() {
     return (
 <BrowserRouter>
-<HalloweenSeason />
-    <HalloweenExtras />
+
 
     <Routes>
                 <Route path="/" element={<Home />} />

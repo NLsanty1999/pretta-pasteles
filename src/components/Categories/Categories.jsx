@@ -11,9 +11,6 @@ import mesaDulceIcon from "../../assets/images/mesadulce.png";
 import cookiesIcon from "../../assets/images/cookies.png";
 import bentoCakeIcon from "../../assets/images/bentocake.png";
 
-import HalloweenFeatureWeb from "../HalloweenFeatureWeb";
-import "../../styles/halloween-feature-web.css";
-
 const icons = {
     torta: tradicionalIcon,
     tartas: tartaIcon,
@@ -29,9 +26,7 @@ function Categories() {
     return (
         <div className="grid grid-cols-2 gap-3 px-3">
             {/* TORTA PERSONALIZADA */}
-            <div className="custom-cake-web-anchor col-span-2">
-                <HalloweenFeatureWeb />
-
+            <div className="col-span-2">
                 <button
                     type="button"
                     onClick={() =>
@@ -39,7 +34,6 @@ function Categories() {
                     }
                     className="
                         relative
-                        z-[2]
                         w-full
                         bg-white/45
                         backdrop-blur-md

@@ -90,8 +90,7 @@ const filteredProducts = products
 
         <Layout>
 
-            <div className="
-    halloween-catalog
+<div className="
     grid
     grid-cols-2
     gap-4
