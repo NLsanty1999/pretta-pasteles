@@ -331,19 +331,36 @@ function Checkout() {
 
         try {
 
-            await saveOrder({
 
-                client,
+const orderId = await saveOrder({
+    client,
+    items: cart,
+    price: totalPrice,
+    deliveryDate,
+    deliveryHour
+});
 
-                items: cart,
+try {
+    const response = await fetch("/api/telegram-notify", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ orderId })
+    });
 
-                price: totalPrice,
+    if (!response.ok) {
+        console.error(
+            "El pedido se guardó, pero no se pudo enviar la notificación a Telegram."
+        );
+    }
+} catch (telegramError) {
+    console.error(
+        "Error de conexión con la notificación de Telegram:",
+        telegramError
+    );
+}
 
-                deliveryDate,
-
-                deliveryHour
-
-            });
 
 
             clearCart();
